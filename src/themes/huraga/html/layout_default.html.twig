@@ -11,8 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {% block opengraph %}{% endblock %}
-    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418">
-    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418">
+    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418b">
+    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418b">
     <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
 
     {{ "Api/API.js" | library_url | script_tag }}
@@ -73,7 +73,7 @@
             <details class="storage-tree-folder storage-tree-root-folder" open>
                 <summary>
                     <span class="storage-folder-icon" aria-hidden="true"></span>
-                    <span>My Storage</span>
+                    <span>Информация</span>
                 </summary>
 
                 <a class="storage-tree-item" href="{{ '/'|link }}">
@@ -157,7 +157,7 @@
         <div class="storage-viewer-toolbar">
             <div class="storage-path">
                 <span class="storage-folder-icon" aria-hidden="true"></span>
-                <span data-storage-path-root>My Storage</span>
+                <span data-storage-path-root>Информация</span>
                 <span>/</span>
                 <strong data-storage-path-page>{% block page_header %}Обзор{% endblock %}</strong>
             </div>

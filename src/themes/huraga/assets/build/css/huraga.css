@@ -520,7 +520,7 @@ table > tbody > tr > td {
   border-radius: 8px;
   display: grid;
   gap: 1rem;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  grid-template-columns: minmax(0, 1fr);
   padding: 1.15rem;
 }
 .storage-hero h1,
