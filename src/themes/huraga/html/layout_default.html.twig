@@ -69,75 +69,77 @@
         </a>
 
         <nav class="storage-tree" aria-label="Site sections">
-            <div class="storage-tree-root">
-                <span class="storage-folder-icon" aria-hidden="true"></span>
-                <span>My Storage</span>
-            </div>
-
-            <a class="storage-tree-item" href="{{ '/'|link }}">
-                <span class="storage-file-icon" aria-hidden="true"></span>
-                <span>Главная</span>
-            </a>
-            <a class="storage-tree-item" href="{{ '/payment'|link }}">
-                <span class="storage-file-icon" aria-hidden="true"></span>
-                <span>Оплата</span>
-            </a>
-            <a class="storage-tree-item" href="{{ '/about-us'|link }}">
-                <span class="storage-file-icon" aria-hidden="true"></span>
-                <span>О сервисе</span>
-            </a>
-            <a class="storage-tree-item" href="{{ '/contacts'|link }}">
-                <span class="storage-file-icon" aria-hidden="true"></span>
-                <span>Контакты</span>
-            </a>
-
-            <details class="storage-tree-folder" open>
+            <details class="storage-tree-folder storage-tree-root-folder" open>
                 <summary>
                     <span class="storage-folder-icon" aria-hidden="true"></span>
-                    <span>Документы</span>
+                    <span>My Storage</span>
                 </summary>
-                <a class="storage-tree-item" href="{{ '/offer'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Оферта</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/tos'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Соглашение</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/privacy-policy'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Конфиденциальность</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/refund-policy'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Возврат</span>
-                </a>
-            </details>
 
-            {% if client %}
+                <a class="storage-tree-item" href="{{ '/'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Главная</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/payment'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Оплата</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/about-us'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>О сервисе</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/contacts'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Контакты</span>
+                </a>
+
                 <details class="storage-tree-folder" open>
                     <summary>
                         <span class="storage-folder-icon" aria-hidden="true"></span>
-                        <span>Аккаунт</span>
+                        <span>Документы</span>
                     </summary>
-                    <a class="storage-tree-item" href="{{ '/'|link }}">
+                    <a class="storage-tree-item" href="{{ '/offer'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Панель</span>
+                        <span>Оферта</span>
                     </a>
-                    <a class="storage-tree-item" href="{{ '/order/service'|link }}">
+                    <a class="storage-tree-item" href="{{ '/tos'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Услуги</span>
+                        <span>Соглашение</span>
                     </a>
-                    <a class="storage-tree-item" href="{{ '/invoice'|link }}">
+                    <a class="storage-tree-item" href="{{ '/privacy-policy'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Счета</span>
+                        <span>Конфиденциальность</span>
                     </a>
-                    <a class="storage-tree-item" href="{{ 'client/profile'|link }}">
+                    <a class="storage-tree-item" href="{{ '/refund-policy'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Профиль</span>
+                        <span>Возврат</span>
                     </a>
                 </details>
-            {% endif %}
+
+                {% if client %}
+                    <details class="storage-tree-folder" open>
+                        <summary>
+                            <span class="storage-folder-icon" aria-hidden="true"></span>
+                            <span>Аккаунт</span>
+                        </summary>
+                        <a class="storage-tree-item" href="{{ '/'|link }}">
+                            <span class="storage-file-icon" aria-hidden="true"></span>
+                            <span>Панель</span>
+                        </a>
+                        <a class="storage-tree-item" href="{{ '/order/service'|link }}">
+                            <span class="storage-file-icon" aria-hidden="true"></span>
+                            <span>Услуги</span>
+                        </a>
+                        <a class="storage-tree-item" href="{{ '/invoice'|link }}">
+                            <span class="storage-file-icon" aria-hidden="true"></span>
+                            <span>Счета</span>
+                        </a>
+                        <a class="storage-tree-item" href="{{ 'client/profile'|link }}">
+                            <span class="storage-file-icon" aria-hidden="true"></span>
+                            <span>Профиль</span>
+                        </a>
+                    </details>
+                {% endif %}
+            </details>
         </nav>
 
         <div class="storage-sidebar-footer">
@@ -155,10 +157,6 @@
                     <div class="db-avatar rounded-circle" data-avatar-seed="{{ profile.email|hash('xxh128') }}" data-avatar-size="28" style="width: 28px; height: 28px;"></div>
                     <span>{{ profile.first_name }} {{ profile.last_name }}</span>
                 </div>
-                <a class="btn btn-outline-primary w-100" href="{{ 'client/logout'|link }}">Выйти</a>
-            {% else %}
-                <a class="btn btn-primary w-100" href="{{ 'signup'|link }}">Регистрация</a>
-                <a class="btn btn-outline-primary w-100" href="{{ 'login'|link }}">Войти</a>
             {% endif %}
         </div>
     </aside>
@@ -171,9 +169,18 @@
                 <span>/</span>
                 <strong>{% block page_header %}Обзор{% endblock %}</strong>
             </div>
-            <div class="storage-toolbar-status" aria-label="Service status">
-                <span class="storage-status-dot" aria-hidden="true"></span>
-                <span>Работает</span>
+            <div class="storage-toolbar-actions">
+                {% if client %}
+                    <span class="storage-toolbar-user">{{ profile.first_name }} {{ profile.last_name }}</span>
+                    <a class="btn btn-outline-primary btn-sm" href="{{ 'client/logout'|link }}">Выйти</a>
+                {% else %}
+                    <a class="btn btn-outline-primary btn-sm" href="{{ 'login'|link }}">Войти</a>
+                    <a class="btn btn-primary btn-sm" href="{{ 'signup'|link }}">Регистрация</a>
+                {% endif %}
+                <span class="storage-toolbar-status" aria-label="Service status">
+                    <span class="storage-status-dot" aria-hidden="true"></span>
+                    <span>Работает</span>
+                </span>
             </div>
         </div>
 
@@ -234,5 +241,34 @@
     {{ include('mod_cookieconsent_index.html.twig', ignore_missing: true) }}
 {% endif %}
 {{ DebugBar_render() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const normalizePath = function (value) {
+            try {
+                const url = new URL(value, window.location.origin);
+                return url.pathname.replace(/\/+$/, '') || '/';
+            } catch (error) {
+                return '/';
+            }
+        };
+        const currentPath = normalizePath(window.location.href);
+
+        document.querySelectorAll('.storage-tree-item[href]').forEach(function (item) {
+            const itemPath = normalizePath(item.href);
+            const isActive = itemPath === currentPath || (itemPath !== '/' && currentPath.startsWith(itemPath + '/'));
+
+            item.classList.toggle('is-active', isActive);
+            if (isActive) {
+                item.setAttribute('aria-current', 'page');
+                const parentFolder = item.closest('details');
+                if (parentFolder) {
+                    parentFolder.setAttribute('open', '');
+                }
+            } else {
+                item.removeAttribute('aria-current');
+            }
+        });
+    });
+</script>
 </body>
 </html>

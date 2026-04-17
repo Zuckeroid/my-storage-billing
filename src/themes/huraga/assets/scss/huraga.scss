@@ -458,7 +458,6 @@ body {
     gap: .2rem;
 }
 
-.storage-tree-root,
 .storage-tree-item,
 .storage-tree-folder summary {
     align-items: center;
@@ -472,7 +471,11 @@ body {
     text-decoration: none;
 }
 
-.storage-tree-root {
+.storage-tree-root-folder {
+    margin-bottom: .1rem;
+}
+
+.storage-tree-root-folder > summary {
     color: #b7c8c3;
     font-weight: 700;
 }
@@ -481,10 +484,25 @@ body {
     margin-left: 1rem;
 }
 
+.storage-tree-folder .storage-tree-folder {
+    margin-left: 1rem;
+}
+
+.storage-tree-folder .storage-tree-folder .storage-tree-item {
+    margin-left: 1.15rem;
+}
+
 .storage-tree-item:hover,
 .storage-tree-folder summary:hover {
     background: #f8fafc;
     color: #0f172a;
+}
+
+.storage-tree-item.is-active,
+.storage-tree-item[aria-current="page"] {
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 800;
 }
 
 .storage-tree-folder summary {
@@ -497,7 +515,7 @@ body {
     display: none;
 }
 
-.storage-tree-folder[open] summary {
+.storage-tree-folder[open] > summary {
     background: rgba(248, 250, 252, .08);
     color: #f8fafc;
 }
@@ -505,7 +523,7 @@ body {
 .storage-sidebar-footer {
     display: grid;
     gap: .65rem;
-    margin-top: auto;
+    margin-top: 0;
 }
 
 .storage-account-chip {
@@ -574,6 +592,30 @@ body {
     display: inline-block;
     height: 8px;
     width: 8px;
+}
+
+.storage-toolbar-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    justify-content: flex-end;
+}
+
+.storage-toolbar-actions .btn {
+    border-radius: 8px;
+    font-weight: 800;
+    min-width: 84px;
+}
+
+.storage-toolbar-user {
+    color: #27323f;
+    font-size: .9rem;
+    font-weight: 800;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .storage-content-pane {
@@ -679,7 +721,6 @@ body {
 
 .storage-folder-icon,
 .storage-file-icon {
-    border-radius: 6px;
     display: inline-block;
     height: 22px;
     position: relative;
@@ -687,37 +728,83 @@ body {
 }
 
 .storage-folder-icon {
-    background: #f5c84b;
-    border: 1px solid #d9a313;
+    background: linear-gradient(180deg, #ffd76a 0%, #f0b938 46%, #d9951b 100%);
+    border: 1px solid #c98616;
+    border-radius: 5px 5px 4px 4px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 1px 1px rgba(15, 23, 42, .18);
+    height: 18px;
+    margin-top: 4px;
 }
 
 .storage-folder-icon::before {
-    background: #f5c84b;
-    border: 1px solid #d9a313;
+    background: linear-gradient(180deg, #ffe08a 0%, #f1c04e 100%);
+    border: 1px solid #c98616;
     border-bottom: 0;
     border-radius: 5px 5px 0 0;
     content: "";
-    height: 7px;
+    height: 6px;
     left: 2px;
     position: absolute;
-    top: -6px;
-    width: 12px;
+    top: -5px;
+    width: 11px;
 }
 
-.storage-file-icon {
-    background: #ccfbf1;
-    border: 1px solid #5eead4;
-}
-
-.storage-file-icon::after {
-    background: #0f766e;
+.storage-folder-icon::after {
+    background: rgba(255, 255, 255, .22);
     border-radius: 999px;
     content: "";
     height: 2px;
-    left: 6px;
+    left: 4px;
+    position: absolute;
+    right: 4px;
+    top: 3px;
+}
+
+.storage-file-icon {
+    background: #ffffff;
+    border: 1px solid #b7c5d5;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(15, 23, 42, .18);
+    height: 24px;
+    width: 19px;
+}
+
+.storage-file-icon::before {
+    background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 58%);
+    border-bottom: 1px solid #b7c5d5;
+    border-left: 1px solid #b7c5d5;
+    border-radius: 0 3px 0 3px;
+    content: "";
+    height: 7px;
+    position: absolute;
+    right: -1px;
+    top: -1px;
+    width: 7px;
+}
+
+.storage-file-icon::after {
+    background: #7f8ea3;
+    border-radius: 999px;
+    content: "";
+    height: 2px;
+    left: 4px;
     position: absolute;
     top: 9px;
-    width: 12px;
+    width: 10px;
+    box-shadow: 0 4px 0 #a3afbf, 0 8px 0 #a3afbf;
+}
+
+.storage-tree-item.is-active .storage-file-icon,
+.storage-tree-item[aria-current="page"] .storage-file-icon,
+.storage-tree-item:hover .storage-file-icon {
+    border-color: #0f766e;
+}
+
+.storage-tree-item.is-active .storage-file-icon::after,
+.storage-tree-item[aria-current="page"] .storage-file-icon::after,
+.storage-tree-item:hover .storage-file-icon::after {
+    background: #0f766e;
+    box-shadow: 0 4px 0 #2dd4bf, 0 8px 0 #99f6e4;
 }
 
 .storage-plan-card {
@@ -866,6 +953,16 @@ body {
 
     .storage-tree {
         max-height: none;
+    }
+
+    .storage-viewer-toolbar,
+    .storage-toolbar-actions {
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .storage-viewer-toolbar {
+        flex-direction: column;
     }
 
     .storage-content-pane {
