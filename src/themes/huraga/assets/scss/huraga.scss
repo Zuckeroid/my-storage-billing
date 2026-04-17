@@ -571,18 +571,21 @@ body {
 .storage-toolbar-actions {
     align-items: center;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: .55rem;
     justify-content: flex-end;
+    white-space: nowrap;
 }
 
 .storage-language-selector {
     border-color: #d8dee8;
     border-radius: 8px;
     color: #27323f;
+    flex: 0 0 auto;
     font-weight: 700;
     min-height: 32px;
-    min-width: 132px;
+    min-width: 118px;
+    width: auto;
 }
 
 .storage-language-selector:focus {
@@ -592,6 +595,7 @@ body {
 
 .storage-toolbar-actions .btn {
     border-radius: 8px;
+    flex: 0 0 auto;
     font-weight: 800;
     min-width: 84px;
 }
@@ -945,12 +949,17 @@ body {
 
     .storage-viewer-toolbar,
     .storage-toolbar-actions {
-        align-items: flex-start;
-        justify-content: flex-start;
+        align-items: stretch;
     }
 
     .storage-viewer-toolbar {
         flex-direction: column;
+    }
+
+    .storage-toolbar-actions {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: .1rem;
     }
 
     .storage-content-pane {

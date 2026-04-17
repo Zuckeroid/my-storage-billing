@@ -162,19 +162,19 @@
                 <strong data-storage-path-page>{% block page_header %}Обзор{% endblock %}</strong>
             </div>
             <div class="storage-toolbar-actions">
-                {% if languages|length > 1 %}
-                    <select name="lang" class="form-select form-select-sm storage-language-selector js-language-selector" aria-label="Выбор языка">
-                        {% for lang in languages %}
-                            <option value="{{ lang.locale }}" data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">&nbsp;{{ lang.title }}</option>
-                        {% endfor %}
-                    </select>
-                {% endif %}
                 {% if client %}
                     <span class="storage-toolbar-user">{{ profile.first_name }} {{ profile.last_name }}</span>
                     <a class="btn btn-outline-primary btn-sm" href="{{ 'client/logout'|link }}">Выйти</a>
                 {% else %}
                     <a class="btn btn-outline-primary btn-sm" href="{{ 'login'|link }}">Войти</a>
                     <a class="btn btn-primary btn-sm" href="{{ 'signup'|link }}">Регистрация</a>
+                {% endif %}
+                {% if languages|length > 1 %}
+                    <select name="lang" class="form-select form-select-sm storage-language-selector js-language-selector" aria-label="Выбор языка">
+                        {% for lang in languages %}
+                            <option value="{{ lang.locale }}" data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">&nbsp;{{ lang.title }}</option>
+                        {% endfor %}
+                    </select>
                 {% endif %}
             </div>
         </div>
