@@ -1,16 +1,3 @@
-FROM node:24-bookworm AS assets
-
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-COPY src/themes/huraga/package.json src/themes/huraga/package.json
-COPY src/themes/admin_default/package.json src/themes/admin_default/package.json
-COPY src/modules/Wysiwyg/package.json src/modules/Wysiwyg/package.json
-RUN npm ci
-
-COPY . .
-RUN npm run build
-
 FROM php:8.3-apache
 
 RUN apt-get update \
@@ -26,7 +13,7 @@ RUN apt-get update \
         unzip \
     && a2enmod rewrite \
     && docker-php-ext-configure gd \
-    && docker-php-ext-install -j"$(nproc)" \
+    && docker-php-ext-install -j1 \
         bz2 \
         curl \
         gd \
@@ -42,7 +29,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 
 COPY composer.json composer.lock ./
-COPY --from=assets /app/src ./src
+COPY src ./src
 
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
     && rm -rf src/install \

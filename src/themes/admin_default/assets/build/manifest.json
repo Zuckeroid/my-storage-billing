@@ -1,0 +1,6 @@
+{
+  "build/fossbilling.js": "/themes/admin_default/assets/build/js/fossbilling.js",
+  "build/vendor.css": "/themes/admin_default/assets/build/css/vendor.css",
+  "build/fossbilling.css": "/themes/admin_default/assets/build/css/fossbilling.css",
+  "build/symbol/icons-sprite.svg": "/themes/admin_default/assets/build/symbol/icons-sprite.svg"
+}

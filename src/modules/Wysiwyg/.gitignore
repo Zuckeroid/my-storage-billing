@@ -1,1 +1,3 @@
 assets/ckeditor.*
+!assets/ckeditor.js
+!assets/ckeditor.css

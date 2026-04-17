@@ -9,6 +9,10 @@
 /src/data/uploads/*
 /src/vendor/*
 build
+!/src/themes/huraga/assets/build/
+!/src/themes/huraga/assets/build/**
+!/src/themes/admin_default/assets/build/
+!/src/themes/admin_default/assets/build/**
 
 # Needed for some workflows
 DOCKER_ENV
