@@ -472,7 +472,7 @@ body {
 }
 
 .storage-tree-root-folder {
-    margin-bottom: .1rem;
+    margin-bottom: .15rem;
 }
 
 .storage-tree-root-folder > summary {
@@ -482,14 +482,6 @@ body {
 
 .storage-tree-item {
     margin-left: 1rem;
-}
-
-.storage-tree-folder .storage-tree-folder {
-    margin-left: 1rem;
-}
-
-.storage-tree-folder .storage-tree-folder .storage-tree-item {
-    margin-left: 1.15rem;
 }
 
 .storage-tree-item:hover,
@@ -576,30 +568,26 @@ body {
     font-weight: 700;
 }
 
-.storage-toolbar-status {
-    align-items: center;
-    color: #64748b;
-    display: inline-flex;
-    font-size: .86rem;
-    font-weight: 700;
-    gap: .45rem;
-}
-
-.storage-status-dot {
-    background: #16a34a;
-    border-radius: 999px;
-    box-shadow: 0 0 0 3px #dcfce7;
-    display: inline-block;
-    height: 8px;
-    width: 8px;
-}
-
 .storage-toolbar-actions {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
     gap: .55rem;
     justify-content: flex-end;
+}
+
+.storage-language-selector {
+    border-color: #d8dee8;
+    border-radius: 8px;
+    color: #27323f;
+    font-weight: 700;
+    min-height: 32px;
+    min-width: 132px;
+}
+
+.storage-language-selector:focus {
+    border-color: #0f766e;
+    box-shadow: 0 0 0 .2rem rgba(15, 118, 110, .18);
 }
 
 .storage-toolbar-actions .btn {

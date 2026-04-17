@@ -56,6 +56,7 @@
     {% set profile = client.profile_get %}
 {% endif %}
 {% set company = guest.system_company %}
+{% set languages = guest.extension_languages(true) %}
 
 <div class="storage-shell">
     <aside class="storage-sidebar" aria-label="My Storage navigation">
@@ -91,67 +92,58 @@
                     <span class="storage-file-icon" aria-hidden="true"></span>
                     <span>Контакты</span>
                 </a>
+            </details>
 
-                <details class="storage-tree-folder" open>
+            <details class="storage-tree-folder storage-tree-root-folder" open>
+                <summary>
+                    <span class="storage-folder-icon" aria-hidden="true"></span>
+                    <span>Документы</span>
+                </summary>
+                <a class="storage-tree-item" href="{{ '/offer'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Оферта</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/tos'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Соглашение</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/privacy-policy'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Конфиденциальность</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/refund-policy'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Возврат</span>
+                </a>
+            </details>
+
+            {% if client %}
+                <details class="storage-tree-folder storage-tree-root-folder" open>
                     <summary>
                         <span class="storage-folder-icon" aria-hidden="true"></span>
-                        <span>Документы</span>
+                        <span>Аккаунт</span>
                     </summary>
-                    <a class="storage-tree-item" href="{{ '/offer'|link }}">
+                    <a class="storage-tree-item" href="{{ '/'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Оферта</span>
+                        <span>Панель</span>
                     </a>
-                    <a class="storage-tree-item" href="{{ '/tos'|link }}">
+                    <a class="storage-tree-item" href="{{ '/order/service'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Соглашение</span>
+                        <span>Услуги</span>
                     </a>
-                    <a class="storage-tree-item" href="{{ '/privacy-policy'|link }}">
+                    <a class="storage-tree-item" href="{{ '/invoice'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Конфиденциальность</span>
+                        <span>Счета</span>
                     </a>
-                    <a class="storage-tree-item" href="{{ '/refund-policy'|link }}">
+                    <a class="storage-tree-item" href="{{ 'client/profile'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Возврат</span>
+                        <span>Профиль</span>
                     </a>
                 </details>
-
-                {% if client %}
-                    <details class="storage-tree-folder" open>
-                        <summary>
-                            <span class="storage-folder-icon" aria-hidden="true"></span>
-                            <span>Аккаунт</span>
-                        </summary>
-                        <a class="storage-tree-item" href="{{ '/'|link }}">
-                            <span class="storage-file-icon" aria-hidden="true"></span>
-                            <span>Панель</span>
-                        </a>
-                        <a class="storage-tree-item" href="{{ '/order/service'|link }}">
-                            <span class="storage-file-icon" aria-hidden="true"></span>
-                            <span>Услуги</span>
-                        </a>
-                        <a class="storage-tree-item" href="{{ '/invoice'|link }}">
-                            <span class="storage-file-icon" aria-hidden="true"></span>
-                            <span>Счета</span>
-                        </a>
-                        <a class="storage-tree-item" href="{{ 'client/profile'|link }}">
-                            <span class="storage-file-icon" aria-hidden="true"></span>
-                            <span>Профиль</span>
-                        </a>
-                    </details>
-                {% endif %}
-            </details>
+            {% endif %}
         </nav>
 
         <div class="storage-sidebar-footer">
-            {% set languages = guest.extension_languages(true) %}
-            {% if languages|length > 1 %}
-                <select name="lang" class="form-select js-language-selector">
-                    {% for lang in languages %}
-                        <option value="{{ lang.locale }}" data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">&nbsp;{{ lang.title }}</option>
-                    {% endfor %}
-                </select>
-            {% endif %}
-
             {% if client %}
                 <div class="storage-account-chip">
                     <div class="db-avatar rounded-circle" data-avatar-seed="{{ profile.email|hash('xxh128') }}" data-avatar-size="28" style="width: 28px; height: 28px;"></div>
@@ -165,11 +157,18 @@
         <div class="storage-viewer-toolbar">
             <div class="storage-path">
                 <span class="storage-folder-icon" aria-hidden="true"></span>
-                <span>My Storage</span>
+                <span data-storage-path-root>My Storage</span>
                 <span>/</span>
-                <strong>{% block page_header %}Обзор{% endblock %}</strong>
+                <strong data-storage-path-page>{% block page_header %}Обзор{% endblock %}</strong>
             </div>
             <div class="storage-toolbar-actions">
+                {% if languages|length > 1 %}
+                    <select name="lang" class="form-select form-select-sm storage-language-selector js-language-selector" aria-label="Выбор языка">
+                        {% for lang in languages %}
+                            <option value="{{ lang.locale }}" data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">&nbsp;{{ lang.title }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
                 {% if client %}
                     <span class="storage-toolbar-user">{{ profile.first_name }} {{ profile.last_name }}</span>
                     <a class="btn btn-outline-primary btn-sm" href="{{ 'client/logout'|link }}">Выйти</a>
@@ -177,10 +176,6 @@
                     <a class="btn btn-outline-primary btn-sm" href="{{ 'login'|link }}">Войти</a>
                     <a class="btn btn-primary btn-sm" href="{{ 'signup'|link }}">Регистрация</a>
                 {% endif %}
-                <span class="storage-toolbar-status" aria-label="Service status">
-                    <span class="storage-status-dot" aria-hidden="true"></span>
-                    <span>Работает</span>
-                </span>
             </div>
         </div>
 
@@ -268,6 +263,31 @@
                 item.removeAttribute('aria-current');
             }
         });
+
+        const activeItems = Array.from(document.querySelectorAll('.storage-tree-item.is-active'));
+        const activeItem = activeItems.length > 0 ? activeItems[activeItems.length - 1] : null;
+        const pathRoot = document.querySelector('[data-storage-path-root]');
+        const pathPage = document.querySelector('[data-storage-path-page]');
+
+        activeItems.forEach(function (item) {
+            if (item !== activeItem) {
+                item.classList.remove('is-active');
+                item.removeAttribute('aria-current');
+            }
+        });
+
+        if (activeItem && pathRoot && pathPage) {
+            const activeFolder = activeItem.closest('details');
+            const folderLabel = activeFolder ? activeFolder.querySelector('summary span:last-child') : null;
+            const itemLabel = activeItem.querySelector('span:last-child');
+
+            if (folderLabel) {
+                pathRoot.textContent = folderLabel.textContent.trim();
+            }
+            if (itemLabel) {
+                pathPage.textContent = itemLabel.textContent.trim();
+            }
+        }
     });
 </script>
 </body>
