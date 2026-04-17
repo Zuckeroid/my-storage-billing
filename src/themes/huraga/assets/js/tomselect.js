@@ -36,8 +36,9 @@ export default function initLanguageSelector() {
     return;
   }
 
-  // Get saved language preference
-  const savedLang = getCookie('fb_locale') || '';
+  // Prefer saved language, then current server-rendered select value.
+  const currentLang = localeSelectorEl.value || localeSelectorEl.querySelector('option[selected]')?.value || '';
+  const savedLang = getCookie('fb_locale') || currentLang;
 
   new TomSelect('.js-language-selector', {
     copyClassesToDropdown: false,
@@ -45,7 +46,7 @@ export default function initLanguageSelector() {
     dropdownClass: 'dropdown-menu ts-dropdown locale-selector-dropdown',
     optionClass: 'dropdown-item',
     controlInput: false,
-    items: savedLang ? [savedLang] : [],
+    items: savedLang ? [savedLang] : [currentLang],
     render: {
       item: (data, escape) => localeSelectorTemplate(data, escape),
       option: (data, escape) => localeSelectorTemplate(data, escape),

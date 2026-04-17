@@ -4653,18 +4653,20 @@
     return `<div class="d-flex align-items-center">${flagHtml}${escape(data.text)}</div>`;
   }
   function initLanguageSelector() {
+    var _a;
     const localeSelectorEl = document.querySelector(".js-language-selector");
     if (localeSelectorEl === null) {
       return;
     }
-    const savedLang = getCookie("fb_locale") || "";
+    const currentLang = localeSelectorEl.value || ((_a = localeSelectorEl.querySelector("option[selected]")) == null ? void 0 : _a.value) || "";
+    const savedLang = getCookie("fb_locale") || currentLang;
     new tom_select_complete_default(".js-language-selector", {
       copyClassesToDropdown: false,
       controlClass: "ts-control locale",
       dropdownClass: "dropdown-menu ts-dropdown locale-selector-dropdown",
       optionClass: "dropdown-item",
       controlInput: false,
-      items: savedLang ? [savedLang] : [],
+      items: savedLang ? [savedLang] : [currentLang],
       render: {
         item: (data, escape) => localeSelectorTemplate(data, escape),
         option: (data, escape) => localeSelectorTemplate(data, escape)

@@ -15,29 +15,30 @@
     {% endif %}
 {% endblock %}
 
+{% set is_en = guest.system_locale|default(settings.locale|default('ru_RU')) starts with 'en' %}
 {% set storage_plans = [
     {
         title: 'Storage Start',
-        price: '290 ₽/месяц',
-        devices: 'Защищенный доступ к файлам для 1 устройства',
-        storage: '50 ГБ для личных файлов',
-        description: 'Для документов, фотографий и небольшого личного архива.',
+        price: is_en ? '290 ₽/month' : '290 ₽/месяц',
+        devices: is_en ? 'Protected file access for 1 device' : 'Защищенный доступ к файлам для 1 устройства',
+        storage: is_en ? '50 GB for personal files' : '50 ГБ для личных файлов',
+        description: is_en ? 'For documents, photos, and a small personal archive.' : 'Для документов, фотографий и небольшого личного архива.',
         href: '/order/storage-start'
     },
     {
         title: 'Storage Plus',
-        price: '790 ₽/месяц',
-        devices: 'Защищенный доступ к файлам для 3 устройств',
-        storage: '200 ГБ для личных файлов',
-        description: 'Для повседневного хранения на нескольких личных устройствах.',
+        price: is_en ? '790 ₽/month' : '790 ₽/месяц',
+        devices: is_en ? 'Protected file access for 3 devices' : 'Защищенный доступ к файлам для 3 устройств',
+        storage: is_en ? '200 GB for personal files' : '200 ГБ для личных файлов',
+        description: is_en ? 'For everyday storage across several personal devices.' : 'Для повседневного хранения на нескольких личных устройствах.',
         href: '/order/storage-plus'
     },
     {
         title: 'Storage Family',
-        price: '1190 ₽/месяц',
-        devices: 'Защищенный доступ к файлам для 5 устройств',
-        storage: '500 ГБ для личных файлов',
-        description: 'Для большого личного архива и семейного хранения файлов.',
+        price: is_en ? '1190 ₽/month' : '1190 ₽/месяц',
+        devices: is_en ? 'Protected file access for 5 devices' : 'Защищенный доступ к файлам для 5 устройств',
+        storage: is_en ? '500 GB for personal files' : '500 ГБ для личных файлов',
+        description: is_en ? 'For a larger personal archive and family file storage.' : 'Для большого личного архива и семейного хранения файлов.',
         href: '/order/storage-family'
     }
 ] %}
@@ -49,12 +50,12 @@
 
         <section class="storage-page-head mb-4">
             <div>
-                <span class="storage-kicker">Личный кабинет</span>
-                <h1 class="mb-2">Ваше облачное хранилище</h1>
-                <p class="text-secondary mb-0">Выберите тариф, оплатите счет, а инструкции по доступу придут на email аккаунта.</p>
+                <span class="storage-kicker">{{ is_en ? 'Account' : 'Личный кабинет' }}</span>
+                <h1 class="mb-2">{{ is_en ? 'Your cloud storage' : 'Ваше облачное хранилище' }}</h1>
+                <p class="text-secondary mb-0">{{ is_en ? 'Choose a plan, pay the invoice, and access instructions will be sent to your account email.' : 'Выберите тариф, оплатите счет, а инструкции по доступу придут на email аккаунта.' }}</p>
             </div>
             <div class="storage-email-panel">
-                <span>Инструкции будут отправлены на</span>
+                <span>{{ is_en ? 'Instructions will be sent to' : 'Инструкции будут отправлены на' }}</span>
                 <strong>{{ profile.email }}</strong>
             </div>
         </section>
@@ -132,12 +133,9 @@
             </section>
         {% endif %}
     {% else %}
-        <section class="storage-hero mb-4">
-            <div class="storage-hero-copy">
-                <span class="storage-kicker">My Storage</span>
-                <h1 class="mb-2">Личное облачное хранилище</h1>
-                <p class="text-secondary mb-0">Храните документы, фотографии и важные файлы в личном облачном пространстве. Зарегистрируйтесь, выберите тариф и оплатите онлайн.</p>
-            </div>
+        <section class="mb-4">
+            <h1 class="mb-2">{{ is_en ? 'Personal cloud storage' : 'Личное облачное хранилище' }}</h1>
+            <p class="text-secondary mb-0">{{ is_en ? 'Store documents, photos, and important files in a personal cloud space. Register, choose a plan, and pay online.' : 'Храните документы, фотографии и важные файлы в личном облачном пространстве. Зарегистрируйтесь, выберите тариф и оплатите онлайн.' }}</p>
         </section>
 
         <section class="row mb-4">
@@ -155,7 +153,7 @@
                             <p class="mb-2">{{ plan.storage|trans }}</p>
                             <p class="mb-2">{{ plan.devices|trans }}</p>
                             <p class="text-secondary small flex-grow-1">{{ plan.description|trans }}</p>
-                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">Выбрать тариф</a>
+                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">{{ is_en ? 'Choose plan' : 'Выбрать тариф' }}</a>
                         </div>
                     </div>
                 </div>
@@ -164,13 +162,13 @@
 
         <section class="storage-panel storage-process">
             <div class="storage-panel-head">
-                <h2>Как это работает</h2>
+                <h2>{{ is_en ? 'How it works' : 'Как это работает' }}</h2>
             </div>
                 <ol class="mb-0">
-                    <li>Создайте аккаунт по email.</li>
-                    <li>Выберите один из трех тарифов хранения.</li>
-                    <li>Оплатите счет онлайн.</li>
-                    <li>Получите инструкции по доступу на email.</li>
+                    <li>{{ is_en ? 'Create an account with your email.' : 'Создайте аккаунт по email.' }}</li>
+                    <li>{{ is_en ? 'Choose one of three storage plans.' : 'Выберите один из трех тарифов хранения.' }}</li>
+                    <li>{{ is_en ? 'Pay the invoice online.' : 'Оплатите счет онлайн.' }}</li>
+                    <li>{{ is_en ? 'Receive access instructions by email.' : 'Получите инструкции по доступу на email.' }}</li>
                 </ol>
         </section>
     {% endif %}

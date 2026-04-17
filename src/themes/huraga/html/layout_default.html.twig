@@ -11,8 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {% block opengraph %}{% endblock %}
-    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418b">
-    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418b">
+    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418c">
+    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418c">
     <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
 
     {{ "Api/API.js" | library_url | script_tag }}
@@ -57,6 +57,8 @@
 {% endif %}
 {% set company = guest.system_company %}
 {% set languages = guest.extension_languages(true) %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
 <div class="storage-shell">
     <aside class="storage-sidebar" aria-label="My Storage navigation">
@@ -73,47 +75,47 @@
             <details class="storage-tree-folder storage-tree-root-folder" open>
                 <summary>
                     <span class="storage-folder-icon" aria-hidden="true"></span>
-                    <span>Информация</span>
+                    <span>{{ is_en ? 'Information' : 'Информация' }}</span>
                 </summary>
 
                 <a class="storage-tree-item" href="{{ '/'|link }}">
                     <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Главная</span>
+                    <span>{{ is_en ? 'Home' : 'Главная' }}</span>
                 </a>
                 <a class="storage-tree-item" href="{{ '/payment'|link }}">
                     <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Оплата</span>
+                    <span>{{ is_en ? 'Payment' : 'Оплата' }}</span>
                 </a>
                 <a class="storage-tree-item" href="{{ '/about-us'|link }}">
                     <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>О сервисе</span>
+                    <span>{{ is_en ? 'About' : 'О сервисе' }}</span>
                 </a>
                 <a class="storage-tree-item" href="{{ '/contacts'|link }}">
                     <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Контакты</span>
+                    <span>{{ is_en ? 'Contacts' : 'Контакты' }}</span>
                 </a>
             </details>
 
             <details class="storage-tree-folder storage-tree-root-folder" open>
                 <summary>
                     <span class="storage-folder-icon" aria-hidden="true"></span>
-                    <span>Документы</span>
+                    <span>{{ is_en ? 'Documents' : 'Документы' }}</span>
                 </summary>
                 <a class="storage-tree-item" href="{{ '/offer'|link }}">
                     <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Оферта</span>
+                    <span>{{ is_en ? 'Offer' : 'Оферта' }}</span>
                 </a>
                 <a class="storage-tree-item" href="{{ '/tos'|link }}">
                     <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Соглашение</span>
+                    <span>{{ is_en ? 'Agreement' : 'Соглашение' }}</span>
                 </a>
                 <a class="storage-tree-item" href="{{ '/privacy-policy'|link }}">
                     <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Конфиденциальность</span>
+                    <span>{{ is_en ? 'Privacy' : 'Конфиденциальность' }}</span>
                 </a>
                 <a class="storage-tree-item" href="{{ '/refund-policy'|link }}">
                     <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>Возврат</span>
+                    <span>{{ is_en ? 'Refunds' : 'Возврат' }}</span>
                 </a>
             </details>
 
@@ -121,23 +123,23 @@
                 <details class="storage-tree-folder storage-tree-root-folder" open>
                     <summary>
                         <span class="storage-folder-icon" aria-hidden="true"></span>
-                        <span>Аккаунт</span>
+                        <span>{{ is_en ? 'Account' : 'Аккаунт' }}</span>
                     </summary>
                     <a class="storage-tree-item" href="{{ '/'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Панель</span>
+                        <span>{{ is_en ? 'Dashboard' : 'Панель' }}</span>
                     </a>
                     <a class="storage-tree-item" href="{{ '/order/service'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Услуги</span>
+                        <span>{{ is_en ? 'Services' : 'Услуги' }}</span>
                     </a>
                     <a class="storage-tree-item" href="{{ '/invoice'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Счета</span>
+                        <span>{{ is_en ? 'Invoices' : 'Счета' }}</span>
                     </a>
                     <a class="storage-tree-item" href="{{ 'client/profile'|link }}">
                         <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>Профиль</span>
+                        <span>{{ is_en ? 'Profile' : 'Профиль' }}</span>
                     </a>
                 </details>
             {% endif %}
@@ -157,22 +159,22 @@
         <div class="storage-viewer-toolbar">
             <div class="storage-path">
                 <span class="storage-folder-icon" aria-hidden="true"></span>
-                <span data-storage-path-root>Информация</span>
+                <span data-storage-path-root>{{ is_en ? 'Information' : 'Информация' }}</span>
                 <span>/</span>
                 <strong data-storage-path-page>{% block page_header %}Обзор{% endblock %}</strong>
             </div>
             <div class="storage-toolbar-actions">
                 {% if client %}
                     <span class="storage-toolbar-user">{{ profile.first_name }} {{ profile.last_name }}</span>
-                    <a class="btn btn-outline-primary btn-sm" href="{{ 'client/logout'|link }}">Выйти</a>
+                    <a class="btn btn-outline-primary btn-sm" href="{{ 'client/logout'|link }}">{{ is_en ? 'Logout' : 'Выйти' }}</a>
                 {% else %}
-                    <a class="btn btn-outline-primary btn-sm" href="{{ 'login'|link }}">Войти</a>
-                    <a class="btn btn-primary btn-sm" href="{{ 'signup'|link }}">Регистрация</a>
+                    <a class="btn btn-outline-primary btn-sm" href="{{ 'login'|link }}">{{ is_en ? 'Login' : 'Войти' }}</a>
+                    <a class="btn btn-primary btn-sm" href="{{ 'signup'|link }}">{{ is_en ? 'Sign up' : 'Регистрация' }}</a>
                 {% endif %}
                 {% if languages|length > 1 %}
-                    <select name="lang" class="form-select form-select-sm storage-language-selector js-language-selector" aria-label="Выбор языка">
+                    <select name="lang" class="form-select form-select-sm storage-language-selector js-language-selector" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
                         {% for lang in languages %}
-                            <option value="{{ lang.locale }}" data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">&nbsp;{{ lang.title }}</option>
+                            <option value="{{ lang.locale }}" {% if lang.locale == current_locale %}selected{% endif %} data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">&nbsp;{{ lang.title }}</option>
                         {% endfor %}
                     </select>
                 {% endif %}
@@ -186,9 +188,9 @@
                     {% block breadcrumbs %}
                         <nav aria-label="{{ 'breadcrumb'|trans }}">
                             <ol class="breadcrumb d-none d-md-flex">
-                                <li class="breadcrumb-item"><a href="{{ '/'|link }}">Главная</a></li>
+                                <li class="breadcrumb-item"><a href="{{ '/'|link }}">{{ is_en ? 'Home' : 'Главная' }}</a></li>
                                 {% block breadcrumb %}
-                                    <li class="active breadcrumb-item">Обзор</li>
+                                    <li class="active breadcrumb-item">{{ is_en ? 'Overview' : 'Обзор' }}</li>
                                 {% endblock %}
                             </ol>
                         </nav>
@@ -209,10 +211,10 @@
             <footer id="footer" class="storage-footer small text-muted">
                 <span>&copy; {{ now|format_date(pattern='yyyy') }} {{ settings.footer_signature | default(company.name) }}</span>
                 <nav aria-label="Legal links">
-                    <a href="{{ '/offer'|link }}">Оферта</a>
-                    <a href="{{ '/tos'|link }}">Соглашение</a>
-                    <a href="{{ '/privacy-policy'|link }}">Конфиденциальность</a>
-                    <a href="{{ '/contacts'|link }}">Реквизиты</a>
+                    <a href="{{ '/offer'|link }}">{{ is_en ? 'Offer' : 'Оферта' }}</a>
+                    <a href="{{ '/tos'|link }}">{{ is_en ? 'Agreement' : 'Соглашение' }}</a>
+                    <a href="{{ '/privacy-policy'|link }}">{{ is_en ? 'Privacy' : 'Конфиденциальность' }}</a>
+                    <a href="{{ '/contacts'|link }}">{{ is_en ? 'Legal details' : 'Реквизиты' }}</a>
                 </nav>
             </footer>
         {% endif %}
