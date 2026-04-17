@@ -2,15 +2,15 @@
 
 {% import "macro_functions.html.twig" as mf %}
 
-{% block meta_title %}{% if client %}{{ 'Client Area'|trans }}{% else %}My Storage{% endif %}{% endblock %}
-{% block page_header %}{{ 'Storage'|trans }}{% endblock %}
+{% block meta_title %}{% if client %}Личный кабинет{% else %}My Storage{% endif %}{% endblock %}
+{% block page_header %}Хранилище{% endblock %}
 {% block body_class %}dashboard storage-dashboard{% endblock %}
 
 {% block breadcrumbs %}
     {% if not settings.hide_dashboard_breadcrumb %}
         <ul class="breadcrumb">
-            <li><a href="{{ '/'|link }}">{{ 'Home'|trans }}</a> <span class="dropdown-divider">/</span></li>
-            <li class="active">{{ 'Storage'|trans }}</li>
+            <li><a href="{{ '/'|link }}">Главная</a> <span class="dropdown-divider">/</span></li>
+            <li class="active">Хранилище</li>
         </ul>
     {% endif %}
 {% endblock %}
@@ -47,11 +47,30 @@
         {% set dashboard = client.index_get_dashboard %}
         {% set profile = dashboard.profile %}
 
-        <section class="mb-4">
-            <h1 class="mb-2">{{ 'Personal cloud storage'|trans }}</h1>
-            <p class="text-secondary mb-3">{{ 'Choose a plan, pay the invoice, and we will send access instructions to your registered email.'|trans }}</p>
-            <div class="alert alert-info" role="alert">
-                {{ 'Access instructions are sent to:'|trans }} <strong>{{ profile.email }}</strong>
+        <section class="storage-page-head mb-4">
+            <div>
+                <span class="storage-kicker">Личный кабинет</span>
+                <h1 class="mb-2">Ваше облачное хранилище</h1>
+                <p class="text-secondary mb-0">Выберите тариф, оплатите счет, а инструкции по доступу придут на email аккаунта.</p>
+            </div>
+            <div class="storage-email-panel">
+                <span>Инструкции будут отправлены на</span>
+                <strong>{{ profile.email }}</strong>
+            </div>
+        </section>
+
+        <section class="storage-metric-grid mb-4" aria-label="Account summary">
+            <div class="storage-metric green">
+                <span>Активные услуги</span>
+                <strong>{{ dashboard.orders.active }}</strong>
+            </div>
+            <div class="storage-metric teal">
+                <span>Неоплаченные счета</span>
+                <strong>{{ dashboard.invoices.unpaid }}</strong>
+            </div>
+            <div class="storage-metric yellow">
+                <span>Тарифов доступно</span>
+                <strong>3</strong>
             </div>
         </section>
 
@@ -70,45 +89,37 @@
                             <p class="mb-2">{{ plan.storage|trans }}</p>
                             <p class="mb-2">{{ plan.devices|trans }}</p>
                             <p class="text-secondary small flex-grow-1">{{ plan.description|trans }}</p>
-                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">{{ 'Choose plan'|trans }}</a>
+                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">Выбрать тариф</a>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         </section>
 
-        <section class="row">
-            <div class="col-md-6 mb-3">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="h6 m-0">{{ 'My services'|trans }}</h2>
-                        <a class="btn btn-sm btn-outline-primary" href="{{ 'order/service'|link }}">{{ 'Open'|trans }}</a>
-                    </div>
-                    <div class="card-body">
-                        <p class="mb-2">{{ 'Active services'|trans }}: <strong>{{ dashboard.orders.active }}</strong></p>
-                        <p class="mb-0 text-secondary">{{ 'After payment, access details and instructions are sent by email.'|trans }}</p>
-                    </div>
+        <section class="storage-panel-grid">
+            <div class="storage-panel">
+                <div class="storage-panel-head">
+                    <h2>Мои услуги</h2>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ 'order/service'|link }}">Открыть</a>
                 </div>
+                <p class="mb-2">Активные услуги: <strong>{{ dashboard.orders.active }}</strong></p>
+                <p class="mb-0 text-secondary">После оплаты доступ и инструкции отправляются на email.</p>
             </div>
 
-            <div class="col-md-6 mb-3">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="h6 m-0">{{ 'Invoices'|trans }}</h2>
-                        <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ 'Open'|trans }}</a>
-                    </div>
-                    <div class="card-body">
-                        <p class="mb-2">{{ 'Unpaid invoices'|trans }}: <strong>{{ dashboard.invoices.unpaid }}</strong></p>
-                        <p class="mb-0 text-secondary">{{ 'You can review and pay invoices from this section.'|trans }}</p>
-                    </div>
+            <div class="storage-panel">
+                <div class="storage-panel-head">
+                    <h2>Счета</h2>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">Открыть</a>
                 </div>
+                <p class="mb-2">Неоплаченные счета: <strong>{{ dashboard.invoices.unpaid }}</strong></p>
+                <p class="mb-0 text-secondary">Счета можно проверить и оплатить в этом разделе.</p>
             </div>
         </section>
 
         {% if dashboard.recent_orders %}
             <section class="card mt-3">
                 <div class="card-header">
-                    <h2 class="h6 m-0">{{ 'Recent services'|trans }}</h2>
+                    <h2 class="h6 m-0">Последние услуги</h2>
                 </div>
                 <div class="list-group list-group-flush">
                     {% for i, order in dashboard.recent_orders %}
@@ -123,8 +134,14 @@
     {% else %}
         <section class="storage-hero mb-4">
             <div class="storage-hero-copy">
-                <h1 class="mb-2">{{ 'Cloud storage for personal information'|trans }}</h1>
-                <p class="text-secondary mb-0">{{ 'Store documents, photos, and important files in a personal cloud space. Register, choose a plan, and pay online.'|trans }}</p>
+                <span class="storage-kicker">My Storage</span>
+                <h1 class="mb-2">Личное облачное хранилище</h1>
+                <p class="text-secondary mb-0">Храните документы, фотографии и важные файлы в личном облачном пространстве. Зарегистрируйтесь, выберите тариф и оплатите онлайн.</p>
+            </div>
+            <div class="storage-hero-panel" aria-label="Storage summary">
+                <div class="storage-folder-icon" aria-hidden="true"></div>
+                <strong>Защищенный доступ</strong>
+                <span>Инструкции приходят на зарегистрированный email после оплаты.</span>
             </div>
         </section>
 
@@ -143,23 +160,23 @@
                             <p class="mb-2">{{ plan.storage|trans }}</p>
                             <p class="mb-2">{{ plan.devices|trans }}</p>
                             <p class="text-secondary small flex-grow-1">{{ plan.description|trans }}</p>
-                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">{{ 'Start'|trans }}</a>
+                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">Выбрать тариф</a>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         </section>
 
-        <section class="card storage-process">
-            <div class="card-body">
-                <h2 class="h5">{{ 'How it works'|trans }}</h2>
-                <ol class="mb-0">
-                    <li>{{ 'Create an account with your email.'|trans }}</li>
-                    <li>{{ 'Choose one of three storage plans.'|trans }}</li>
-                    <li>{{ 'Pay the invoice online.'|trans }}</li>
-                    <li>{{ 'Receive access instructions by email.'|trans }}</li>
-                </ol>
+        <section class="storage-panel storage-process">
+            <div class="storage-panel-head">
+                <h2>Как это работает</h2>
             </div>
+                <ol class="mb-0">
+                    <li>Создайте аккаунт по email.</li>
+                    <li>Выберите один из трех тарифов хранения.</li>
+                    <li>Оплатите счет онлайн.</li>
+                    <li>Получите инструкции по доступу на email.</li>
+                </ol>
         </section>
     {% endif %}
 {% endblock %}

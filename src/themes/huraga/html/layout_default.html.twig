@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="{{ settings.theme|default('light') }}">
+<html lang="{{ settings.locale|default('ru_RU')|split('_')[0] }}" data-bs-theme="{{ settings.theme|default('light') }}">
 <head>
     <meta charset="utf-8">
     <title>{{ settings.meta_title_prefix }} {% block meta_title %}{% endblock %} {{ settings.meta_title_suffix }}</title>
@@ -171,6 +171,10 @@
                 <span>/</span>
                 <strong>{% block page_header %}Обзор{% endblock %}</strong>
             </div>
+            <div class="storage-toolbar-status" aria-label="Service status">
+                <span class="storage-status-dot" aria-hidden="true"></span>
+                <span>Работает</span>
+            </div>
         </div>
 
         <section class="storage-content-pane" role="main">
@@ -180,9 +184,9 @@
                     {% block breadcrumbs %}
                         <nav aria-label="{{ 'breadcrumb'|trans }}">
                             <ol class="breadcrumb d-none d-md-flex">
-                                <li class="breadcrumb-item"><a href="{{ '/'|link }}">{{ 'Home'|trans }}</a></li>
+                                <li class="breadcrumb-item"><a href="{{ '/'|link }}">Главная</a></li>
                                 {% block breadcrumb %}
-                                    <li class="active breadcrumb-item">{{ 'Dashboard'|trans }}</li>
+                                    <li class="active breadcrumb-item">Обзор</li>
                                 {% endblock %}
                             </ol>
                         </nav>
