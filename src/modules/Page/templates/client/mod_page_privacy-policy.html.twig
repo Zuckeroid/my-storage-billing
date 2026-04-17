@@ -1,0 +1,75 @@
+{% extends "layout_default.html.twig" %}
+
+{% block meta_title %}Политика конфиденциальности{% endblock %}
+{% block meta_description %}Политика обработки персональных данных пользователей My Storage.{% endblock %}
+{% block body_class %}privacy-policy{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Политика конфиденциальности</li>
+{% endblock %}
+
+{% block content %}
+    {% set company = guest.system_company %}
+    {% set support_email = company.email|default('support@my-storage.org') %}
+
+    <section class="mb-4">
+        <h1 class="mb-2">Политика конфиденциальности</h1>
+        <p class="text-secondary mb-0">
+            Настоящая политика описывает, какие данные обрабатывает My Storage при регистрации,
+            оплате и использовании личного облачного хранилища.
+        </p>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">1. Оператор данных</h2>
+            <p class="mb-0">
+                Оператор: {{ company.address_2 }}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
+                Email для обращений: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+            </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">2. Какие данные обрабатываются</h2>
+            <ul class="mb-0">
+                <li>Email, имя и контактные данные, указанные при регистрации.</li>
+                <li>Данные о выбранном тарифе, заказах, счетах и платежах.</li>
+                <li>Технические данные, необходимые для работы сайта и защиты аккаунта.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">3. Цели обработки</h2>
+            <ul class="mb-0">
+                <li>Создание и обслуживание аккаунта клиента.</li>
+                <li>Выставление счетов и прием оплаты.</li>
+                <li>Отправка инструкций и сервисных уведомлений на зарегистрированный email.</li>
+                <li>Обработка обращений в поддержку.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">4. Хранение и защита</h2>
+            <p class="mb-0">
+                Данные обрабатываются в объеме, необходимом для оказания услуги, выполнения обязательств перед клиентом
+                и соблюдения требований законодательства. Доступ к данным ограничивается техническими и организационными мерами.
+            </p>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5">5. Обращения пользователя</h2>
+            <p class="mb-0">
+                Пользователь может направить запрос по персональным данным на
+                <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+            </p>
+        </div>
+    </section>
+{% endblock %}

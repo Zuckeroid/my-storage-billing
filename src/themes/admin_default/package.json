@@ -1,0 +1,26 @@
+{
+  "name": "admin_default",
+  "scripts": {
+    "build": "node ./esbuild.mjs",
+    "dev": "node ./esbuild.mjs"
+  },
+  "dependencies": {
+    "@dicebear/core": "^9.4.1",
+    "@dicebear/identicon": "^9.0.0",
+    "@melloware/coloris": "^0.25.0",
+    "@tabler/core": "^1.2.0",
+    "apexcharts": "^5.0.0",
+    "flag-icons": "^7.2.3",
+    "litepicker": "^2.0.12",
+    "sortable-tablesort": "^4.1.7",
+    "tom-select": "^2.3.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "10.5.0",
+    "esbuild": "0.28.0",
+    "postcss": "8.5.9",
+    "purgecss": "8.0.0",
+    "sass": "1.99.0",
+    "svg-sprite": "2.0.4"
+  }
+}

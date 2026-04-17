@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {% set static_pages = [
+        '/',
+        '/about-us',
+        '/contacts',
+        '/payment',
+        '/refund-policy',
+        '/offer',
+        '/tos',
+        '/privacy-policy',
+        '/signup',
+        '/login'
+    ] %}
+    {% for page in static_pages %}
+    <url>
+        <loc>{{ page|link }}</loc>
+        <priority>{% if page == '/' %}1.0{% else %}0.8{% endif %}</priority>
+        <changefreq>monthly</changefreq>
+    </url>
+    {% endfor %}
+
+    {# products #}
+    {% for i, product in guest.product_get_list({"per_page": 50}).list %}
+    <url>
+        <loc>{{ 'order'|link }}/{{product.slug}}</loc>
+        <lastmod>{{product.updated_at|date('Y-m-d')}}</lastmod>
+        <priority>0.9</priority>
+        <changefreq>weekly</changefreq>
+    </url>
+    {% endfor %}
+
+    {# news items #}
+    {% if guest.extension_is_on({"mod":'news'}) %}
+    {% for i, article in guest.news_get_list({"per_page": 50}).list %}
+    <url>
+        <loc>{{ 'news'|link }}/{{article.slug}}</loc>
+        <lastmod>{{article.updated_at|date('Y-m-d')}}</lastmod>
+        <priority>0.9</priority>
+        <changefreq>weekly</changefreq>
+    </url>
+    {% endfor %}
+    {% endif %}
+
+    {# knowledge base items #}
+    {% if guest.support_kb_enabled() %}
+    {% for i, article in guest.support_kb_article_get_list({"per_page":50}).list %}
+    <url>
+        <loc>{{ 'support/kb'|link }}/{{article.category.slug}}/{{article.slug}}</loc>
+        <lastmod>{{article.updated_at|date('Y-m-d')}}</lastmod>
+        <priority>0.9</priority>
+        <changefreq>weekly</changefreq>
+    </url>
+    {% endfor %}
+    {% endif %}
+</urlset>

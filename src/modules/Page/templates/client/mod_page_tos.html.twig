@@ -1,0 +1,72 @@
+{% extends "layout_default.html.twig" %}
+
+{% block meta_title %}Пользовательское соглашение{% endblock %}
+{% block meta_description %}Пользовательское соглашение My Storage для клиентов личного облачного хранилища.{% endblock %}
+{% block body_class %}tos{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Пользовательское соглашение</li>
+{% endblock %}
+
+{% block content %}
+    {% set company = guest.system_company %}
+    {% set support_email = company.email|default('support@my-storage.org') %}
+
+    <section class="mb-4">
+        <h1 class="mb-2">Пользовательское соглашение</h1>
+        <p class="text-secondary mb-0">
+            Используя сайт и оплачивая тариф My Storage, пользователь принимает условия настоящего соглашения
+            и публичной оферты.
+        </p>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">1. Назначение сервиса</h2>
+            <p class="mb-0">
+                My Storage предназначен для личного облачного хранения документов, фотографий и важных файлов.
+                Доступ предоставляется в соответствии с выбранным тарифом.
+            </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">2. Аккаунт пользователя</h2>
+            <p class="mb-0">
+                Пользователь отвечает за достоверность email, указанного при регистрации, и за сохранность данных доступа.
+                Все инструкции и сервисные уведомления отправляются на зарегистрированный email.
+            </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">3. Оплата и продление</h2>
+            <p class="mb-0">
+                Услуга оплачивается по выбранному тарифу. Период, стоимость и статус счета отображаются в аккаунте клиента.
+                Доступ к услуге может быть ограничен при отсутствии оплаты.
+            </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">4. Запрещенное использование</h2>
+            <p class="mb-0">
+                Запрещено использовать сервис для хранения или распространения информации, нарушающей законодательство РФ,
+                права третьих лиц или нормальную работу сервиса.
+            </p>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5">5. Поддержка</h2>
+            <p class="mb-0">
+                По вопросам работы сервиса, оплаты и доступа пользователь может обратиться на
+                <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+            </p>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "layout_default.html.twig" %}
+
+{% block meta_title %}Возврат средств{% endblock %}
+{% block meta_description %}Правила отмены услуги и возврата средств My Storage.{% endblock %}
+{% block body_class %}page-refund-policy{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Возврат средств</li>
+{% endblock %}
+
+{% block content %}
+    {% set company = guest.system_company %}
+    {% set support_email = company.email|default('support@my-storage.org') %}
+
+    <section class="mb-4">
+        <h1 class="mb-2">Возврат средств</h1>
+        <p class="text-secondary mb-0">
+            Запросы на отмену услуги и возврат рассматриваются поддержкой My Storage по обращению клиента.
+        </p>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">Когда возможен возврат</h2>
+            <ul class="mb-0">
+                <li>Если доступ к услуге не был предоставлен после оплаты по технической причине на стороне сервиса.</li>
+                <li>Если платеж был совершен ошибочно и клиент обратился в поддержку до начала оказания услуги.</li>
+                <li>Если возврат требуется по иным основаниям, предусмотренным законодательством РФ.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5">Как запросить возврат</h2>
+            <p>
+                Напишите на <a href="mailto:{{ support_email }}">{{ support_email }}</a> с email,
+                использованного при регистрации. Укажите номер счета, дату оплаты и причину обращения.
+            </p>
+            <p class="mb-0">
+                Возврат выполняется тем же способом, которым была произведена оплата, если иное не согласовано сторонами.
+            </p>
+        </div>
+    </section>
+{% endblock %}

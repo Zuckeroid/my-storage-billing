@@ -1,0 +1,58 @@
+FROM node:24-bookworm AS assets
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY src/themes/huraga/package.json src/themes/huraga/package.json
+COPY src/themes/admin_default/package.json src/themes/admin_default/package.json
+COPY src/modules/Wysiwyg/package.json src/modules/Wysiwyg/package.json
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+FROM php:8.3-apache
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        cron \
+        git \
+        libbz2-dev \
+        libcurl4-openssl-dev \
+        libicu-dev \
+        libonig-dev \
+        libpng-dev \
+        libzip-dev \
+        unzip \
+    && a2enmod rewrite \
+    && docker-php-ext-configure gd \
+    && docker-php-ext-install -j"$(nproc)" \
+        bz2 \
+        curl \
+        gd \
+        intl \
+        mbstring \
+        pdo_mysql \
+        zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+COPY --from=assets /app/src ./src
+
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
+    && rm -rf src/install \
+    && mkdir -p src/data/cache src/data/log src/data/uploads \
+    && chown -R www-data:www-data src/data \
+    && echo '*/5 * * * * /usr/local/bin/php /var/www/html/cron.php >> /var/log/cron.log 2>&1' > /tmp/www-data.cron \
+    && crontab -u www-data /tmp/www-data.cron \
+    && rm /tmp/www-data.cron \
+    && rm -rf /var/www/html \
+    && mv /app/src /var/www/html \
+    && chown -R www-data:www-data /var/www/html
+
+CMD ["sh", "-c", "chown -R www-data:www-data /var/www/html/data && cron & exec apache2-foreground"]

@@ -1,0 +1,13 @@
+{
+  "name": "wysiwyg",
+  "files": [
+    "assets"
+  ],
+  "scripts": {
+    "build": "node ./esbuild.mjs"
+  },
+  "devDependencies": {
+    "ckeditor5": "48.0.0",
+    "esbuild": "0.28.0"
+  }
+}

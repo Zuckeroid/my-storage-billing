@@ -1,0 +1,744 @@
+@use "flags";
+
+html {
+    font-size: 1rem;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    overflow: hidden;
+}
+
+body {
+    font-family: var(--bs-body-font-family, system-ui, -apple-system, sans-serif);
+    font-size: 1rem;
+    line-height: 1.42857143;
+}
+
+.fs-7 {
+    font-size: .875rem;
+}
+
+.offcanvas-item {
+    border-bottom: 1px rgba(#000, .1) solid;
+
+    &:first-child {
+        border-top: 1px rgba(#000, .1) solid;
+    }
+
+    &:hover {
+        background: #fafafa;
+    }
+
+    >a {
+        color: var(--bs-secondary);
+    }
+}
+
+.card-header h1, .page-password-reset .card h1, .page-login .card h1, .page-signup .card h1 {
+    font-size: 1.25rem;
+}
+
+.card-body {
+    @at-root table {
+        >thead {
+            >tr {
+                >th {
+                    font-size: 0.765625rem;
+                    color: var(--bs-secondary);
+                    font-weight: 600;
+                    text-transform: uppercase;
+                }
+            }
+        }
+
+        >tbody {
+            >tr {
+                >td {
+                    vertical-align: middle;
+                }
+            }
+        }
+    }
+}
+
+.svg-icon {
+    height: 20px;
+    width: 20px;
+    fill: currentColor;
+}
+
+// Order management accordion
+#orderManager {
+    --bs-accordion-btn-icon: none;
+    --bs-accordion-btn-active-icon: none;
+}
+
+// TomSelect dropdown
+.ts-input {
+    color: inherit;
+}
+
+.ts-wrapper {
+    &.form-select {
+        background-color: inherit;
+    }
+
+    .ts-control {
+        font-size: 14px;
+        width: 100%;
+        color: inherit;
+
+        &.locale {
+            width: 205px;
+        }
+
+        .dropdown-menu {
+            width: 100%;
+            height: auto;
+        }
+    }
+
+    .ts-dropdown {
+        font-size: 14px;
+
+        .active {
+            background-color: rgba(var(--bs-secondary-rgb), 0.06);
+            color: inherit;
+        }
+
+        .selected {
+            background-color: rgba(var(--bs-secondary-rgb), 0.1);
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .ts-wrapper.js-language-selector {
+        width: 180px
+    }
+}
+
+.invoice-gateway {
+    border: 1px solid var(--bs-border-color);
+
+    &:hover {
+        border: 1px solid var(--bs-primary);
+    }
+}
+
+.email-list {
+    border-radius: 0;
+
+    .list-group-item {
+        border: 0;
+        border-bottom: 1px solid var(--bs-border-color);
+        border-left: 2px solid transparent;
+
+        &.active {
+            border-left: 2px solid var(--bs-primary);
+            background: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--bs-dark);
+        }
+    }
+}
+
+// Badge text contrast fix - ensure white text on colored badges
+.badge[class*="bg-"],
+.badge[class*="text-bg-"] {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+// Hide empty badges to prevent grey circle from showing
+.badge:empty {
+    display: none;
+}
+
+.card-header {
+    padding: 0.75rem 1.25rem;
+    background-color: var(--bs-tertiary-bg);
+}
+
+// Navbar and logo styling
+.navbar {
+    background-color: var(--bs-body-bg);
+    box-shadow: none;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 45px;
+}
+
+.navbar-brand img {
+    display: block;
+    height: 45px;
+    width: auto;
+}
+
+// Language selector flag icon styling
+.locale-selector-dropdown {
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    box-shadow: var(--bs-box-shadow);
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+
+        .fi {
+            display: inline-block;
+            width: 1.25em;
+            height: 1em;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+    }
+}
+
+// Ensure flag icons render correctly in all contexts
+.fi {
+    border-radius: 4px;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    width: 1.25em;
+    height: 1em;
+
+    &::before {
+        content: '';
+        display: block;
+        width: inherit;
+        height: inherit;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+}
+
+// Flag icon size variants
+.fi-fw {
+    width: 1.28571429em;
+}
+
+.fi-size-sm {
+    font-size: 0.875rem;
+}
+
+.fi-size-lg {
+    font-size: 1.25rem;
+}
+
+// Dark mode is now handled by Bootstrap's native color modes via data-bs-theme attribute
+// See: https://getbootstrap.com/docs/5.3/customize/color-modes/
+
+// Breadcrumb margin
+.breadcrumb {
+    margin-bottom: 1.25rem;
+}
+
+// Nav-link color - black for better visibility and contrast
+.nav-link {
+    color: #000000 !important;
+}
+
+.nav-link:hover {
+    color: var(--bs-primary) !important;
+}
+
+// Client profile dropdown - inline with nav items, transparent background
+.client-dropdown {
+    .nav-link.dropdown-toggle {
+        color: var(--bs-body-color);
+        background-color: transparent;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.5rem 0.75rem;
+
+        &:hover {
+            color: var(--bs-primary);
+        }
+
+        &::after {
+            margin-left: 0.25rem;
+        }
+    }
+
+    .dropdown-menu {
+        background-color: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        box-shadow: var(--bs-box-shadow);
+    }
+
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+    }
+}
+
+// Sidebar balance and note styling
+.sidebar-balance-title {
+    color: var(--bs-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.sidebar-note-content {
+    font-size: 0.875rem;
+}
+
+// Alert styling - use Bootstrap's native alert colors
+.alert-danger {
+    --bs-alert-bg: rgba(var(--bs-danger-rgb), 0.15);
+    --bs-alert-border-color: rgba(var(--bs-danger-rgb), 0.3);
+    --bs-alert-color: var(--bs-danger);
+}
+
+.alert-warning {
+    --bs-alert-bg: rgba(var(--bs-warning-rgb), 0.15);
+    --bs-alert-border-color: rgba(var(--bs-warning-rgb), 0.3);
+    --bs-alert-color: var(--bs-warning);
+}
+
+.alert-info {
+    --bs-alert-bg: rgba(var(--bs-primary-rgb), 0.1);
+    --bs-alert-border-color: rgba(var(--bs-primary-rgb), 0.2);
+    --bs-alert-color: var(--bs-primary);
+}
+
+// Order page text sizing
+.mod_orderbutton {
+    .accordion-body {
+        span:not(.badge) {
+            font-size: 0.875rem;
+        }
+    }
+}
+
+// Dashboard and client area styling
+.dashboard,
+.mod_client {
+    // Card header h6 styling - larger and more prominent
+    .card-header {
+        h6 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--bs-body-color);
+        }
+    }
+}
+
+// Language selector vertical alignment in navbar
+.nav-item {
+    display: flex;
+    align-items: center;
+
+    .form-select.js-language-selector {
+        color: var(--bs-body-color);
+        padding: 0.5rem 2rem 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        min-height: auto;
+        height: auto;
+        background-position: right 0.5rem center;
+    }
+}
+
+// Alert vertical centering and layout
+.alert {
+    align-items: center;
+    flex-direction: column !important;
+}
+
+.alert p {
+    margin-bottom: 0;
+}
+
+// Nav-link vertical alignment with language selector
+.navbar-nav {
+    align-items: center;
+    gap: 0.25rem;
+
+    .nav-link {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    > .btn {
+        margin-top: 0;
+        margin-bottom: 0;
+        display: inline-flex;
+        align-items: center;
+    }
+}
+.toast-container-zindex {
+    z-index: 1070;
+}
+
+.brand-folder-icon {
+    align-items: center;
+    background: #f6c453;
+    border: 1px solid #dfaa24;
+    border-radius: 8px;
+    color: #27323f;
+    display: inline-flex;
+    height: 34px;
+    justify-content: center;
+    width: 42px;
+}
+
+.brand-folder-icon .svg-icon {
+    height: 24px;
+    width: 24px;
+}
+
+.auth-brand {
+    align-items: center;
+    color: #27323f;
+    display: inline-flex;
+    font-weight: 700;
+    gap: .65rem;
+    text-decoration: none;
+}
+
+.auth-brand:hover {
+    color: #27323f;
+}
+
+.storage-shell {
+    background: #eef3f8;
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    height: 100vh;
+    min-height: 720px;
+}
+
+.storage-sidebar {
+    background: #f8fafc;
+    border-right: 1px solid #d7dee8;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 1.25rem;
+}
+
+.storage-sidebar-brand {
+    align-items: center;
+    color: #27323f;
+    display: inline-flex;
+    font-size: 1.05rem;
+    font-weight: 700;
+    gap: .7rem;
+    min-height: 42px;
+    text-decoration: none;
+}
+
+.storage-sidebar-brand:hover {
+    color: #27323f;
+}
+
+.storage-tree {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+}
+
+.storage-tree-root,
+.storage-tree-item,
+.storage-tree-folder summary {
+    align-items: center;
+    border-radius: 8px;
+    color: #27323f;
+    display: grid;
+    gap: .65rem;
+    grid-template-columns: 28px minmax(0, 1fr);
+    min-height: 38px;
+    padding: .45rem .55rem;
+    text-decoration: none;
+}
+
+.storage-tree-root {
+    font-weight: 700;
+}
+
+.storage-tree-item {
+    margin-left: 1rem;
+}
+
+.storage-tree-item:hover,
+.storage-tree-folder summary:hover {
+    background: #e8f4ef;
+    color: #27323f;
+}
+
+.storage-tree-folder summary {
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+}
+
+.storage-tree-folder summary::-webkit-details-marker {
+    display: none;
+}
+
+.storage-tree-folder[open] summary {
+    background: #eef3f8;
+}
+
+.storage-sidebar-footer {
+    display: grid;
+    gap: .65rem;
+    margin-top: auto;
+}
+
+.storage-account-chip {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #d7dee8;
+    border-radius: 8px;
+    display: flex;
+    gap: .65rem;
+    min-height: 44px;
+    padding: .5rem .65rem;
+}
+
+.storage-account-chip span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.storage-viewer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+}
+
+.storage-viewer-toolbar {
+    align-items: center;
+    background: #ffffff;
+    border-bottom: 1px solid #d7dee8;
+    display: flex;
+    min-height: 64px;
+    padding: .85rem 1.25rem;
+}
+
+.storage-path {
+    align-items: center;
+    color: #6c7a89;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+}
+
+.storage-path strong {
+    color: #27323f;
+    font-weight: 700;
+}
+
+.storage-content-pane {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 1.25rem;
+}
+
+.storage-content-pane .content-block {
+    background: #ffffff;
+    border: 1px solid #d7dee8;
+    border-radius: 8px;
+    flex: 1;
+    min-height: 100%;
+    padding: 1.25rem;
+}
+
+.storage-footer {
+    align-items: center;
+    background: #ffffff;
+    border-top: 1px solid #d7dee8;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    justify-content: space-between;
+    padding: .85rem 1.25rem;
+}
+
+.storage-footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .8rem;
+}
+
+.storage-footer a {
+    color: #52606d;
+    text-decoration: none;
+}
+
+.storage-footer a:hover {
+    color: #27323f;
+    text-decoration: underline;
+}
+
+.storage-hero {
+    max-width: 760px;
+}
+
+.storage-folder-icon,
+.storage-file-icon {
+    border-radius: 6px;
+    display: inline-block;
+    height: 22px;
+    position: relative;
+    width: 26px;
+}
+
+.storage-folder-icon {
+    background: #f6c453;
+    border: 1px solid #dfaa24;
+}
+
+.storage-folder-icon::before {
+    background: #f6c453;
+    border: 1px solid #dfaa24;
+    border-bottom: 0;
+    border-radius: 5px 5px 0 0;
+    content: "";
+    height: 7px;
+    left: 2px;
+    position: absolute;
+    top: -6px;
+    width: 12px;
+}
+
+.storage-file-icon {
+    background: #e8f4ef;
+    border: 1px solid #75af91;
+}
+
+.storage-file-icon::after {
+    background: #75af91;
+    border-radius: 999px;
+    content: "";
+    height: 2px;
+    left: 6px;
+    position: absolute;
+    top: 9px;
+    width: 12px;
+}
+
+.storage-plan-card {
+    border-color: #d7dee8;
+    transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+
+.storage-plan-card:hover {
+    border-color: #75af91;
+    box-shadow: 0 10px 24px rgba(39, 50, 63, .08);
+    transform: translateY(-2px);
+}
+
+.storage-card-icon {
+    align-items: center;
+    background: #e8f4ef;
+    border: 1px solid #b8d9c8;
+    border-radius: 8px;
+    color: #3b7657;
+    display: inline-flex;
+    height: 38px;
+    justify-content: center;
+    margin-bottom: .85rem;
+    width: 38px;
+}
+
+.storage-card-icon .svg-icon {
+    height: 22px;
+    width: 22px;
+}
+
+.storage-process ol {
+    counter-reset: storage-step;
+    list-style: none;
+    padding-left: 0;
+}
+
+.storage-process li {
+    align-items: center;
+    counter-increment: storage-step;
+    display: flex;
+    gap: .75rem;
+    margin-bottom: .75rem;
+}
+
+.storage-process li:last-child {
+    margin-bottom: 0;
+}
+
+.storage-process li::before {
+    align-items: center;
+    background: #27323f;
+    border-radius: 8px;
+    color: #ffffff;
+    content: counter(storage-step);
+    display: inline-flex;
+    flex: 0 0 28px;
+    height: 28px;
+    justify-content: center;
+    width: 28px;
+}
+
+@media (max-width: 768px) {
+    body {
+        overflow: auto;
+    }
+
+    .storage-shell {
+        height: auto;
+        grid-template-columns: 1fr;
+        min-height: 100vh;
+    }
+
+    .storage-sidebar {
+        border-bottom: 1px solid #d7dee8;
+        border-right: 0;
+        height: auto;
+        min-height: auto;
+    }
+
+    .storage-tree {
+        max-height: none;
+    }
+
+    .storage-content-pane {
+        padding: .8rem;
+    }
+
+    .storage-content-pane .content-block {
+        min-height: auto;
+        padding: 1rem;
+    }
+
+    .storage-hero {
+        max-width: none;
+    }
+}
+
+// Dark mode support uses Bootstrap's native color mode system via data-bs-theme attribute in HTML tag.
+// Bootstrap 5.3+ automatically handles dark mode colors through CSS variables.

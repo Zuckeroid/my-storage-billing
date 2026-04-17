@@ -1,0 +1,165 @@
+{% extends request.ajax ? "layout_blank.html.twig" : "layout_default.html.twig" %}
+
+{% import "macro_functions.html.twig" as mf %}
+
+{% block meta_title %}{% if client %}{{ 'Client Area'|trans }}{% else %}My Storage{% endif %}{% endblock %}
+{% block page_header %}{{ 'Storage'|trans }}{% endblock %}
+{% block body_class %}dashboard storage-dashboard{% endblock %}
+
+{% block breadcrumbs %}
+    {% if not settings.hide_dashboard_breadcrumb %}
+        <ul class="breadcrumb">
+            <li><a href="{{ '/'|link }}">{{ 'Home'|trans }}</a> <span class="dropdown-divider">/</span></li>
+            <li class="active">{{ 'Storage'|trans }}</li>
+        </ul>
+    {% endif %}
+{% endblock %}
+
+{% set storage_plans = [
+    {
+        title: 'Storage Start',
+        price: '290 ₽/месяц',
+        devices: 'Защищенный доступ к файлам для 1 устройства',
+        storage: '50 ГБ для личных файлов',
+        description: 'Для документов, фотографий и небольшого личного архива.',
+        href: '/order/storage-start'
+    },
+    {
+        title: 'Storage Plus',
+        price: '790 ₽/месяц',
+        devices: 'Защищенный доступ к файлам для 3 устройств',
+        storage: '200 ГБ для личных файлов',
+        description: 'Для повседневного хранения на нескольких личных устройствах.',
+        href: '/order/storage-plus'
+    },
+    {
+        title: 'Storage Family',
+        price: '1190 ₽/месяц',
+        devices: 'Защищенный доступ к файлам для 5 устройств',
+        storage: '500 ГБ для личных файлов',
+        description: 'Для большого личного архива и семейного хранения файлов.',
+        href: '/order/storage-family'
+    }
+] %}
+
+{% block content %}
+    {% if client %}
+        {% set dashboard = client.index_get_dashboard %}
+        {% set profile = dashboard.profile %}
+
+        <section class="mb-4">
+            <h1 class="mb-2">{{ 'Personal cloud storage'|trans }}</h1>
+            <p class="text-secondary mb-3">{{ 'Choose a plan, pay the invoice, and we will send access instructions to your registered email.'|trans }}</p>
+            <div class="alert alert-info" role="alert">
+                {{ 'Access instructions are sent to:'|trans }} <strong>{{ profile.email }}</strong>
+            </div>
+        </section>
+
+        <section class="row mb-4">
+            {% for plan in storage_plans %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 storage-plan-card">
+                        <div class="card-body d-flex flex-column">
+                            <span class="storage-card-icon" aria-hidden="true">
+                                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M4 4.75C4 3.78 4.78 3 5.75 3h6.5L18 8.75v10.5c0 .97-.78 1.75-1.75 1.75H5.75C4.78 21 4 20.22 4 19.25V4.75Zm8 0V9h4.25L12 4.75Z"/>
+                                </svg>
+                            </span>
+                            <h2 class="h5">{{ plan.title|trans }}</h2>
+                            <p class="h4 mb-3">{{ plan.price|trans }}</p>
+                            <p class="mb-2">{{ plan.storage|trans }}</p>
+                            <p class="mb-2">{{ plan.devices|trans }}</p>
+                            <p class="text-secondary small flex-grow-1">{{ plan.description|trans }}</p>
+                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">{{ 'Choose plan'|trans }}</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+
+        <section class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="h6 m-0">{{ 'My services'|trans }}</h2>
+                        <a class="btn btn-sm btn-outline-primary" href="{{ 'order/service'|link }}">{{ 'Open'|trans }}</a>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">{{ 'Active services'|trans }}: <strong>{{ dashboard.orders.active }}</strong></p>
+                        <p class="mb-0 text-secondary">{{ 'After payment, access details and instructions are sent by email.'|trans }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="h6 m-0">{{ 'Invoices'|trans }}</h2>
+                        <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ 'Open'|trans }}</a>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">{{ 'Unpaid invoices'|trans }}: <strong>{{ dashboard.invoices.unpaid }}</strong></p>
+                        <p class="mb-0 text-secondary">{{ 'You can review and pay invoices from this section.'|trans }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {% if dashboard.recent_orders %}
+            <section class="card mt-3">
+                <div class="card-header">
+                    <h2 class="h6 m-0">{{ 'Recent services'|trans }}</h2>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for i, order in dashboard.recent_orders %}
+                        <a href="{{ 'order/service/manage'|link }}/{{ order.id }}" class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>#{{ order.id }} {{ order.title|truncate(45) }}</span>
+                            <span class="badge {% if order.status == 'active' %}text-bg-success{% elseif order.status == 'pending_setup' %}text-bg-warning{% elseif order.status == 'failed_setup' or order.status == 'suspended' or order.status == 'failed_renew' %}text-bg-danger{% elseif order.status == 'canceled' %}text-bg-secondary{% endif %}">{{ mf.status_name(order.status) }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% else %}
+        <section class="storage-hero mb-4">
+            <div class="storage-hero-copy">
+                <h1 class="mb-2">{{ 'Cloud storage for personal information'|trans }}</h1>
+                <p class="text-secondary mb-0">{{ 'Store documents, photos, and important files in a personal cloud space. Register, choose a plan, and pay online.'|trans }}</p>
+            </div>
+        </section>
+
+        <section class="row mb-4">
+            {% for plan in storage_plans %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 storage-plan-card">
+                        <div class="card-body d-flex flex-column">
+                            <span class="storage-card-icon" aria-hidden="true">
+                                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M4 4.75C4 3.78 4.78 3 5.75 3h6.5L18 8.75v10.5c0 .97-.78 1.75-1.75 1.75H5.75C4.78 21 4 20.22 4 19.25V4.75Zm8 0V9h4.25L12 4.75Z"/>
+                                </svg>
+                            </span>
+                            <h2 class="h5">{{ plan.title|trans }}</h2>
+                            <p class="h4 mb-3">{{ plan.price|trans }}</p>
+                            <p class="mb-2">{{ plan.storage|trans }}</p>
+                            <p class="mb-2">{{ plan.devices|trans }}</p>
+                            <p class="text-secondary small flex-grow-1">{{ plan.description|trans }}</p>
+                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">{{ 'Start'|trans }}</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+
+        <section class="card storage-process">
+            <div class="card-body">
+                <h2 class="h5">{{ 'How it works'|trans }}</h2>
+                <ol class="mb-0">
+                    <li>{{ 'Create an account with your email.'|trans }}</li>
+                    <li>{{ 'Choose one of three storage plans.'|trans }}</li>
+                    <li>{{ 'Pay the invoice online.'|trans }}</li>
+                    <li>{{ 'Receive access instructions by email.'|trans }}</li>
+                </ol>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

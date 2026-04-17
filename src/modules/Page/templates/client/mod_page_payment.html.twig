@@ -1,0 +1,42 @@
+{% extends "layout_default.html.twig" %}
+
+{% block meta_title %}Оплата{% endblock %}
+{% block meta_description %}Информация об оплате тарифов My Storage и порядке получения доступа после оплаты.{% endblock %}
+{% block body_class %}page-payment{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Оплата</li>
+{% endblock %}
+
+{% block content %}
+    <section class="mb-4">
+        <h1 class="mb-2">Оплата</h1>
+        <p class="text-secondary mb-0">
+            Оплата выполняется после регистрации и выбора тарифа. После поступления платежа инструкции по доступу
+            отправляются на email, указанный в аккаунте.
+        </p>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">Доступные тарифы</h2>
+            <ul class="mb-0">
+                <li>Storage Start: 290 ₽ в месяц, защищенный доступ к файлам для 1 устройства.</li>
+                <li>Storage Plus: 790 ₽ в месяц, защищенный доступ к файлам для 3 устройств.</li>
+                <li>Storage Family: 1190 ₽ в месяц, защищенный доступ к файлам для 5 устройств.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5">Порядок оплаты</h2>
+            <ol class="mb-0">
+                <li>Зарегистрируйтесь на сайте.</li>
+                <li>Выберите тариф в разделе "Тарифы".</li>
+                <li>Проверьте счет и оплатите его доступным способом.</li>
+                <li>Дождитесь письма с инструкциями на зарегистрированный email.</li>
+            </ol>
+        </div>
+    </section>
+{% endblock %}

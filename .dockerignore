@@ -1,0 +1,14 @@
+.git
+.github
+.ddev
+.claude
+.gemini
+.qwen
+node_modules
+src/vendor
+src/config.php
+src/data/cache/*
+src/data/log/*
+src/data/uploads/*
+.env
+*.log

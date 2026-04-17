@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="{{ settings.theme|default('light') }}">
+<head>
+    <meta charset="utf-8">
+    <title>{{ settings.meta_title_prefix }} {% block meta_title %}{% endblock %} {{ settings.meta_title_suffix }}</title>
+
+    <meta name="description" content="{% block meta_description %}{{ settings.meta_description }}{% endblock %}">
+    <meta name="keywords" content="{{ settings.meta_keywords }}">
+    <meta name="robots" content="{{ settings.meta_robots }}">
+    <meta name="author" content="{{ settings.meta_author }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% block opengraph %}{% endblock %}
+    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}">
+    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}">
+    <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
+
+    {{ "Api/API.js" | library_url | script_tag }}
+    <script src="{{ 'build/js/huraga.js' | asset_url }}"></script>
+
+    {{ DebugBar_renderHead() }}
+
+    {% block head %}{% endblock %}
+    {% block js %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+{% block body %}
+{% if not client and settings.require_login %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const publicPaths = [
+                '/',
+                '/about-us',
+                '/contacts',
+                '/payment',
+                '/refund-policy',
+                '/offer',
+                '/tos',
+                '/privacy-policy',
+                '/signup',
+                '/login'
+            ];
+            const currentPath = window.location.pathname;
+
+            const isAllowed = publicPaths.some(path => currentPath === path || currentPath.startsWith(path + '/'));
+            if (!isAllowed) {
+                window.location.href = '{{ "login"|link }}';
+            }
+        });
+    </script>
+{% endif %}
+
+{% if client and profile is not defined %}
+    {% set profile = client.profile_get %}
+{% endif %}
+{% set company = guest.system_company %}
+
+<div class="storage-shell">
+    <aside class="storage-sidebar" aria-label="My Storage navigation">
+        <a class="storage-sidebar-brand" href="{{ '/'|link }}">
+            <span class="brand-folder-icon" aria-hidden="true">
+                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M3 6.75C3 5.78 3.78 5 4.75 5h5.4l2 2h7.1C20.22 7 21 7.78 21 8.75v8.5c0 .97-.78 1.75-1.75 1.75H4.75C3.78 19 3 18.22 3 17.25V6.75Z"/>
+                </svg>
+            </span>
+            <span>{{ company.name }}</span>
+        </a>
+
+        <nav class="storage-tree" aria-label="Site sections">
+            <div class="storage-tree-root">
+                <span class="storage-folder-icon" aria-hidden="true"></span>
+                <span>My Storage</span>
+            </div>
+
+            <a class="storage-tree-item" href="{{ '/'|link }}">
+                <span class="storage-file-icon" aria-hidden="true"></span>
+                <span>Главная</span>
+            </a>
+            <a class="storage-tree-item" href="{{ '/payment'|link }}">
+                <span class="storage-file-icon" aria-hidden="true"></span>
+                <span>Оплата</span>
+            </a>
+            <a class="storage-tree-item" href="{{ '/about-us'|link }}">
+                <span class="storage-file-icon" aria-hidden="true"></span>
+                <span>О сервисе</span>
+            </a>
+            <a class="storage-tree-item" href="{{ '/contacts'|link }}">
+                <span class="storage-file-icon" aria-hidden="true"></span>
+                <span>Контакты</span>
+            </a>
+
+            <details class="storage-tree-folder" open>
+                <summary>
+                    <span class="storage-folder-icon" aria-hidden="true"></span>
+                    <span>Документы</span>
+                </summary>
+                <a class="storage-tree-item" href="{{ '/offer'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Оферта</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/tos'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Соглашение</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/privacy-policy'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Конфиденциальность</span>
+                </a>
+                <a class="storage-tree-item" href="{{ '/refund-policy'|link }}">
+                    <span class="storage-file-icon" aria-hidden="true"></span>
+                    <span>Возврат</span>
+                </a>
+            </details>
+
+            {% if client %}
+                <details class="storage-tree-folder" open>
+                    <summary>
+                        <span class="storage-folder-icon" aria-hidden="true"></span>
+                        <span>Аккаунт</span>
+                    </summary>
+                    <a class="storage-tree-item" href="{{ '/'|link }}">
+                        <span class="storage-file-icon" aria-hidden="true"></span>
+                        <span>Панель</span>
+                    </a>
+                    <a class="storage-tree-item" href="{{ '/order/service'|link }}">
+                        <span class="storage-file-icon" aria-hidden="true"></span>
+                        <span>Услуги</span>
+                    </a>
+                    <a class="storage-tree-item" href="{{ '/invoice'|link }}">
+                        <span class="storage-file-icon" aria-hidden="true"></span>
+                        <span>Счета</span>
+                    </a>
+                    <a class="storage-tree-item" href="{{ 'client/profile'|link }}">
+                        <span class="storage-file-icon" aria-hidden="true"></span>
+                        <span>Профиль</span>
+                    </a>
+                </details>
+            {% endif %}
+        </nav>
+
+        <div class="storage-sidebar-footer">
+            {% set languages = guest.extension_languages(true) %}
+            {% if languages|length > 1 %}
+                <select name="lang" class="form-select js-language-selector">
+                    {% for lang in languages %}
+                        <option value="{{ lang.locale }}" data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">&nbsp;{{ lang.title }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+
+            {% if client %}
+                <div class="storage-account-chip">
+                    <div class="db-avatar rounded-circle" data-avatar-seed="{{ profile.email|hash('xxh128') }}" data-avatar-size="28" style="width: 28px; height: 28px;"></div>
+                    <span>{{ profile.first_name }} {{ profile.last_name }}</span>
+                </div>
+                <a class="btn btn-outline-primary w-100" href="{{ 'client/logout'|link }}">Выйти</a>
+            {% else %}
+                <a class="btn btn-primary w-100" href="{{ 'signup'|link }}">Регистрация</a>
+                <a class="btn btn-outline-primary w-100" href="{{ 'login'|link }}">Войти</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <main class="storage-viewer">
+        <div class="storage-viewer-toolbar">
+            <div class="storage-path">
+                <span class="storage-folder-icon" aria-hidden="true"></span>
+                <span>My Storage</span>
+                <span>/</span>
+                <strong>{% block page_header %}Обзор{% endblock %}</strong>
+            </div>
+        </div>
+
+        <section class="storage-content-pane" role="main">
+            {% block content_before %}{% endblock %}
+            <div class="content-block" role="main">
+                {% if settings.show_breadcrumb %}
+                    {% block breadcrumbs %}
+                        <nav aria-label="{{ 'breadcrumb'|trans }}">
+                            <ol class="breadcrumb d-none d-md-flex">
+                                <li class="breadcrumb-item"><a href="{{ '/'|link }}">{{ 'Home'|trans }}</a></li>
+                                {% block breadcrumb %}
+                                    <li class="active breadcrumb-item">{{ 'Dashboard'|trans }}</li>
+                                {% endblock %}
+                            </ol>
+                        </nav>
+                    {% endblock %}
+                {% endif %}
+
+                {{ render_widgets('client.theme.content.before') }}
+                {% block content %}{% endblock %}
+                {{ render_widgets('client.theme.content.after') }}
+
+                {{ include('partial_message.html.twig') }}
+
+                {% block content_after %}{% endblock %}
+            </div>
+        </section>
+
+        {% if settings.footer_enabled %}
+            <footer id="footer" class="storage-footer small text-muted">
+                <span>&copy; {{ now|format_date(pattern='yyyy') }} {{ settings.footer_signature | default(company.name) }}</span>
+                <nav aria-label="Legal links">
+                    <a href="{{ '/offer'|link }}">Оферта</a>
+                    <a href="{{ '/tos'|link }}">Соглашение</a>
+                    <a href="{{ '/privacy-policy'|link }}">Конфиденциальность</a>
+                    <a href="{{ '/contacts'|link }}">Реквизиты</a>
+                </nav>
+            </footer>
+        {% endif %}
+    </main>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1070;"></div>
+    <div class="wait" style="display:none" onclick="this.style.display='none'">
+        <div class="spinner-border"
+             style="width: 4rem; height: 4rem; top: 50%; left: 50%; position: fixed; z-index: 999"></div>
+    </div>
+    <noscript>Для работы аккаунта My Storage включите JavaScript и cookies в настройках браузера.</noscript>
+</div>
+
+{% endblock %}
+
+{% if settings.inject_javascript %}
+    {{ settings.inject_javascript | raw }}
+{% endif %}
+{{ include('partial_pending_messages.html.twig', ignore_missing: true) }}
+{% if guest.extension_is_on({ "mod": "cookieconsent" }) %}
+    {{ include('mod_cookieconsent_index.html.twig', ignore_missing: true) }}
+{% endif %}
+{{ DebugBar_render() }}
+</body>
+</html>

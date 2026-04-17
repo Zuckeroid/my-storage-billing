@@ -1,0 +1,86 @@
+{% extends "layout_default.html.twig" %}
+
+{% block meta_title %}Публичная оферта{% endblock %}
+{% block meta_description %}Публичная оферта My Storage на оказание услуг личного облачного хранения.{% endblock %}
+{% block body_class %}page-offer{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Публичная оферта</li>
+{% endblock %}
+
+{% block content %}
+    {% set company = guest.system_company %}
+    {% set support_email = company.email|default('support@my-storage.org') %}
+
+    <section class="mb-4">
+        <h1 class="mb-2">Публичная оферта</h1>
+        <p class="text-secondary mb-0">
+            Настоящий документ является предложением {{ company.address_2 }}
+            заключить договор на условиях, изложенных ниже.
+        </p>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">1. Стороны</h2>
+            <p>
+                Исполнитель: {{ company.address_2 }}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
+            </p>
+            <p class="mb-0">
+                Клиент: физическое лицо, зарегистрировавшее аккаунт на сайте My Storage и оплатившее выбранный тариф.
+            </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">2. Предмет договора</h2>
+            <p class="mb-0">
+                Исполнитель предоставляет клиенту информационно-техническую услугу личного облачного хранения
+                документов, фотографий и иных файлов в пределах выбранного тарифа. Инструкции по доступу направляются
+                на email, указанный клиентом при регистрации.
+            </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">3. Тарифы и оплата</h2>
+            <p>
+                Стоимость услуги указывается на странице тарифов и в счете перед оплатой.
+                Оплата означает согласие клиента с условиями настоящей оферты.
+            </p>
+            <p class="mb-0">
+                Актуальные тарифы: Storage Start - 290 ₽ в месяц, Storage Plus - 790 ₽ в месяц, Storage Family - 1190 ₽ в месяц.
+            </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">4. Порядок оказания услуги</h2>
+            <p class="mb-0">
+                После оплаты Исполнитель направляет инструкции на зарегистрированный email клиента.
+                Клиент отвечает за корректность указанного email и сохранность данных доступа.
+            </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">5. Ограничения</h2>
+            <p class="mb-0">
+                Клиент обязуется использовать сервис только в законных целях, не размещать запрещенную информацию
+                и не нарушать права третьих лиц. При нарушении условий доступ к услуге может быть ограничен.
+            </p>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5">6. Контакты</h2>
+            <p class="mb-1">Email поддержки: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            {% if company.address_1 %}<p class="mb-0">Адрес: {{ company.address_1 }}</p>{% endif %}
+        </div>
+    </section>
+{% endblock %}

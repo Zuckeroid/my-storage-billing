@@ -1,0 +1,29 @@
+.vscode
+._*
+.DS_Store
+/cache
+/src/config.php
+/src/data/log/*
+/src/data/cache/*
+!/src/data/cache/.gitkeep
+/src/data/uploads/*
+/src/vendor/*
+build
+
+# Needed for some workflows
+DOCKER_ENV
+docker_tag
+Dockerfile-php-build
+
+### phpunit/phpunit ###
+.phpunit.result.cache
+.phpunit.cache/test-results
+
+### node_modules ###
+node_modules
+
+### friendsofphp/php-cs-fixer ###
+.php-cs-fixer.cache
+src/install/php_error.log
+!/src/themes/huraga/config/settings_data.json
+output.log

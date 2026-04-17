@@ -1,0 +1,34 @@
+{
+  "name": "fossbilling",
+  "author": "FOSSBilling Team",
+  "homepage": "https://fossbilling.org",
+  "license": "Apache License 2.0",
+  "scripts": {
+    "build": "npm run build-themes && npm run build-modules",
+    "build-themes": "npm run build-admin_default && npm run build -w huraga",
+    "build-modules": "npm run build-wysiwyg",
+    "build-huraga": "npm run build -w huraga",
+    "build-admin_default": "npm run build -w admin_default",
+    "build-wysiwyg": "npm run build -w wysiwyg"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FOSSBilling/FOSSBilling.git"
+  },
+  "issues": {
+    "url": "https://github.com/FOSSBilling/FOSSBilling/issues"
+  },
+  "workspaces": [
+    "src/themes/huraga",
+    "src/themes/admin_default",
+    "src/modules/Wysiwyg"
+  ],
+  "config": {
+    "platform": {
+      "php": "8.3"
+    }
+  },
+  "engines": {
+    "npm": ">=11"
+  }
+}

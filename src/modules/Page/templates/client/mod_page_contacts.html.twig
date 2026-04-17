@@ -1,0 +1,59 @@
+{% extends "layout_default.html.twig" %}
+
+{% block meta_title %}Контакты{% endblock %}
+{% block meta_description %}Контактная информация My Storage: email поддержки, телефон, адрес и реквизиты ИП.{% endblock %}
+{% block body_class %}page-contacts{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Контакты</li>
+{% endblock %}
+
+{% block content %}
+    {% set company = guest.system_company %}
+    {% set support_email = company.email|default('support@my-storage.org') %}
+    {% set support_tel = company.tel|default('') %}
+    {% set support_tel_href = support_tel|replace({' ': '', '-': '', '(': '', ')': ''}) %}
+
+    <section class="mb-4">
+        <h1 class="mb-2">Контакты</h1>
+        <p class="text-secondary mb-0">
+            My Storage помогает хранить документы, фотографии и важные личные файлы в облаке.
+            По вопросам сервиса и оплаты напишите в поддержку.
+        </p>
+    </section>
+
+    <section class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">Поддержка</h2>
+                    <p class="mb-2">Email: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+                    {% if support_tel %}
+                        <p class="mb-0">Телефон: <a href="tel:{{ support_tel_href }}">{{ support_tel }}</a></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">Реквизиты</h2>
+                    <p class="mb-1">{{ company.address_2 }}</p>
+                    {% if company.vat_number %}<p class="mb-1">ИНН {{ company.vat_number }}</p>{% endif %}
+                    {% if company.number %}<p class="mb-1">ОГРНИП {{ company.number }}</p>{% endif %}
+                    {% if company.address_1 %}<p class="mb-0">Адрес: {{ company.address_1 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card mt-3">
+        <div class="card-body">
+            <h2 class="h5">Банковские реквизиты</h2>
+            {% if company.account_number %}<p class="mb-1">Расчетный счет: {{ company.account_number }}</p>{% endif %}
+            {% if company.bank_name %}<p class="mb-1">Банк: {{ company.bank_name }}</p>{% endif %}
+            {% if company.bic %}<p class="mb-1">БИК: {{ company.bic }}</p>{% endif %}
+            {% if company.address_3 %}<p class="mb-0">{{ company.address_3 }}</p>{% endif %}
+        </div>
+    </section>
+{% endblock %}

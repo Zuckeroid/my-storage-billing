@@ -1,0 +1,44 @@
+{% extends "layout_default.html.twig" %}
+
+{% block meta_title %}О сервисе{% endblock %}
+{% block meta_description %}My Storage - личное облачное хранилище для документов, фотографий и важных файлов.{% endblock %}
+{% block body_class %}about-us{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">О сервисе</li>
+{% endblock %}
+
+{% block content %}
+    {% set company = guest.system_company %}
+
+    <section class="mb-4">
+        <h1 class="mb-2">My Storage</h1>
+        <p class="text-secondary mb-0">
+            Личное облачное хранилище для обычных пользователей: документов, фотографий,
+            семейных файлов и другой важной информации, которую хочется держать под рукой.
+        </p>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">Что делает сервис</h2>
+            <p>
+                My Storage предоставляет личное пространство для хранения файлов и защищенный доступ к ним
+                в рамках выбранного тарифа. После регистрации и оплаты клиент получает инструкции на email.
+            </p>
+            <p class="mb-0">
+                Интерфейс аккаунта оставлен простым: регистрация, выбор тарифа, счета и основные данные пользователя.
+            </p>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5">Юридическая информация</h2>
+            <p class="mb-1">{{ company.address_2 }}</p>
+            {% if company.vat_number %}<p class="mb-1">ИНН {{ company.vat_number }}</p>{% endif %}
+            {% if company.number %}<p class="mb-1">ОГРНИП {{ company.number }}</p>{% endif %}
+            {% if company.address_1 %}<p class="mb-0">Адрес: {{ company.address_1 }}</p>{% endif %}
+        </div>
+    </section>
+{% endblock %}

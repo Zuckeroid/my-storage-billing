@@ -1,0 +1,472 @@
+<?php
+
+declare(strict_types=1);
+/**
+ * Copyright 2022-2025 FOSSBilling
+ * Copyright 2011-2021 BoxBilling, Inc.
+ * SPDX-License-Identifier: Apache-2.0.
+ *
+ * @copyright FOSSBilling (https://www.fossbilling.org)
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache-2.0
+ */
+
+namespace Box\Mod\Servicedownloadable;
+
+use FOSSBilling\Environment;
+use FOSSBilling\InjectionAwareInterface;
+use FOSSBilling\Tools;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Response;
+
+class Service implements InjectionAwareInterface
+{
+    private const array DEFAULT_ALLOWED_EXTENSIONS = [
+        'zip', 'tar', 'gz', 'tgz', 'bz2', 'xz', 'rar', '7z',
+        'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
+        'txt', 'csv', 'xml', 'json', 'yml', 'yaml', 'sql',
+        'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp',
+        'mp3', 'wav', 'ogg', 'mp4', 'm4v', 'mov', 'avi', 'mkv', 'webm',
+        'exe', 'msi', 'dmg', 'pkg', 'deb', 'rpm', 'apk', 'ipa',
+        'jar', 'war', 'ear', 'iso', 'bin', 'img',
+    ];
+
+    private const array DEFAULT_ALLOWED_MIME_TYPES = [
+        'application/octet-stream',
+        'application/zip',
+        'application/x-zip-compressed',
+        'application/x-tar',
+        'application/gzip',
+        'application/x-gzip',
+        'application/x-bzip2',
+        'application/x-xz',
+        'application/x-rar-compressed',
+        'application/x-7z-compressed',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/json',
+        'application/xml',
+        'application/sql',
+        'application/x-msdownload',
+        'application/vnd.microsoft.portable-executable',
+        'application/x-apple-diskimage',
+        'application/vnd.android.package-archive',
+        'application/java-archive',
+        'application/x-iso9660-image',
+        'image/png',
+        'image/jpeg',
+        'image/gif',
+        'image/svg+xml',
+        'image/webp',
+        'audio/mpeg',
+        'audio/wav',
+        'audio/ogg',
+        'video/mp4',
+        'video/quicktime',
+        'video/x-msvideo',
+        'video/x-matroska',
+        'video/webm',
+        'text/plain',
+        'text/csv',
+        'text/xml',
+        'text/yaml',
+    ];
+
+    protected ?\Pimple\Container $di = null;
+    private readonly Filesystem $filesystem;
+
+    public function setDi(\Pimple\Container $di): void
+    {
+        $this->di = $di;
+    }
+
+    public function getDi(): ?\Pimple\Container
+    {
+        return $this->di;
+    }
+
+    private function getAllowedFileTypes(): array
+    {
+        return [
+            'extensions' => self::DEFAULT_ALLOWED_EXTENSIONS,
+            'mime_types' => self::DEFAULT_ALLOWED_MIME_TYPES,
+        ];
+    }
+
+    private function validateFileUpload(\Symfony\Component\HttpFoundation\File\UploadedFile $file): void
+    {
+        $allowedTypes = $this->getAllowedFileTypes();
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        $mimeType = strtolower((string) $file->getMimeType());
+
+        if (!in_array($extension, $allowedTypes['extensions'], true)) {
+            throw new \FOSSBilling\Exception('File extension :ext is not allowed. Allowed extensions: :allowed', [':ext' => $extension, ':allowed' => implode(', ', $allowedTypes['extensions'])]);
+        }
+
+        if (!$this->isAllowedMimeType($mimeType, $allowedTypes['mime_types']) && $this->di->offsetExists('logger')) {
+            $this->di['logger']->warn(
+                'Accepting downloadable upload %s with unexpected MIME type %s because the extension %s is allowed',
+                $file->getClientOriginalName(),
+                $mimeType,
+                $extension
+            );
+        }
+    }
+
+    private function isAllowedMimeType(string $mimeType, array $allowedMimeTypes): bool
+    {
+        return $mimeType === '' || $mimeType === 'application/octet-stream' || in_array($mimeType, $allowedMimeTypes, true);
+    }
+
+    public function __construct()
+    {
+        $this->filesystem = new Filesystem();
+    }
+
+    public function attachOrderConfig(\Model_Product $product, array &$data): array
+    {
+        $config = json_decode($product->config ?? '', true) ?? [];
+        $required = [
+            'filename' => 'Product is not configured completely.',
+        ];
+        $this->di['validator']->checkRequiredParamsForArray($required, $config);
+
+        $data['filename'] = $config['filename'];
+
+        return array_merge($config, $data);
+    }
+
+    public function validateOrderData(array &$data): void
+    {
+        $required = [
+            'filename' => 'Filename is missing in product config',
+        ];
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+    }
+
+    /**
+     * @return \Model_ServiceDownloadable
+     */
+    public function action_create(\Model_ClientOrder $order)
+    {
+        $c = json_decode($order->config ?? '', true);
+        if (!is_array($c)) {
+            throw new \FOSSBilling\Exception(sprintf('Order #%s config is missing', $order->id));
+        }
+        $this->validateOrderData($c);
+
+        $model = $this->di['db']->dispense('ServiceDownloadable');
+        $model->client_id = $order->client_id;
+        $model->filename = $c['filename'];
+        $model->downloads = 0;
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($model);
+
+        return $model;
+    }
+
+    public function action_activate(\Model_ClientOrder $order): bool
+    {
+        return true;
+    }
+
+    /**
+     * @todo
+     */
+    public function action_renew(\Model_ClientOrder $order): bool
+    {
+        return true;
+    }
+
+    /**
+     * @todo
+     */
+    public function action_suspend(\Model_ClientOrder $order): bool
+    {
+        return true;
+    }
+
+    /**
+     * @todo
+     */
+    public function action_unsuspend(\Model_ClientOrder $order): bool
+    {
+        return true;
+    }
+
+    /**
+     * @todo
+     */
+    public function action_cancel(\Model_ClientOrder $order): bool
+    {
+        return true;
+    }
+
+    /**
+     * @todo
+     */
+    public function action_uncancel(\Model_ClientOrder $order): bool
+    {
+        return true;
+    }
+
+    /**
+     * @todo
+     */
+    public function action_delete(\Model_ClientOrder $order): void
+    {
+        $orderService = $this->di['mod_service']('order');
+        $service = $orderService->getOrderService($order);
+        if ($service instanceof \Model_ServiceDownloadable) {
+            $this->di['db']->trash($service);
+        }
+    }
+
+    public function toApiArray(\Model_ServiceDownloadable $model, $deep = false, $identity = null): array
+    {
+        $productService = $this->di['mod_service']('product');
+        $result = [
+            'path' => Path::join(PATH_UPLOADS, md5($model->filename)),
+            'filename' => $model->filename,
+        ];
+
+        if ($identity instanceof \Model_Admin) {
+            $result['downloads'] = $model->downloads;
+        }
+
+        return $result;
+    }
+
+    public function uploadProductFile(\Model_Product $productModel): bool
+    {
+        $productService = $this->di['mod_service']('product');
+        $request = $this->di['request'];
+
+        if ($request->files->count() == 0) {
+            throw new \FOSSBilling\Exception('File upload failed: no files in request.');
+        }
+        $file = $request->files->get('file_data');
+        $fileName = $file->getClientOriginalName();
+
+        $errorCode = $file->getError();
+        if ($errorCode !== UPLOAD_ERR_OK) {
+            throw new \FOSSBilling\Exception('File upload failed: ' . $this->_error_message($errorCode));
+        }
+
+        $this->validateFileUpload($file);
+
+        $fileNameHash = md5((string) $fileName);
+        $fileSavePath = PATH_UPLOADS;
+        $file->move($fileSavePath, $fileNameHash);
+
+        $config = json_decode($productModel->config ?? '', true) ?? [];
+
+        // Remove old file.
+        if (isset($config['filename'])) {
+            $oldFilePath = Path::join(PATH_UPLOADS, md5((string) $config['filename']));
+            if ($this->filesystem->exists($oldFilePath)) {
+                $this->filesystem->remove($oldFilePath);
+            }
+        }
+
+        // Check if update_orders is true and update all orders
+        if (isset($config['update_orders']) && $config['update_orders']) {
+            $orderService = $this->di['mod_service']('order');
+            // get all orders with this product
+            $orders = $productService->getOrdersForProduct($productModel);
+
+            foreach ($orders as $order) {
+                $ordermodel = $this->di['db']->getExistingModelById('ClientOrder', $order['id']);
+                $serviceDownloadable = $orderService->getOrderService($ordermodel);
+
+                // Update the filename
+                $oldconfig = json_decode($order['config'] ?? '', true);
+                $oldconfig['filename'] = $fileName;
+
+                // Save the change to the DB
+                $ordermodel->config = json_encode($oldconfig);
+                $ordermodel->updated_at = date('Y-m-d H:i:s');
+                $this->di['db']->store($ordermodel);
+
+                // Pass the filename since the file was already uploaded and moved
+                $this->updateProductFile($serviceDownloadable, $ordermodel, $fileName);
+            }
+        }
+
+        $config['filename'] = $fileName;
+        $productModel->config = json_encode($config);
+        $productModel->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($productModel);
+
+        $this->di['logger']->info('Uploaded new file for product %s', $productModel->id);
+
+        return true;
+    }
+
+    /**
+     * @throws \FOSSBilling\Exception
+     */
+    public function updateProductFile(\Model_ServiceDownloadable $serviceDownloadable, \Model_ClientOrder $order, ?string $filename = null): bool
+    {
+        $request = $this->di['request'];
+
+        // If filename is provided, use it directly (file was already uploaded in uploadProductFile)
+        if ($filename !== null) {
+            $fileName = $filename;
+        } elseif ($request->files->count() > 0) {
+            $file = $request->files->get('file_data');
+            $fileName = $file->getClientOriginalName();
+
+            $errorCode = $file->getError();
+            if ($errorCode !== UPLOAD_ERR_OK) {
+                throw new \FOSSBilling\Exception('File upload failed: ' . $this->_error_message($errorCode));
+            }
+
+            $this->validateFileUpload($file);
+
+            $fileNameHash = md5((string) $fileName);
+            $fileSavePath = PATH_UPLOADS;
+            $file->move($fileSavePath, $fileNameHash);
+        } else {
+            $fileName = null;
+            if (isset($order->config)) {
+                $config = json_decode($order->config, true);
+                $fileName = $config['filename'] ?? null;
+            }
+            if (!$fileName && isset($serviceDownloadable->filename)) {
+                $fileName = $serviceDownloadable->filename;
+            }
+            if (!$fileName) {
+                throw new \FOSSBilling\Exception('No filename available for order file update');
+            }
+        }
+
+        $serviceDownloadable->filename = $fileName;
+        $serviceDownloadable->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($serviceDownloadable);
+
+        $this->di['logger']->info('Uploaded new file for order %s', $order->id);
+
+        return true;
+    }
+
+    private function _error_message($error_code): string
+    {
+        return match ($error_code) {
+            UPLOAD_ERR_INI_SIZE => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
+            UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
+            UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded',
+            UPLOAD_ERR_NO_FILE => 'No file was uploaded',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+            UPLOAD_ERR_EXTENSION => 'File upload stopped by extension',
+            default => 'Unknown upload error',
+        };
+    }
+
+    public function sendFile(\Model_ServiceDownloadable $serviceDownloadable): bool
+    {
+        $info = $this->toApiArray($serviceDownloadable);
+
+        $fileName = $info['filename'];
+        $filePath = $info['path'];
+        if (!$this->filesystem->exists($filePath)) {
+            throw new \FOSSBilling\Exception('File cannot be downloaded at the moment. Please contact support.', null, 404);
+        }
+
+        // Increase download hit count.
+        ++$serviceDownloadable->downloads;
+        $serviceDownloadable->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($serviceDownloadable);
+
+        // Send the file for download, unless in testing environment.
+        if (!Environment::isTesting()) {
+            $response = new Response($this->filesystem->readFile($filePath));
+
+            $disposition = $response->headers->makeDisposition(
+                HeaderUtils::DISPOSITION_ATTACHMENT,
+                $fileName
+            );
+
+            $response->headers->set('Content-Type', 'application/octet-stream');
+            $response->headers->set('Content-Disposition', $disposition);
+            $response->send();
+        }
+
+        $this->di['logger']->info('Downloaded service %s file', $serviceDownloadable->id);
+
+        return true;
+    }
+
+    public function saveProductConfig(\Model_Product $productModel, $data): bool
+    {
+        $config = json_decode($productModel->config ?? '', true) ?: [];
+        $config['update_orders'] = Tools::normalizeBoolean($data['update_orders'] ?? false);
+        $productModel->config = json_encode($config);
+        $productModel->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($productModel);
+
+        return true;
+    }
+
+    /**
+     * Sends the file associated with a product for download.
+     *
+     * In a non-testing environment, this method reads the product file from disk,
+     * constructs an HTTP response with appropriate headers, and sends it directly
+     * to the client. In a testing environment ({@see Environment::isTesting()}),
+     * no response is sent, but the method will still perform logging and return
+     * a boolean indicating that the operation completed.
+     *
+     * @param \Model_Product $product the product model whose associated file should be downloaded
+     *
+     * @return bool True if the download operation completed successfully, regardless of whether
+     *              a response was actually sent (e.g. in a testing environment).
+     *
+     * @throws \FOSSBilling\Exception If no file is associated with the product configuration
+     *                                or if the associated file cannot be found or read. In both
+     *                                cases, the exception is thrown with an HTTP-style error
+     *                                code of 404.
+     */
+    public function sendProductFile(\Model_Product $product): bool
+    {
+        $config = $product->config;
+        $config = json_decode($config ?? '', true) ?: [];
+
+        if (!isset($config['filename'])) {
+            throw new \FOSSBilling\Exception('No file associated with this product.', null, 404);
+        }
+
+        $fileName = $config['filename'];
+        $filePath = Path::join(PATH_UPLOADS, md5((string) $fileName));
+
+        if (!$this->filesystem->exists($filePath)) {
+            throw new \FOSSBilling\Exception('File cannot be downloaded at the moment. Please contact support.', null, 404);
+        }
+
+        if (!Environment::isTesting()) {
+            $response = new Response($this->filesystem->readFile($filePath));
+
+            $disposition = $response->headers->makeDisposition(
+                HeaderUtils::DISPOSITION_ATTACHMENT,
+                $fileName
+            );
+
+            $response->headers->set('Content-Type', 'application/octet-stream');
+            $response->headers->set('Content-Disposition', $disposition);
+            $response->send();
+        }
+
+        $this->di['logger']->info('Downloaded product %s file by admin.', $product->id);
+
+        return true;
+    }
+}
