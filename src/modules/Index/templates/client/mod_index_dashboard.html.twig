@@ -16,33 +16,6 @@
 {% endblock %}
 
 {% set is_en = guest.system_locale|default(settings.locale|default('ru_RU')) starts with 'en' %}
-{% set storage_plans = [
-    {
-        title: 'Storage Start',
-        price: is_en ? '290 ₽/month' : '290 ₽/месяц',
-        devices: is_en ? 'Protected file access for 1 device' : 'Защищенный доступ к файлам для 1 устройства',
-        storage: is_en ? '50 GB for personal files' : '50 ГБ для личных файлов',
-        description: is_en ? 'For documents, photos, and a small personal archive.' : 'Для документов, фотографий и небольшого личного архива.',
-        href: '/order/storage-start'
-    },
-    {
-        title: 'Storage Plus',
-        price: is_en ? '790 ₽/month' : '790 ₽/месяц',
-        devices: is_en ? 'Protected file access for 3 devices' : 'Защищенный доступ к файлам для 3 устройств',
-        storage: is_en ? '200 GB for personal files' : '200 ГБ для личных файлов',
-        description: is_en ? 'For everyday storage across several personal devices.' : 'Для повседневного хранения на нескольких личных устройствах.',
-        href: '/order/storage-plus'
-    },
-    {
-        title: 'Storage Family',
-        price: is_en ? '1190 ₽/month' : '1190 ₽/месяц',
-        devices: is_en ? 'Protected file access for 5 devices' : 'Защищенный доступ к файлам для 5 устройств',
-        storage: is_en ? '500 GB for personal files' : '500 ГБ для личных файлов',
-        description: is_en ? 'For a larger personal archive and family file storage.' : 'Для большого личного архива и семейного хранения файлов.',
-        href: '/order/storage-family'
-    }
-] %}
-
 {% block content %}
     {% if client %}
         {% set dashboard = client.index_get_dashboard %}
@@ -76,25 +49,7 @@
         </section>
 
         <section class="row mb-4">
-            {% for plan in storage_plans %}
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 storage-plan-card">
-                        <div class="card-body d-flex flex-column">
-                            <span class="storage-card-icon" aria-hidden="true">
-                                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                    <path d="M4 4.75C4 3.78 4.78 3 5.75 3h6.5L18 8.75v10.5c0 .97-.78 1.75-1.75 1.75H5.75C4.78 21 4 20.22 4 19.25V4.75Zm8 0V9h4.25L12 4.75Z"/>
-                                </svg>
-                            </span>
-                            <h2 class="h5">{{ plan.title|trans }}</h2>
-                            <p class="h4 mb-3">{{ plan.price|trans }}</p>
-                            <p class="mb-2">{{ plan.storage|trans }}</p>
-                            <p class="mb-2">{{ plan.devices|trans }}</p>
-                            <p class="text-secondary small flex-grow-1">{{ plan.description|trans }}</p>
-                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">Выбрать тариф</a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+            {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'card_items', is_en: is_en } %}
         </section>
 
         <section class="storage-panel-grid">
@@ -139,25 +94,7 @@
         </section>
 
         <section class="row mb-4">
-            {% for plan in storage_plans %}
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 storage-plan-card">
-                        <div class="card-body d-flex flex-column">
-                            <span class="storage-card-icon" aria-hidden="true">
-                                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                    <path d="M4 4.75C4 3.78 4.78 3 5.75 3h6.5L18 8.75v10.5c0 .97-.78 1.75-1.75 1.75H5.75C4.78 21 4 20.22 4 19.25V4.75Zm8 0V9h4.25L12 4.75Z"/>
-                                </svg>
-                            </span>
-                            <h2 class="h5">{{ plan.title|trans }}</h2>
-                            <p class="h4 mb-3">{{ plan.price|trans }}</p>
-                            <p class="mb-2">{{ plan.storage|trans }}</p>
-                            <p class="mb-2">{{ plan.devices|trans }}</p>
-                            <p class="text-secondary small flex-grow-1">{{ plan.description|trans }}</p>
-                            <a class="btn btn-primary w-100" href="{{ plan.href|link }}">{{ is_en ? 'Choose plan' : 'Выбрать тариф' }}</a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+            {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'card_items', is_en: is_en } %}
         </section>
 
         <section class="storage-panel storage-process">

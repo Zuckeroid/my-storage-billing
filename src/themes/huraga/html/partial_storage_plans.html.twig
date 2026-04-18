@@ -1,0 +1,76 @@
+{% set is_en = is_en|default(guest.system_locale|default(settings.locale|default('ru_RU')) starts with 'en') %}
+{% set storage_plan_view = storage_plan_view|default('cards') %}
+{% set storage_plan_defaults = {
+    'storage-start': {
+        title: 'Storage Start',
+        price: is_en ? '290 RUB/month' : '290 руб./мес.',
+        devices: is_en ? 'Protected file access for 1 device' : 'Защищенный доступ к файлам для 1 устройства',
+        storage: is_en ? '50 GB for personal files' : '50 ГБ для личных файлов',
+        description: is_en ? 'For documents, photos, and a small personal archive.' : 'Для документов, фотографий и небольшого личного архива.',
+        href: '/order/storage-start'
+    },
+    'storage-plus': {
+        title: 'Storage Plus',
+        price: is_en ? '790 RUB/month' : '790 руб./мес.',
+        devices: is_en ? 'Protected file access for 3 devices' : 'Защищенный доступ к файлам для 3 устройств',
+        storage: is_en ? '200 GB for personal files' : '200 ГБ для личных файлов',
+        description: is_en ? 'For everyday storage across several personal devices.' : 'Для повседневного хранения на нескольких личных устройствах.',
+        href: '/order/storage-plus'
+    },
+    'storage-family': {
+        title: 'Storage Family',
+        price: is_en ? '1190 RUB/month' : '1190 руб./мес.',
+        devices: is_en ? 'Protected file access for 5 devices' : 'Защищенный доступ к файлам для 5 устройств',
+        storage: is_en ? '500 GB for personal files' : '500 ГБ для личных файлов',
+        description: is_en ? 'For a larger personal archive and family file storage.' : 'Для большого личного архива и семейного хранения файлов.',
+        href: '/order/storage-family'
+    }
+} %}
+{% set storage_plan_slugs = ['storage-start', 'storage-plus', 'storage-family'] %}
+{% set billing_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false }).list|default([]) %}
+{% set storage_products = billing_products|filter(product => storage_plan_defaults[product.slug]|default(null)) %}
+{% set use_billing_products = storage_products|length > 0 %}
+
+{% if storage_plan_view == 'list' %}<ul class="mb-0">{% endif %}
+{% for slug in storage_plan_slugs %}
+    {% set fallback = storage_plan_defaults[slug] %}
+    {% set product = storage_products|filter(item => item.slug == slug)|first|default(null) %}
+    {% if not use_billing_products or product %}
+        {% set title = product ? product.title : fallback.title %}
+        {% set price = fallback.price %}
+        {% if product and product.pricing.type == 'recurrent' and product.pricing.recurrent['1M'] is defined and product.pricing.recurrent['1M'].enabled %}
+            {% set price = product.pricing.recurrent['1M'].price|money_convert ~ (is_en ? '/month' : '/мес.') %}
+        {% elseif product and product.pricing.type == 'once' %}
+            {% set price = product.pricing.once.price|money_convert %}
+        {% elseif product and product.pricing.type == 'free' %}
+            {% set price = 0|money_convert %}
+        {% endif %}
+        {% set description = product and product.description ? product.description|striptags : fallback.description %}
+        {% set href = product ? '/order/' ~ product.slug : fallback.href %}
+
+        {% if storage_plan_view == 'card_items' %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 storage-plan-card">
+                    <div class="card-body d-flex flex-column">
+                        <span class="storage-card-icon" aria-hidden="true">
+                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M4 4.75C4 3.78 4.78 3 5.75 3h6.5L18 8.75v10.5c0 .97-.78 1.75-1.75 1.75H5.75C4.78 21 4 20.22 4 19.25V4.75Zm8 0V9h4.25L12 4.75Z"/>
+                            </svg>
+                        </span>
+                        <h2 class="h5">{{ title }}</h2>
+                        <p class="h4 mb-3">{{ price }}</p>
+                        <p class="mb-2">{{ fallback.storage }}</p>
+                        <p class="mb-2">{{ fallback.devices }}</p>
+                        <p class="text-secondary small flex-grow-1">{{ description }}</p>
+                        <a class="btn btn-primary w-100" href="{{ href|link }}">{{ is_en ? 'Choose plan' : 'Выбрать тариф' }}</a>
+                    </div>
+                </div>
+            </div>
+        {% elseif storage_plan_view == 'list' %}
+            <li>{{ title }}: {{ price }}, {{ fallback.devices|lower }}.</li>
+        {% elseif storage_plan_view == 'inline' %}
+            {{ title }} - {{ price }}{% if not loop.last %}, {% endif %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+{% if storage_plan_view == 'list' %}</ul>{% endif %}

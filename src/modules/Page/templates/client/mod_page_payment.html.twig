@@ -20,11 +20,7 @@
     <section class="card mb-3">
         <div class="card-body">
             <h2 class="h5">Доступные тарифы</h2>
-            <ul class="mb-0">
-                <li>Storage Start: 290 ₽ в месяц, защищенный доступ к файлам для 1 устройства.</li>
-                <li>Storage Plus: 790 ₽ в месяц, защищенный доступ к файлам для 3 устройств.</li>
-                <li>Storage Family: 1190 ₽ в месяц, защищенный доступ к файлам для 5 устройств.</li>
-            </ul>
+            {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'list', is_en: false } %}
         </div>
     </section>
 
