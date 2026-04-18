@@ -72,7 +72,7 @@
         </a>
 
         <nav class="storage-tree" aria-label="Site sections">
-            <details class="storage-tree-folder storage-tree-root-folder" open>
+            <details class="storage-tree-folder storage-tree-root-folder">
                 <summary>
                     <span class="storage-folder-icon" aria-hidden="true"></span>
                     <span>{{ is_en ? 'Information' : 'Информация' }}</span>
@@ -96,7 +96,7 @@
                 </a>
             </details>
 
-            <details class="storage-tree-folder storage-tree-root-folder" open>
+            <details class="storage-tree-folder storage-tree-root-folder">
                 <summary>
                     <span class="storage-folder-icon" aria-hidden="true"></span>
                     <span>{{ is_en ? 'Documents' : 'Документы' }}</span>
@@ -120,7 +120,7 @@
             </details>
 
             {% if client %}
-                <details class="storage-tree-folder storage-tree-root-folder" open>
+                <details class="storage-tree-folder storage-tree-root-folder">
                     <summary>
                         <span class="storage-folder-icon" aria-hidden="true"></span>
                         <span>{{ is_en ? 'Account' : 'Аккаунт' }}</span>
