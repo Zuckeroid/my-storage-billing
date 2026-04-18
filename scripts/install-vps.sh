@@ -217,8 +217,14 @@ if [ -z "${TABLE_EXISTS}" ]; then
   docker_compose -f docker-compose.prod.yml exec -T db mariadb --default-character-set=utf8mb4 -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < src/install/sql/content.sql
 fi
 
-echo "Applying My Storage seed data..."
-docker_compose -f docker-compose.prod.yml exec -T db mariadb --default-character-set=utf8mb4 -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < local-demo-data.sql
+STORAGE_PRODUCT_COUNT="$(docker_compose -f docker-compose.prod.yml exec -T db mariadb -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -Nse "SELECT COUNT(*) FROM product WHERE slug IN ('storage-start', 'storage-plus', 'storage-family');" | tr -d '\r')"
+
+if [ "${STORAGE_PRODUCT_COUNT}" = "0" ]; then
+  echo "Applying initial My Storage seed data..."
+  docker_compose -f docker-compose.prod.yml exec -T db mariadb --default-character-set=utf8mb4 -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < local-demo-data.sql
+else
+  echo "Skipping product seed because My Storage products already exist. Existing prices and product edits are preserved."
+fi
 
 COMPANY_EMAIL_ESC="$(sql_escape "${COMPANY_EMAIL}")"
 COMPANY_PHONE_ESC="$(sql_escape "${COMPANY_PHONE}")"
