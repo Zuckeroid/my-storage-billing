@@ -61,15 +61,13 @@
                         </span>
                         <h2 class="h5">{{ title }}</h2>
                         <p class="h4 mb-3">{{ price }}</p>
-                        <p class="mb-2">{{ fallback.storage }}</p>
-                        <p class="mb-2">{{ fallback.devices }}</p>
                         <p class="text-secondary small flex-grow-1">{{ description }}</p>
                         <a class="btn btn-primary w-100" href="{{ href|link }}">{{ is_en ? 'Choose plan' : 'Выбрать тариф' }}</a>
                     </div>
                 </div>
             </div>
         {% elseif storage_plan_view == 'list' %}
-            <li>{{ title }}: {{ price }}, {{ fallback.devices|lower }}.</li>
+            <li>{{ title }}: {{ price }}{% if description %}. {{ description }}{% endif %}</li>
         {% elseif storage_plan_view == 'inline' %}
             {{ title }} - {{ price }}{% if not loop.last %}, {% endif %}
         {% endif %}
