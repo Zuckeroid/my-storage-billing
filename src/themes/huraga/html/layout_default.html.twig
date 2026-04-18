@@ -11,12 +11,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {% block opengraph %}{% endblock %}
-    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418c">
-    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418c">
+    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
+    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
 
     {{ "Api/API.js" | library_url | script_tag }}
-    <script src="{{ 'build/js/huraga.js' | asset_url }}"></script>
+    <script src="{{ 'build/js/huraga.js' | asset_url }}?v=my-storage-20260418d"></script>
 
     {{ DebugBar_renderHead() }}
 
@@ -174,7 +174,8 @@
                 {% if languages|length > 1 %}
                     <select name="lang" class="form-select form-select-sm storage-language-selector js-language-selector" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
                         {% for lang in languages %}
-                            <option value="{{ lang.locale }}" {% if lang.locale == current_locale %}selected{% endif %} data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">&nbsp;{{ lang.title }}</option>
+                            {% set lang_label = lang.locale starts with 'ru' ? 'Русский (RU)' : 'English (US)' %}
+                            <option value="{{ lang.locale }}" {% if lang.locale == current_locale %}selected{% endif %} data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">{{ lang_label }}</option>
                         {% endfor %}
                     </select>
                 {% endif %}

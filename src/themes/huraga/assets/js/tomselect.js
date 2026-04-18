@@ -26,7 +26,7 @@ function extractFlagClass(customProperties) {
  */
 function localeSelectorTemplate(data, escape) {
   const flagClass = extractFlagClass(data.customProperties);
-  const flagHtml = flagClass ? `<span class="${flagClass} me-2" style="display: inline-block; vertical-align: middle;"></span>` : '';
+  const flagHtml = flagClass ? `<span class="${flagClass} me-1" style="display: inline-block; vertical-align: middle;"></span>` : '';
   return `<div class="d-flex align-items-center">${flagHtml}${escape(data.text)}</div>`;
 }
 

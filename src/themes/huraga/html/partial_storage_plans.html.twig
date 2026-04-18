@@ -27,21 +27,23 @@
     }
 } %}
 {% set storage_plan_slugs = ['storage-start', 'storage-plus', 'storage-family'] %}
-{% set billing_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false }).list|default([]) %}
-{% set storage_products = billing_products|filter(product => storage_plan_defaults[product.slug]|default(null)) %}
-{% set use_billing_products = storage_products|length > 0 %}
+{% set storage_products = {
+    'storage-start': guest.product_get({ 'slug': 'storage-start' }),
+    'storage-plus': guest.product_get({ 'slug': 'storage-plus' }),
+    'storage-family': guest.product_get({ 'slug': 'storage-family' })
+} %}
 
 {% if storage_plan_view == 'list' %}<ul class="mb-0">{% endif %}
 {% for slug in storage_plan_slugs %}
     {% set fallback = storage_plan_defaults[slug] %}
-    {% set product = storage_products|filter(item => item.slug == slug)|first|default(null) %}
-    {% if not use_billing_products or product %}
+    {% set product = storage_products[slug]|default(null) %}
+    {% if product %}
         {% set title = product ? product.title : fallback.title %}
         {% set price = fallback.price %}
         {% if product and product.pricing.type == 'recurrent' and product.pricing.recurrent['1M'] is defined and product.pricing.recurrent['1M'].enabled %}
-            {% set price = product.pricing.recurrent['1M'].price|money_convert ~ (is_en ? '/month' : '/мес.') %}
+            {% set price = product.pricing.recurrent['1M'].price|money_convert|replace({'.00': ''}) ~ (is_en ? '/month' : '/мес.') %}
         {% elseif product and product.pricing.type == 'once' %}
-            {% set price = product.pricing.once.price|money_convert %}
+            {% set price = product.pricing.once.price|money_convert|replace({'.00': ''}) %}
         {% elseif product and product.pricing.type == 'free' %}
             {% set price = 0|money_convert %}
         {% endif %}

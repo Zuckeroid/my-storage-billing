@@ -453,8 +453,18 @@ table > tbody > tr > td {
   flex: 0 0 auto;
   font-weight: 700;
   min-height: 32px;
-  min-width: 118px;
-  width: auto;
+  min-width: 104px;
+  width: 118px;
+}
+.storage-toolbar-actions .ts-wrapper.js-language-selector,
+.storage-toolbar-actions .ts-wrapper.js-language-selector .ts-control.locale {
+  flex: 0 0 auto;
+  width: 118px;
+}
+.storage-toolbar-actions .ts-wrapper.js-language-selector .ts-control.locale {
+  font-size: 0.76rem;
+  min-height: 32px;
+  overflow: hidden;
 }
 .storage-language-selector:focus {
   border-color: #0f766e;
@@ -794,6 +804,11 @@ table > tbody > tr > td {
     justify-content: flex-start;
     overflow-x: auto;
     padding-bottom: 0.1rem;
+  }
+  .storage-language-selector,
+  .storage-toolbar-actions .ts-wrapper.js-language-selector,
+  .storage-toolbar-actions .ts-wrapper.js-language-selector .ts-control.locale {
+    width: 112px;
   }
   .storage-content-pane {
     padding: 0.8rem;
