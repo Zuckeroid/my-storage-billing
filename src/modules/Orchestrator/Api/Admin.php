@@ -14,6 +14,13 @@ namespace Box\Mod\Orchestrator\Api;
 
 class Admin extends \Api_Abstract
 {
+    public function connection_status(array $data): array
+    {
+        $this->di['mod_service']('Staff')->checkPermissionsAndThrowException('orchestrator', 'manage_settings');
+
+        return $this->getService()->getConnectionStatus();
+    }
+
     public function check_connection(array $data): array
     {
         $this->di['mod_service']('Staff')->checkPermissionsAndThrowException('orchestrator', 'manage_settings');

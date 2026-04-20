@@ -22,6 +22,7 @@
 
 {% block content %}
     {% set params = admin.extension_config_get({ 'ext': 'mod_orchestrator' }) %}
+    {% set connection = admin.orchestrator_connection_status({}) %}
     <div class="card">
         <form method="post" action="{{ 'api/admin/extension/config_save'|link }}" {{ fb_api_form({ message: 'Configuration Updated'|trans }) }}>
             <input type="hidden" name="ext" value="mod_orchestrator">
@@ -34,6 +35,26 @@
             </div>
 
             <div class="card-body">
+                <div class="alert {% if connection.status == 'ok' %}alert-success{% elseif connection.status == 'error' %}alert-danger{% elseif connection.status == 'disabled' %}alert-warning{% else %}alert-secondary{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div>
+                            <strong>{{ 'Connection status'|trans }}:</strong>
+                            <span class="text-capitalize">{{ connection.status|default('unknown') }}</span>
+                            {% if connection.message %}
+                                <div class="small mt-1">{{ connection.message }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="small text-secondary text-end">
+                            {% if connection.checked_at %}
+                                <div>{{ 'Last check'|trans }}: {{ connection.checked_at|date('Y-m-d H:i:s') }}</div>
+                            {% endif %}
+                            {% if connection.latency_ms is defined and connection.latency_ms is not null %}
+                                <div>{{ 'Latency'|trans }}: {{ connection.latency_ms }} ms</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mb-4">
                     <label class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" name="enabled" {% if params.enabled %}checked{% endif %}>
@@ -79,7 +100,7 @@
             </div>
 
             <div class="card-footer text-end">
-                <a class="btn btn-outline-secondary" href="{{ 'api/admin/orchestrator/check_connection'|link }}" {{ fb_api_link({message: 'Orchestrator connection verified'|trans}) }}>
+                <a class="btn btn-outline-secondary" href="{{ 'api/admin/orchestrator/check_connection'|link }}" {{ fb_api_link({message: 'Orchestrator connection verified'|trans, reload: true}) }}>
                     {{ 'Check connection'|trans }}
                 </a>
                 <button class="btn btn-primary" type="submit">{{ 'Update'|trans }}</button>

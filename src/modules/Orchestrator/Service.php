@@ -92,11 +92,44 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->di['mod_service']('extension')->getConfig('mod_orchestrator');
     }
 
+    public function getConnectionStatus(): array
+    {
+        $bean = $this->di['db']->findOne(
+            'extension_meta',
+            'extension = :ext AND meta_key = :key',
+            [
+                ':ext' => 'mod_orchestrator',
+                ':key' => 'connection_status',
+            ]
+        );
+
+        if (!$bean || empty($bean->meta_value)) {
+            return [
+                'status' => 'unknown',
+            ];
+        }
+
+        $decoded = json_decode((string) $bean->meta_value, true);
+        if (!is_array($decoded)) {
+            return [
+                'status' => 'unknown',
+            ];
+        }
+
+        return $decoded;
+    }
+
     public function checkConnection(): array
     {
         $config = $this->getConfig();
         $enabled = !empty($config['enabled']);
         if (!$enabled) {
+            $status = [
+                'status' => 'disabled',
+                'checked_at' => date(DATE_ATOM),
+            ];
+            $this->storeConnectionStatus($status);
+
             throw new \FOSSBilling\Exception('Orchestrator integration is disabled');
         }
 
@@ -104,6 +137,13 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $apiKey = trim((string) ($config['orchestrator_webhook_api_key'] ?? ''));
         $signingSecret = trim((string) ($config['orchestrator_webhook_signing_secret'] ?? ''));
         if ($webhookUrl === '' || $apiKey === '' || $signingSecret === '') {
+            $status = [
+                'status' => 'error',
+                'checked_at' => date(DATE_ATOM),
+                'message' => 'Orchestrator webhook settings are incomplete',
+            ];
+            $this->storeConnectionStatus($status);
+
             throw new \FOSSBilling\Exception('Orchestrator webhook settings are incomplete');
         }
 
@@ -125,32 +165,55 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'bindto' => BIND_TO,
             'timeout' => 10,
         ]);
-        $response = $client->request('POST', $preflightUrl, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'X-Api-Key' => $apiKey,
-                'X-Timestamp' => $timestamp,
-                'X-Signature' => $signature,
-            ],
-            'body' => $body,
-        ]);
+        try {
+            $response = $client->request('POST', $preflightUrl, [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'X-Api-Key' => $apiKey,
+                    'X-Timestamp' => $timestamp,
+                    'X-Signature' => $signature,
+                ],
+                'body' => $body,
+            ]);
 
-        $statusCode = $response->getStatusCode();
-        if ($statusCode < 200 || $statusCode >= 300) {
-            throw new \FOSSBilling\Exception(
-                'Orchestrator preflight returned HTTP :status',
-                [':status' => $statusCode]
-            );
+            $statusCode = $response->getStatusCode();
+            if ($statusCode < 200 || $statusCode >= 300) {
+                $status = [
+                    'status' => 'error',
+                    'preflight_url' => $preflightUrl,
+                    'checked_at' => date(DATE_ATOM),
+                    'message' => sprintf('HTTP %d', $statusCode),
+                ];
+                $this->storeConnectionStatus($status);
+
+                throw new \FOSSBilling\Exception(
+                    'Orchestrator preflight returned HTTP :status',
+                    [':status' => $statusCode]
+                );
+            }
+
+            $latencyMs = (int) round((microtime(true) - $startedAt) * 1000);
+            $status = [
+                'status' => 'ok',
+                'preflight_url' => $preflightUrl,
+                'latency_ms' => $latencyMs,
+                'checked_at' => date(DATE_ATOM),
+                'message' => 'Connection verified',
+            ];
+            $this->storeConnectionStatus($status);
+
+            return $status;
+        } catch (\Throwable $e) {
+            $status = [
+                'status' => 'error',
+                'preflight_url' => $preflightUrl,
+                'checked_at' => date(DATE_ATOM),
+                'message' => $e->getMessage(),
+            ];
+            $this->storeConnectionStatus($status);
+
+            throw $e;
         }
-
-        $latencyMs = (int) round((microtime(true) - $startedAt) * 1000);
-
-        return [
-            'status' => 'ok',
-            'preflight_url' => $preflightUrl,
-            'latency_ms' => $latencyMs,
-            'checked_at' => date(DATE_ATOM),
-        ];
     }
 
     private static function dispatchOrderEvent(\Box_Event $event, string $eventName): void
@@ -239,6 +302,29 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         return $normalized . '/preflight';
+    }
+
+    private function storeConnectionStatus(array $status): void
+    {
+        $bean = $this->di['db']->findOne(
+            'extension_meta',
+            'extension = :ext AND meta_key = :key',
+            [
+                ':ext' => 'mod_orchestrator',
+                ':key' => 'connection_status',
+            ]
+        );
+
+        if (!$bean) {
+            $bean = $this->di['db']->dispense('extension_meta');
+            $bean->extension = 'mod_orchestrator';
+            $bean->meta_key = 'connection_status';
+            $bean->created_at = date('Y-m-d H:i:s');
+        }
+
+        $bean->meta_value = json_encode($status, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $bean->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($bean);
     }
 
     private function buildPayload(\Model_ClientOrder $order, string $eventName): ?array
