@@ -69,10 +69,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
     }
 
-    public function updateStatus(string $externalSubscriptionId, string $status): bool
+    public function updateStatus(string $externalSubscriptionId, string $status, ?string $error = null): bool
     {
         $order = $this->findOrderByExternalSubscriptionId($externalSubscriptionId);
         $this->setOrderMeta($order->id, 'orchestrator_status', $status);
+        $this->setOrderMeta($order->id, 'orchestrator_error', $error !== null ? trim($error) : '');
         $this->setOrderMeta($order->id, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
         $this->sendAccessReadyEmailIfNeeded($order);
 
@@ -138,6 +139,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
         return [
             'status' => $this->getOrderMetaValue($orderId, 'orchestrator_status'),
+            'error' => $this->getOrderMetaValue($orderId, 'orchestrator_error'),
             'subscription_link' => $this->getOrderMetaValue($orderId, 'orchestrator_subscription_link'),
             'last_sync_at' => $this->getOrderMetaValue($orderId, 'orchestrator_last_sync_at'),
             'access_email_sent_at' => $this->getOrderMetaValue($orderId, 'orchestrator_access_email_sent_at'),
@@ -255,6 +257,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         try {
             $service->sendOrderEvent($orderId, $eventName);
         } catch (\Throwable $e) {
+            if ($eventName === 'payment_paid') {
+                $service->setOrderMeta($orderId, 'orchestrator_status', 'failed');
+                $service->setOrderMeta($orderId, 'orchestrator_error', $e->getMessage());
+                $service->setOrderMeta($orderId, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
+            }
             $event->getDi()['logger']->error(
                 'Failed to deliver Orchestrator webhook for order {order_id}: {message}',
                 [
@@ -284,6 +291,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $payload = $this->buildPayload($order, $eventName);
         if ($payload === null) {
             return;
+        }
+
+        if ($eventName === 'payment_paid') {
+            $this->setOrderMeta($order->id, 'orchestrator_status', 'pending');
+            $this->setOrderMeta($order->id, 'orchestrator_error', '');
         }
 
         $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

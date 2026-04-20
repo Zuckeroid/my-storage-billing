@@ -39,6 +39,7 @@ class Guest extends \Api_Abstract
         return $this->getService()->updateStatus(
             (string) $data['external_subscription_id'],
             (string) $data['status'],
+            isset($data['error']) ? (string) $data['error'] : null,
         );
     }
 

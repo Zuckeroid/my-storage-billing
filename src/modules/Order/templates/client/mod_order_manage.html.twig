@@ -116,7 +116,7 @@
                 </div>
             </div>
 
-            {% if orchestrator_access.subscription_link %}
+            {% if orchestrator_access.subscription_link or orchestrator_access.status or orchestrator_access.error %}
                 <div class="card mb-4">
                     <div class="card-header py-3">
                         <div class="d-flex justify-content-between align-items-center">
@@ -126,17 +126,35 @@
                             </div>
                             {% if orchestrator_access.status == 'active' %}
                                 <span class="badge text-bg-success text-uppercase">{{ orchestrator_access.status }}</span>
+                            {% elseif orchestrator_access.status == 'failed' %}
+                                <span class="badge text-bg-danger text-uppercase">{{ orchestrator_access.status }}</span>
+                            {% elseif orchestrator_access.status == 'pending' or orchestrator_access.status == 'provisioning' %}
+                                <span class="badge text-bg-warning text-uppercase">{{ orchestrator_access.status }}</span>
                             {% elseif orchestrator_access.status %}
                                 <span class="badge text-bg-secondary text-uppercase">{{ orchestrator_access.status }}</span>
                             {% endif %}
                         </div>
                     </div>
                     <div class="card-body">
+                        {% if orchestrator_access.status == 'pending' or orchestrator_access.status == 'provisioning' %}
+                            <p class="mb-3">{{ 'Your access is being prepared. This usually takes a moment.'|trans }}</p>
+                        {% elseif orchestrator_access.status == 'failed' %}
+                            <div class="alert alert-danger mb-3">
+                                {{ 'Provisioning failed. Please contact support if this status does not change soon.'|trans }}
+                            </div>
+                        {% endif %}
+                        {% if orchestrator_access.error %}
+                            <div class="alert alert-warning mb-3">
+                                <strong>{{ 'Last error'|trans }}:</strong> {{ orchestrator_access.error }}
+                            </div>
+                        {% endif %}
                         <p class="mb-3">Используйте эту ссылку, чтобы импортировать или обновить подписку в вашем VPN-приложении.</p>
+                        {% if orchestrator_access.subscription_link %}
                         <div class="input-group">
                             <input class="form-control" type="text" value="{{ orchestrator_access.subscription_link }}" readonly onclick="this.select();">
                             <a class="btn btn-primary" href="{{ orchestrator_access.subscription_link }}" target="_blank" rel="noopener noreferrer">Открыть ссылку</a>
                         </div>
+                        {% endif %}
                         <div class="small text-secondary mt-3">
                             {% if orchestrator_access.last_sync_at %}
                                 <div>Последнее обновление: {{ orchestrator_access.last_sync_at|format_date }}</div>
