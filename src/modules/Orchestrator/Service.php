@@ -74,6 +74,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $order = $this->findOrderByExternalSubscriptionId($externalSubscriptionId);
         $this->setOrderMeta($order->id, 'orchestrator_status', $status);
         $this->setOrderMeta($order->id, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
+        $this->sendAccessReadyEmailIfNeeded($order);
 
         return true;
     }
@@ -83,6 +84,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $order = $this->findOrderByExternalSubscriptionId($externalSubscriptionId);
         $this->setOrderMeta($order->id, 'orchestrator_subscription_link', $subscriptionLink);
         $this->setOrderMeta($order->id, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
+        $this->sendAccessReadyEmailIfNeeded($order);
 
         return true;
     }
@@ -529,5 +531,74 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $meta->value = $value;
         $meta->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($meta);
+    }
+
+    private function getOrderMetaValue(int $orderId, string $name): ?string
+    {
+        $meta = $this->di['db']->findOne(
+            'ClientOrderMeta',
+            'client_order_id = :order_id AND name = :name',
+            [
+                ':order_id' => $orderId,
+                ':name' => $name,
+            ]
+        );
+
+        if (!$meta || !isset($meta->value)) {
+            return null;
+        }
+
+        $value = trim((string) $meta->value);
+
+        return $value === '' ? null : $value;
+    }
+
+    private function sendAccessReadyEmailIfNeeded(\Model_ClientOrder $order): void
+    {
+        $status = $this->getOrderMetaValue($order->id, 'orchestrator_status');
+        $subscriptionLink = $this->getOrderMetaValue($order->id, 'orchestrator_subscription_link');
+        if ($status !== 'active' || $subscriptionLink === null) {
+            return;
+        }
+
+        $lastEmailedLink = $this->getOrderMetaValue($order->id, 'orchestrator_last_emailed_subscription_link');
+        if ($lastEmailedLink === $subscriptionLink) {
+            return;
+        }
+
+        $client = $this->di['db']->getExistingModelById('Client', $order->client_id, 'Client not found');
+        $product = $this->di['db']->load('Product', $order->product_id);
+
+        $email = [
+            'to_client' => $client->id,
+            'code' => 'mod_orchestrator_access_ready',
+            'send_now' => false,
+            'c' => [
+                'id' => $client->id,
+                'email' => (string) $client->email,
+                'first_name' => (string) ($client->first_name ?? ''),
+                'last_name' => (string) ($client->last_name ?? ''),
+                'full_name' => trim((string) ($client->first_name ?? '') . ' ' . (string) ($client->last_name ?? '')),
+            ],
+            'order' => [
+                'id' => $order->id,
+                'title' => $product instanceof \Model_Product ? (string) $product->title : sprintf('Order #%d', $order->id),
+                'status' => (string) $order->status,
+            ],
+            'product' => [
+                'id' => $product instanceof \Model_Product ? $product->id : null,
+                'title' => $product instanceof \Model_Product ? (string) $product->title : sprintf('Order #%d', $order->id),
+            ],
+            'orchestrator' => [
+                'status' => $status,
+                'subscription_link' => $subscriptionLink,
+                'updated_at' => date(DATE_ATOM),
+            ],
+        ];
+
+        $this->di['mod_service']('email')->sendTemplate($email);
+
+        $this->setOrderMeta($order->id, 'orchestrator_last_emailed_subscription_link', $subscriptionLink);
+        $this->setOrderMeta($order->id, 'orchestrator_access_email_sent_at', date('Y-m-d H:i:s'));
     }
 }

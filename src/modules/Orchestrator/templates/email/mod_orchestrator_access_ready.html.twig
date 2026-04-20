@@ -1,0 +1,22 @@
+{% block subject %}Доступ к услуге готов{% endblock %}
+
+{% block content %}
+<p>Здравствуйте{% if c.first_name %}, {{ c.first_name }}{% endif %}.</p>
+
+<p>Ваш доступ к услуге <strong>{{ product.title }}</strong> готов.</p>
+
+<p><strong>Ссылка подписки:</strong><br><a href="{{ orchestrator.subscription_link }}">{{ orchestrator.subscription_link }}</a></p>
+
+<p><strong>Как подключиться:</strong></p>
+<ol>
+    <li>Откройте ваше VPN-приложение.</li>
+    <li>Импортируйте подписку по ссылке.</li>
+    <li>Обновите конфигурации и подключитесь к серверу.</li>
+</ol>
+
+<p>Если приложение уже настроено, просто обновите подписку по этой ссылке.</p>
+
+<p>Если возникнут сложности с подключением, напишите нам на <a href="mailto:support@my-storage.org">support@my-storage.org</a>.</p>
+
+<p>Спасибо,<br>команда My Storage</p>
+{% endblock %}
