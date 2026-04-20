@@ -48,6 +48,12 @@
                 <div class="tab-pane fade show active" id="tab-index" role="tabpanel">
 
                     <div class="card-footer text-center">
+                        <a class="btn btn-outline-secondary" href="{{ 'email/history'|alink }}">
+                            <svg class="icon icon-tabler" width="24" height="24">
+                                <use xlink:href="#clock" />
+                            </svg>
+                            <span>{{ 'Email History'|trans }}</span>
+                        </a>
                         <a class="btn btn-primary" href="{{ 'api/admin/email/batch_template_generate'|link }}" {{ fb_api_link({ reload: true}) }}>
                             <svg class="icon icon-tabler" width="24" height="24">
                                 <use xlink:href="#mail" />

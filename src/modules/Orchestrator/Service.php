@@ -121,6 +121,29 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $decoded;
     }
 
+    public function getClientOrderAccess(\Model_Client $client, int $orderId): array
+    {
+        $order = $this->di['db']->findOne(
+            'ClientOrder',
+            'id = :id AND client_id = :client_id',
+            [
+                ':id' => $orderId,
+                ':client_id' => $client->id,
+            ]
+        );
+
+        if (!$order instanceof \Model_ClientOrder) {
+            throw new \FOSSBilling\Exception('Order not found');
+        }
+
+        return [
+            'status' => $this->getOrderMetaValue($orderId, 'orchestrator_status'),
+            'subscription_link' => $this->getOrderMetaValue($orderId, 'orchestrator_subscription_link'),
+            'last_sync_at' => $this->getOrderMetaValue($orderId, 'orchestrator_last_sync_at'),
+            'access_email_sent_at' => $this->getOrderMetaValue($orderId, 'orchestrator_access_email_sent_at'),
+        ];
+    }
+
     public function checkConnection(): array
     {
         $config = $this->getConfig();
