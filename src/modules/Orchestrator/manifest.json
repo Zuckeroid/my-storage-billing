@@ -1,0 +1,7 @@
+{
+  "id": "orchestrator",
+  "type": "mod",
+  "name": "Orchestrator integration",
+  "description": "Sends billing lifecycle events to Orchestrator and stores provisioning updates from Orchestrator",
+  "version": "1.0.0"
+}

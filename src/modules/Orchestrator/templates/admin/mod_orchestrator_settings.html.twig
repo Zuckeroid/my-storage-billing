@@ -1,0 +1,86 @@
+{% extends request.ajax ? 'layout_blank.html.twig' : 'layout_default.html.twig' %}
+
+{% block meta_title %}{{ 'Orchestrator Integration'|trans }}{% endblock %}
+
+{% set active_menu = 'extensions' %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ '/'|alink }}">
+                <svg class="icon">
+                    <use xlink:href="#home" />
+                </svg>
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ 'extension'|alink }}">{{ 'Extensions'|trans }}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ 'Orchestrator Integration'|trans }}</li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+    {% set params = admin.extension_config_get({ 'ext': 'mod_orchestrator' }) %}
+    <div class="card">
+        <form method="post" action="{{ 'api/admin/extension/config_save'|link }}" {{ fb_api_form({ message: 'Configuration Updated'|trans }) }}>
+            <input type="hidden" name="ext" value="mod_orchestrator">
+
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">{{ 'Orchestrator Integration'|trans }}</h3>
+                    <div class="card-subtitle">{{ 'Billing owns orders and payments. Orchestrator owns provisioning.'|trans }}</div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-4">
+                    <label class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="enabled" {% if params.enabled %}checked{% endif %}>
+                        <span class="form-check-label">{{ 'Enable outbound lifecycle webhooks to Orchestrator'|trans }}</span>
+                    </label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="orchestrator_webhook_url">{{ 'Orchestrator webhook URL'|trans }}</label>
+                    <input class="form-control" id="orchestrator_webhook_url" name="orchestrator_webhook_url" type="text" value="{{ params.orchestrator_webhook_url|default('') }}" placeholder="https://orchestrator.example.com/api/v1/webhook/billing">
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="orchestrator_webhook_api_key">{{ 'Webhook API key'|trans }}</label>
+                        <input class="form-control" id="orchestrator_webhook_api_key" name="orchestrator_webhook_api_key" type="text" value="{{ params.orchestrator_webhook_api_key|default('') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="orchestrator_webhook_signing_secret">{{ 'Webhook signing secret'|trans }}</label>
+                        <input class="form-control" id="orchestrator_webhook_signing_secret" name="orchestrator_webhook_signing_secret" type="text" value="{{ params.orchestrator_webhook_signing_secret|default('') }}">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="billing_api_key">{{ 'Inbound API key from Orchestrator'|trans }}</label>
+                        <input class="form-control" id="billing_api_key" name="billing_api_key" type="text" value="{{ params.billing_api_key|default('') }}">
+                        <small class="form-hint">{{ 'Used by Orchestrator when it sends status and subscription link updates back to billing.'|trans }}</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="default_external_plan_id">{{ 'Default external plan ID'|trans }}</label>
+                        <input class="form-control" id="default_external_plan_id" name="default_external_plan_id" type="text" value="{{ params.default_external_plan_id|default('') }}" placeholder="storage_start">
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label" for="product_plan_map_json">{{ 'Product/order plan mapping JSON'|trans }}</label>
+                    <textarea class="form-control" id="product_plan_map_json" name="product_plan_map_json" rows="10" spellcheck="false">{{ params.product_plan_map_json|default('{\n  "101": "storage_start",\n  "102": "storage_plus",\n  "103": "storage_family",\n  "order:77": "storage_custom"\n}') }}</textarea>
+                    <small class="form-hint">{{ 'Keys without a prefix are product IDs. Keys with order: are order-specific overrides.'|trans }}</small>
+                </div>
+            </div>
+
+            <div class="card-footer text-end">
+                <button class="btn btn-primary" type="submit">{{ 'Update'|trans }}</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
