@@ -16,6 +16,18 @@ use FOSSBilling\Validation\Api\RequiredParams;
 
 class Guest extends \Api_Abstract
 {
+    public function ping(array $data): array
+    {
+        $this->getService()->assertApiKey();
+
+        return [
+            'status' => 'ok',
+            'service' => 'fossbilling',
+            'module' => 'orchestrator',
+            'checked_at' => date(DATE_ATOM),
+        ];
+    }
+
     #[RequiredParams([
         'external_subscription_id' => 'External subscription ID is required',
         'status' => 'Status is required',

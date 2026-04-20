@@ -79,6 +79,9 @@
             </div>
 
             <div class="card-footer text-end">
+                <a class="btn btn-outline-secondary" href="{{ 'api/admin/orchestrator/check_connection'|link }}" {{ fb_api_link({message: 'Orchestrator connection verified'|trans}) }}>
+                    {{ 'Check connection'|trans }}
+                </a>
                 <button class="btn btn-primary" type="submit">{{ 'Update'|trans }}</button>
             </div>
         </form>
