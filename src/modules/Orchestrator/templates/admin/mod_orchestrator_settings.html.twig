@@ -28,9 +28,16 @@
             <input type="hidden" name="ext" value="mod_orchestrator">
 
             <div class="card-header">
-                <div>
-                    <h3 class="card-title">{{ 'Orchestrator Integration'|trans }}</h3>
-                    <div class="card-subtitle">{{ 'Billing owns orders and payments. Orchestrator owns provisioning.'|trans }}</div>
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap w-100">
+                    <div>
+                        <h3 class="card-title">{{ 'Orchestrator Integration'|trans }}</h3>
+                        <div class="card-subtitle">{{ 'Billing owns orders and payments. Orchestrator owns provisioning.'|trans }}</div>
+                    </div>
+                    <div>
+                        <a class="btn btn-outline-secondary" href="{{ 'api/admin/orchestrator/check_connection'|link }}" {{ fb_api_link({ message: 'Orchestrator connection verified'|trans, reload: true }) }}>
+                            {{ 'Check connection'|trans }}
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -100,9 +107,6 @@
             </div>
 
             <div class="card-footer text-end">
-                <a class="btn btn-outline-secondary" href="{{ 'api/admin/orchestrator/check_connection'|link }}" {{ fb_api_link({message: 'Orchestrator connection verified'|trans, reload: true}) }}>
-                    {{ 'Check connection'|trans }}
-                </a>
                 <button class="btn btn-primary" type="submit">{{ 'Update'|trans }}</button>
             </div>
         </form>
