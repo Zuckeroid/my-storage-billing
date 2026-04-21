@@ -108,10 +108,10 @@
                     <span>{{ company.name }}</span>
                 </a>
                 <nav class="public-site-nav" aria-label="{{ is_en ? 'Main navigation' : 'Основная навигация' }}">
+                    <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
                     <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
-                    <a href="#steps">{{ is_en ? 'How it works' : 'Как это работает' }}</a>
                     <a href="{{ '/payment'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>
-                    <a href="{{ '/contacts'|link }}">{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                    <a href="{{ '/contacts'|link }}">{{ is_en ? 'Contacts' : 'Контакты' }}</a>
                 </nav>
                 <div class="public-site-actions">
                     <a class="btn btn-outline-light btn-sm" href="{{ 'login'|link }}">{{ is_en ? 'Login' : 'Войти' }}</a>
@@ -125,35 +125,83 @@
                 <div class="public-site-shell public-hero-shell">
                     <div class="public-hero-copy">
                         <span class="public-eyebrow">{{ is_en ? 'Private cloud storage' : 'Личное облачное хранилище' }}</span>
-                        <h1>{{ is_en ? 'Private space for files you want close at hand.' : 'Личное пространство для файлов, которые всегда должны быть под рукой.' }}</h1>
-                        <p>{{ is_en ? 'Pick a plan, pay online, and receive access details by email. No extra maze between the first visit and the real service.' : 'Выберите тариф, оплатите онлайн и получите доступ на email. Без лишнего лабиринта между первым визитом и реальной услугой.' }}</p>
+                        <h1>
+                            {{ is_en ? 'Storage.' : 'Хранение.' }}<br>
+                            {{ is_en ? 'Secure access.' : 'Безопасный доступ.' }}<br>
+                            <span>{{ is_en ? 'No extra noise.' : 'Без лишнего шума.' }}</span>
+                        </h1>
+                        <p>{{ is_en ? 'Keep documents, photos, and backups in one private space. Choose a plan, pay online, and receive access details by email.' : 'Храните документы, фотографии и резервные копии в одном личном пространстве. Выберите тариф, оплатите онлайн и получите доступ на email.' }}</p>
+                        <div class="public-checks">
+                            <div class="public-check-item">
+                                <span class="public-check-icon">✓</span>
+                                <span>{{ is_en ? 'One account for plans, invoices, and status' : 'Один аккаунт для тарифов, счетов и статусов' }}</span>
+                            </div>
+                            <div class="public-check-item">
+                                <span class="public-check-icon">✓</span>
+                                <span>{{ is_en ? 'Access instructions are delivered by email' : 'Инструкции по доступу приходят на email' }}</span>
+                            </div>
+                            <div class="public-check-item">
+                                <span class="public-check-icon">✓</span>
+                                <span>{{ is_en ? 'Fast setup without extra onboarding' : 'Быстрый запуск без лишнего онбординга' }}</span>
+                            </div>
+                        </div>
                         <div class="public-hero-actions">
                             <a class="btn btn-warning btn-lg" href="#plans">{{ is_en ? 'Choose a plan' : 'Выбрать тариф' }}</a>
                             <a class="btn btn-outline-light btn-lg" href="{{ 'signup'|link }}">{{ is_en ? 'Open account' : 'Открыть аккаунт' }}</a>
                         </div>
                     </div>
-                    <div class="public-hero-meta" aria-label="{{ is_en ? 'Highlights' : 'Ключевые преимущества' }}">
-                        <span>{{ storage_products|length }} {{ is_en ? 'plans' : 'тарифа' }}</span>
-                        <span>{{ is_en ? 'online billing' : 'онлайн-оплата' }}</span>
-                        <span>{{ is_en ? 'access by email' : 'доступ по email' }}</span>
+                    <div class="public-proof-card" aria-label="{{ is_en ? 'Quick facts' : 'Ключевые факты' }}">
+                        <div class="public-proof-stat">
+                            <strong>{{ storage_products|length }}</strong>
+                            <span>{{ is_en ? 'current plans' : 'актуальных тарифа' }}</span>
+                        </div>
+                        <div class="public-proof-list">
+                            <div>{{ is_en ? 'Online billing' : 'Онлайн-оплата' }}</div>
+                            <div>{{ is_en ? 'Access by email' : 'Доступ по email' }}</div>
+                            <div>{{ is_en ? 'Services and invoices in one cabinet' : 'Услуги и счета в одном кабинете' }}</div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <section class="public-quickline">
+            <section id="features" class="public-features">
                 <div class="public-site-shell public-quickline-grid">
-                    <div class="public-quickline-item">
-                        <strong>{{ is_en ? 'One account' : 'Один аккаунт' }}</strong>
-                        <span>{{ is_en ? 'Plans, invoices, and service status in one place.' : 'Тарифы, счета и состояние услуги в одном кабинете.' }}</span>
-                    </div>
-                    <div class="public-quickline-item">
-                        <strong>{{ is_en ? 'Fast start' : 'Быстрый старт' }}</strong>
-                        <span>{{ is_en ? 'The path to the first setup is short and visible.' : 'Путь до первого подключения короткий и понятный.' }}</span>
-                    </div>
-                    <div class="public-quickline-item">
-                        <strong>{{ is_en ? 'Clear delivery' : 'Понятная выдача' }}</strong>
-                        <span>{{ is_en ? 'Access instructions arrive to the account email.' : 'Инструкции по доступу приходят на email аккаунта.' }}</span>
-                    </div>
+                    <article class="public-feature-card">
+                        <span class="public-feature-icon" aria-hidden="true">
+                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M4 4.75C4 3.78 4.78 3 5.75 3h6.5L18 8.75v10.5c0 .97-.78 1.75-1.75 1.75H5.75C4.78 21 4 20.22 4 19.25V4.75Zm8 0V9h4.25L12 4.75Z"/>
+                            </svg>
+                        </span>
+                        <h3>{{ is_en ? 'Private file space' : 'Личное пространство для файлов' }}</h3>
+                        <p>{{ is_en ? 'Documents, photos, archives, and backups stay together instead of being scattered across devices.' : 'Документы, фото, архивы и резервные копии находятся в одном месте, а не разбросаны по устройствам.' }}</p>
+                    </article>
+                    <article class="public-feature-card">
+                        <span class="public-feature-icon" aria-hidden="true">
+                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12 2.75a4.25 4.25 0 0 0-4.25 4.25V9H7a2 2 0 0 0-2 2v6.25A2.75 2.75 0 0 0 7.75 20h8.5A2.75 2.75 0 0 0 19 17.25V11a2 2 0 0 0-2-2h-.75V7A4.25 4.25 0 0 0 12 2.75Zm-2.75 6.2V7a2.75 2.75 0 1 1 5.5 0v1.95h-5.5Z"/>
+                            </svg>
+                        </span>
+                        <h3>{{ is_en ? 'Secure access' : 'Безопасный доступ' }}</h3>
+                        <p>{{ is_en ? 'After payment, access details arrive to the account email, and the cabinet keeps the service state visible.' : 'После оплаты доступ приходит на email аккаунта, а кабинет показывает состояние услуги без путаницы.' }}</p>
+                    </article>
+                    <article class="public-feature-card">
+                        <span class="public-feature-icon" aria-hidden="true">
+                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M6 4.5A2.5 2.5 0 0 1 8.5 2h7A2.5 2.5 0 0 1 18 4.5v15a2.5 2.5 0 0 1-2.5 2h-7A2.5 2.5 0 0 1 6 19.5v-15Zm2.5-.5a.5.5 0 0 0-.5.5v15a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-15a.5.5 0 0 0-.5-.5h-7Zm1.25 2.5h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5Z"/>
+                            </svg>
+                        </span>
+                        <h3>{{ is_en ? 'Works from your usual devices' : 'Работает с привычных устройств' }}</h3>
+                        <p>{{ is_en ? 'The service is made for normal everyday use: laptop, home machine, phone, and family access.' : 'Сервис рассчитан на обычные повседневные сценарии: ноутбук, домашний компьютер, телефон и семейное использование.' }}</p>
+                    </article>
+                    <article class="public-feature-card">
+                        <span class="public-feature-icon" aria-hidden="true">
+                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12 3 2.75 7v4.9c0 5.1 3.13 9.69 7.9 11.56l1.35.54 1.35-.54c4.77-1.87 7.9-6.46 7.9-11.56V7L12 3Zm0 2.1 7.25 3.14v3.66c0 4.24-2.58 8.06-6.49 9.59L12 21.9l-.76-.31c-3.91-1.53-6.49-5.35-6.49-9.59V8.24L12 5.1Zm-1.07 10.86-2.8-2.8-1.06 1.06 3.86 3.86 6.01-6.01-1.06-1.06-4.95 4.95Z"/>
+                            </svg>
+                        </span>
+                        <h3>{{ is_en ? 'Clear billing flow' : 'Понятный платежный путь' }}</h3>
+                        <p>{{ is_en ? 'Plans, invoices, and access details stay visible in one flow instead of turning into support chat.' : 'Тарифы, счета и доступ видны в одном потоке, а не превращаются в бесконечную переписку с поддержкой.' }}</p>
+                    </article>
                 </div>
             </section>
 
@@ -161,7 +209,7 @@
                 <div class="public-site-shell">
                     <div class="public-section-head">
                         <span class="public-section-kicker">{{ is_en ? 'Plans' : 'Тарифы' }}</span>
-                        <h2>{{ is_en ? 'Choose the format that fits your files' : 'Выберите формат, который подходит вашим файлам и привычкам' }}</h2>
+                        <h2>{{ is_en ? 'Choose the plan that fits your routine' : 'Выберите тариф, который подходит вашему объему и привычкам' }}</h2>
                         <p>{{ is_en ? 'Current plans are loaded directly from billing, so the homepage always shows the real catalog.' : 'Текущие тарифы подтягиваются прямо из биллинга, поэтому на главной всегда показан реальный каталог.' }}</p>
                     </div>
 
@@ -171,44 +219,35 @@
                 </div>
             </section>
 
-            <section id="steps" class="public-section public-process">
+            <section id="steps" class="public-section public-flow">
                 <div class="public-site-shell">
-                    <div class="public-section-head">
-                        <span class="public-section-kicker">{{ is_en ? 'Three steps' : 'Три шага' }}</span>
-                        <h2>{{ is_en ? 'The whole start fits into a short, visible flow' : 'Весь старт укладывается в короткий и понятный сценарий' }}</h2>
-                        <p>{{ is_en ? 'No extra onboarding maze: create an account, pay for the right plan, and get your access details.' : 'Без длинного онбординга: создайте аккаунт, оплатите нужный тариф и получите доступ.' }}</p>
-                    </div>
-
-                    <div class="public-process-grid">
-                        <article class="public-process-step">
-                            <span class="public-process-number">01</span>
-                            <h3>{{ is_en ? 'Create an account' : 'Создайте аккаунт' }}</h3>
-                            <p>{{ is_en ? 'Use the email where you want to receive invoices, status updates, and access instructions.' : 'Используйте тот email, на который удобно получать счета, статусы и инструкции по доступу.' }}</p>
-                        </article>
-                        <article class="public-process-step">
-                            <span class="public-process-number">02</span>
-                            <h3>{{ is_en ? 'Choose a storage plan' : 'Выберите тариф хранения' }}</h3>
-                            <p>{{ is_en ? 'Compare the plans, pick the one that fits your file volume and routine, and move straight to checkout.' : 'Сравните тарифы, выберите подходящий объем и сразу переходите к оформлению заказа.' }}</p>
-                        </article>
-                        <article class="public-process-step">
-                            <span class="public-process-number">03</span>
-                            <h3>{{ is_en ? 'Receive your access details' : 'Получите доступ и инструкции' }}</h3>
-                            <p>{{ is_en ? 'Pay online and receive the access details by email. The cabinet keeps the service status visible afterward.' : 'Оплатите онлайн и получите данные для доступа на email. Дальше кабинет показывает состояние услуги и счета.' }}</p>
-                        </article>
-                    </div>
-                </div>
-            </section>
-
-            <section class="public-section public-trust-strip">
-                <div class="public-site-shell public-trust-strip-shell">
-                    <div class="public-trust-copy">
-                        <span class="public-section-kicker">{{ is_en ? 'Before payment' : 'Перед оплатой' }}</span>
-                        <h2>{{ is_en ? 'Everything important is one click away' : 'Все важное находится в одном клике до оформления' }}</h2>
-                    </div>
-                    <div class="public-link-stack public-link-stack-inline">
-                        <a href="{{ '/payment'|link }}"><strong>{{ is_en ? 'Payment' : 'Оплата' }}</strong></a>
-                        <a href="{{ '/about-us'|link }}"><strong>{{ is_en ? 'About service' : 'О сервисе' }}</strong></a>
-                        <a href="{{ '/contacts'|link }}"><strong>{{ is_en ? 'Contacts' : 'Контакты' }}</strong></a>
+                    <div class="public-flow-shell">
+                        <div class="public-flow-head">
+                            <span class="public-section-kicker">{{ is_en ? 'Three steps' : 'Три шага' }}</span>
+                            <h2>{{ is_en ? 'Start without extra onboarding' : 'Старт без лишнего онбординга' }}</h2>
+                        </div>
+                        <div class="public-flow-grid">
+                            <article class="public-flow-item">
+                                <span class="public-flow-number">01</span>
+                                <strong>{{ is_en ? 'Account' : 'Аккаунт' }}</strong>
+                                <span>{{ is_en ? 'Create it in a minute' : 'Создайте за минуту' }}</span>
+                            </article>
+                            <article class="public-flow-item">
+                                <span class="public-flow-number">02</span>
+                                <strong>{{ is_en ? 'Plan' : 'Тариф' }}</strong>
+                                <span>{{ is_en ? 'Pick the right volume' : 'Выберите нужный объем' }}</span>
+                            </article>
+                            <article class="public-flow-item">
+                                <span class="public-flow-number">03</span>
+                                <strong>{{ is_en ? 'Access' : 'Доступ' }}</strong>
+                                <span>{{ is_en ? 'Receive details by email' : 'Получите данные на email' }}</span>
+                            </article>
+                        </div>
+                        <div class="public-link-stack">
+                            <a href="{{ '/payment'|link }}"><strong>{{ is_en ? 'Payment' : 'Оплата' }}</strong></a>
+                            <a href="{{ '/about-us'|link }}"><strong>{{ is_en ? 'About service' : 'О сервисе' }}</strong></a>
+                            <a href="{{ '/contacts'|link }}"><strong>{{ is_en ? 'Contacts' : 'Контакты' }}</strong></a>
+                        </div>
                     </div>
                 </div>
             </section>
