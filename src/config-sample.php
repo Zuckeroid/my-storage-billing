@@ -103,7 +103,6 @@ return [
      */
     'i18n' => [
         'locale' => 'en_US',
-        'enabled_locales' => ['en_US', 'ru_RU'],
         'timezone' => 'UTC',
 
         // Short names for formats (none, short, medium, long).

@@ -54,10 +54,6 @@ class Box_AppClient extends Box_App
 
     public function get_custom_page($page): string
     {
-        if ($page === 'pricing') {
-            $this->redirect('/');
-        }
-
         $ext = $this->ext;
         if (str_contains((string) $page, '.')) {
             $ext = substr((string) $page, strpos((string) $page, '.') + 1);

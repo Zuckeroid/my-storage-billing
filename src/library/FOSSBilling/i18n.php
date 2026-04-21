@@ -213,31 +213,8 @@ class i18n
         $locales = ($disabled) ? array_filter($locales, fn ($locale): bool => $filesystem->exists(Path::join($locale->getPathname(), '.disabled')))
                                : array_filter($locales, fn ($locale): bool => !$filesystem->exists(Path::join($locale->getPathname(), '.disabled')));
         $locales = array_map(fn ($locale) => $locale->getBasename(), $locales);
-        $locales = array_values(array_intersect($locales, self::getEnabledLocaleWhitelist()));
         sort($locales);
 
         return $locales;
-    }
-
-    /**
-     * Returns the locales exposed by this fork.
-     *
-     * The upstream project can install many translation packs, but this product
-     * intentionally keeps only English and Russian in the UI.
-     */
-    private static function getEnabledLocaleWhitelist(): array
-    {
-        $configuredLocales = Config::getProperty('i18n.enabled_locales', ['en_US', 'ru_RU']);
-
-        if (!is_array($configuredLocales) || empty($configuredLocales)) {
-            return ['en_US', 'ru_RU'];
-        }
-
-        $filteredLocales = array_values(array_filter(
-            $configuredLocales,
-            fn ($locale): bool => is_string($locale) && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $locale) === 1
-        ));
-
-        return empty($filteredLocales) ? ['en_US', 'ru_RU'] : $filteredLocales;
     }
 }
