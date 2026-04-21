@@ -487,10 +487,6 @@ class Service implements InjectionAwareInterface
 
     public function getSearchQuery($data): array
     {
-        $query = 'SELECT co.* from client_order co
-                LEFT JOIN client c ON c.id = co.client_id
-                LEFT JOIN client_order_meta meta ON meta.client_order_id = co.id';
-
         $search = $data['search'] ?? false;
         $hide_addons = $data['hide_addons'] ?? null;
         $show_action_required = $data['show_action_required'] ?? null;
@@ -505,6 +501,13 @@ class Service implements InjectionAwareInterface
         $date_to = $data['date_to'] ?? null;
         $ids = (isset($data['ids']) && is_array($data['ids'])) ? $data['ids'] : null;
         $meta = (isset($data['meta']) && is_array($data['meta'])) ? $data['meta'] : null;
+
+        $query = 'SELECT co.* from client_order co
+                LEFT JOIN client c ON c.id = co.client_id';
+        if ($meta) {
+            $query .= '
+                LEFT JOIN client_order_meta meta ON meta.client_order_id = co.id';
+        }
 
         $client_id = $data['client_id'] ?? null;
         $invoice_option = $data['invoice_option'] ?? null;
