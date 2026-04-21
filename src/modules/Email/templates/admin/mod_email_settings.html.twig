@@ -74,6 +74,34 @@
                         </a>
                     </div>
                     {{ include('partial_search.html.twig') }}
+                    {% set templates = admin.email_template_get_list({ 'per_page': 100, 'page': request.page }|merge(request)) %}
+                    {% set featured_codes = [
+                        'mod_client_signup',
+                        'mod_client_confirm',
+                        'mod_client_password_reset_request',
+                        'mod_client_password_reset_information',
+                        'mod_invoice_created',
+                        'mod_invoice_paid',
+                        'mod_invoice_payment_reminder',
+                        'mod_invoice_due_after',
+                        'mod_orchestrator_access_ready',
+                        'mod_email_test'
+                    ] %}
+                    {% set featured_templates = [] %}
+                    {% set other_templates = [] %}
+                    {% for template in templates.list %}
+                        {% set is_featured = template.action_code in featured_codes or template.action_code starts with 'mod_servicecustom_' %}
+                        {% if is_featured %}
+                            {% set featured_templates = featured_templates|merge([template]) %}
+                        {% else %}
+                            {% set other_templates = other_templates|merge([template]) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="card-body border-bottom">
+                        <h3 class="card-title">{{ 'Primary Templates'|trans }}</h3>
+                        <p class="card-subtitle">{{ 'These templates are the ones we actively use for accounts, billing, provisioning, and storage service lifecycle emails.'|trans }}</p>
+                    </div>
                     <div class="table-responsive">
                         <table class="table card-table table-vcenter table-striped text-nowrap sortable">
                             <thead>
@@ -89,8 +117,7 @@
                             </thead>
 
                             <tbody>
-                            {% set templates = admin.email_template_get_list({ 'per_page': 100, 'page': request.page }|merge(request)) %}
-                            {% for i, template in templates.list %}
+                            {% for template in featured_templates %}
                                 {% set type_label = template.is_custom ? 'Custom'|trans : 'Built-in'|trans %}
                                 {% set type_class = template.is_custom ? 'bg-blue-lt' : 'bg-secondary-lt' %}
                                 {% if template.is_custom %}
@@ -148,6 +175,100 @@
                             {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="accordion m-3" id="email-templates-legacy">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#email-templates-legacy-body" aria-expanded="false">
+                                    {{ 'Other Templates'|trans }} ({{ other_templates|length }})
+                                    <div class="accordion-button-toggle">
+                                        <svg class="icon">
+                                            <use xlink:href="#chevron-down" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </div>
+                            <div id="email-templates-legacy-body" class="accordion-collapse collapse" data-bs-parent="#email-templates-legacy">
+                                <div class="card-body border-bottom">
+                                    <p class="card-subtitle mb-0">{{ 'These templates belong to modules and flows that are not part of the main My Storage product path right now, but are still available when needed.'|trans }}</p>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table card-table table-vcenter table-striped text-nowrap sortable mb-0">
+                                        <thead>
+                                        <tr>
+                                            <th class="w-1">{{ 'Subject'|trans }}</th>
+                                            <th>{{ 'Extension'|trans }}</th>
+                                            <th>{{ 'Code'|trans }}</th>
+                                            <th>{{ 'Type'|trans }}</th>
+                                            <th>{{ 'Status'|trans }}</th>
+                                            <th>{{ 'Enabled'|trans }}</th>
+                                            <th class="w-1"></th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody>
+                                        {% for template in other_templates %}
+                                            {% set type_label = template.is_custom ? 'Custom'|trans : 'Built-in'|trans %}
+                                            {% set type_class = template.is_custom ? 'bg-blue-lt' : 'bg-secondary-lt' %}
+                                            {% if template.is_custom %}
+                                                {% set status_label = 'Database Only'|trans %}
+                                                {% set status_class = 'bg-blue-lt' %}
+                                            {% elseif not template.has_default %}
+                                                {% set status_label = 'Missing Default'|trans %}
+                                                {% set status_class = 'bg-warning-lt' %}
+                                            {% elseif template.is_overridden %}
+                                                {% set status_label = 'Customized'|trans %}
+                                                {% set status_class = 'bg-azure-lt' %}
+                                            {% else %}
+                                                {% set status_label = 'Default'|trans %}
+                                                {% set status_class = 'bg-secondary-lt' %}
+                                            {% endif %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ '/email/template'|alink }}/{{ template.id }}">{{ template.subject }}</a>
+                                                </td>
+                                                <td>{{ template.category }}</td>
+                                                <td>{{ template.action_code }}</td>
+                                                <td><span class="badge {{ type_class }}">{{ type_label }}</span></td>
+                                                <td><span class="badge {{ status_class }}">{{ status_label }}</span></td>
+                                                <td>
+                                                    {% if template.enabled == 1 %}
+                                                        <span class="badge bg-success me-1"></span>
+                                                    {% endif %}
+                                                    {% if template.enabled == 0 %}
+                                                        <span class="badge bg-danger me-1"></span>
+                                                    {% endif %}
+                                                    {{ mf.q(template.enabled) }}
+                                                </td>
+                                                <td>
+                                                    <a class="btn btn-icon" href="{{ '/email/template'|alink }}/{{ template.id }}"
+                                                       data-bs-toggle="tooltip" data-bs-title="{{ 'Edit'|trans }}">
+                                                        <svg class="icon">
+                                                            <use xlink:href="#edit" />
+                                                        </svg>
+                                                    </a>
+                                                    {% if template.is_custom or not template.has_default %}
+                                                        <a class="btn btn-icon"
+                                                            data-bs-toggle="tooltip" data-bs-title="{{ 'Delete'|trans }}"
+                                                            {{ fb_api_link({href: 'api/admin/email/template_delete'|link({id: template.id}), modal: {type: 'danger', title: 'Are you sure?'|trans, content: 'This action will delete the email template'|trans, button: 'Delete'|trans}, reload: true}) }}>
+                                                            <svg class="icon">
+                                                                <use xlink:href="#delete" />
+                                                            </svg>
+                                                        </a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <td class="text-muted" colspan="7">{{ 'There are no additional templates to display.'|trans }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
