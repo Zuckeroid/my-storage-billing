@@ -14,7 +14,8 @@ namespace FOSSBilling;
 
 final class Version
 {
-    public const string VERSION = '0.0.1';
+    public const string VERSION = '0.7.2';
+    public const string DISPLAY_VERSION = '0.7.2+my-storage.1';
     public const int PATCH = 0;
     public const int MINOR = 1;
     public const int MAJOR = 2;
@@ -33,6 +34,11 @@ final class Version
     public static function compareVersion(string $version): int
     {
         return version_compare(strtolower($version), strtolower(self::VERSION));
+    }
+
+    public static function getDisplayVersion(): string
+    {
+        return self::DISPLAY_VERSION;
     }
 
     /**
@@ -73,6 +79,6 @@ final class Version
 
     public static function isPreviewVersion(string $version = Version::VERSION): bool
     {
-        return ($version !== '0.0.1' && preg_match(self::semverRegex, $version, $matches) !== 0) ? false : true;
+        return preg_match(self::semverRegex, $version, $matches) === 0;
     }
 }

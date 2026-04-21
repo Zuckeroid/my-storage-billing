@@ -327,7 +327,7 @@ $di['twig'] = $di->factory(function () use ($di) {
     $twig->addGlobal('CSRFToken', $csrfToken);
     $twig->addGlobal('request', $_GET);
     $twig->addGlobal('guest', $di['api_guest']);
-    $twig->addGlobal('FOSSBillingVersion', FOSSBilling\Version::VERSION);
+    $twig->addGlobal('FOSSBillingVersion', FOSSBilling\Version::getDisplayVersion());
 
     return $twig;
 });

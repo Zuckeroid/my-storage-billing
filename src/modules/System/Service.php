@@ -1008,7 +1008,7 @@ class Service
 
     public function getVersion(): string
     {
-        return Version::VERSION;
+        return Version::getDisplayVersion();
     }
 
     public function shouldExposeVersion(): bool
