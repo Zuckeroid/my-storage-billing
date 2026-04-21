@@ -15,6 +15,8 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
+COPY docker/php/conf.d/zz-security.ini /usr/local/etc/php/conf.d/zz-security.ini
+
 # Copy files and set required permissions.
 COPY --chown=www-data:www-data ./src/. /var/www/html
 

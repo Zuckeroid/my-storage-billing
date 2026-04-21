@@ -30,6 +30,7 @@ WORKDIR /app
 
 COPY composer.json composer.lock ./
 COPY src ./src
+COPY docker/php/conf.d/zz-security.ini /usr/local/etc/php/conf.d/zz-security.ini
 
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
     && rm -rf src/install \
