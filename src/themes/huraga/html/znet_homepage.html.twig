@@ -254,7 +254,13 @@
                                                             data-href="{{ base_href }}?period={{ code }}"
                                                             {% if code == '1M' %}selected="selected"{% endif %}
                                                         >
-                                                            {{ guest.system_periods[code] }}
+                                                            {% if code == '1M' %}
+                                                                {{ is_en ? '1 month' : '1 месяц' }}
+                                                            {% elseif code == '3M' %}
+                                                                {{ is_en ? '3 months' : '3 месяца' }}
+                                                            {% else %}
+                                                                {{ guest.system_periods[code] }}
+                                                            {% endif %}
                                                         </option>
                                                     {% endif %}
                                                 {% endfor %}
