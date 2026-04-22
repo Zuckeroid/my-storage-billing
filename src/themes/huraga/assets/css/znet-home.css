@@ -511,6 +511,10 @@
   min-height: 132px;
 }
 
+.znet-homepage .znet-plan-summary {
+  display: block;
+}
+
 .znet-homepage .znet-plan-badge {
   position: absolute;
   top: 18px;
@@ -855,8 +859,43 @@
     display: none;
   }
 
+  .znet-homepage .znet-plans-section {
+    padding-top: 18px;
+  }
+
   .znet-homepage .znet-plan-top {
     min-height: 0;
+  }
+
+  .znet-homepage .znet-plan-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: end;
+  }
+
+  .znet-homepage .znet-plan-name {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 24px;
+  }
+
+  .znet-homepage .znet-plan-price {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    font-size: 36px;
+    justify-self: start;
+    white-space: nowrap;
+  }
+
+  .znet-homepage .znet-plan-period {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+    justify-self: start;
+    white-space: nowrap;
   }
 
   .znet-homepage .znet-plan-list li:not(:first-child) {
