@@ -31,6 +31,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 COPY src ./src
 COPY docker/php/conf.d/zz-security.ini /usr/local/etc/php/conf.d/zz-security.ini
+COPY docker/entrypoint-prod.sh /usr/local/bin/entrypoint-prod.sh
 
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
     && rm -rf src/install \
@@ -41,6 +42,7 @@ RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoload
     && rm /tmp/www-data.cron \
     && rm -rf /var/www/html \
     && mv /app/src /var/www/html \
-    && chown -R www-data:www-data /var/www/html
+    && chown -R www-data:www-data /var/www/html \
+    && chmod +x /usr/local/bin/entrypoint-prod.sh
 
-CMD ["sh", "-c", "chown -R www-data:www-data /var/www/html/data && cron & exec apache2-foreground"]
+CMD ["/usr/local/bin/entrypoint-prod.sh"]
