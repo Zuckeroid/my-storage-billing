@@ -245,14 +245,14 @@
                                     {% if period %}
                                         <span class="znet-plan-period">{{ period }}</span>
                                     {% endif %}
+                                    <div class="znet-plan-highlight">
+                                        <span class="znet-check">✓</span>
+                                        <span>{{ description ?: (is_en ? 'Built for everyday private use.' : 'Подходит для повседневного личного использования.') }}</span>
+                                    </div>
                                 </div>
                             </div>
 
                             <ul class="znet-plan-list">
-                                <li>
-                                    <span class="znet-check">✓</span>
-                                    <span>{{ description ?: (is_en ? 'Built for everyday private use.' : 'Подходит для повседневного личного использования.') }}</span>
-                                </li>
                                 <li>
                                     <span class="znet-check">✓</span>
                                     <span>{{ is_en ? 'Access instructions by email' : 'Доступ и инструкции на email' }}</span>
