@@ -849,4 +849,17 @@
   .znet-homepage .znet-section-head p {
     font-size: 16px;
   }
+
+  .znet-homepage .znet-plans-section .znet-section-head h2,
+  .znet-homepage .znet-plans-section .znet-section-head p {
+    display: none;
+  }
+
+  .znet-homepage .znet-plan-top {
+    min-height: 0;
+  }
+
+  .znet-homepage .znet-plan-list li:not(:first-child) {
+    display: none;
+  }
 }
