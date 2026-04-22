@@ -236,6 +236,197 @@
   box-shadow: 0 14px 30px rgba(74, 222, 128, 0.16);
 }
 
+body.znet-auth-open {
+  overflow: hidden;
+}
+
+.znet-homepage .znet-auth-layer[hidden],
+.znet-homepage .znet-auth-panel[hidden] {
+  display: none !important;
+}
+
+.znet-homepage .znet-auth-layer {
+  position: fixed;
+  inset: var(--znet-header-offset) 0 0;
+  z-index: 45;
+}
+
+.znet-homepage .znet-auth-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(1, 4, 9, 0.56);
+}
+
+.znet-homepage .znet-auth-shell {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+}
+
+.znet-homepage .znet-auth-panel {
+  width: min(440px, 100%);
+  max-height: calc(100vh - var(--znet-header-offset) - 32px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  border-radius: 18px;
+  background: rgba(1, 4, 9, 0.96);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.znet-homepage .znet-auth-panel-signup {
+  width: min(560px, 100%);
+}
+
+.znet-homepage .znet-auth-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.znet-homepage .znet-auth-kicker {
+  display: block;
+  color: var(--znet-accent-soft);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.znet-homepage .znet-auth-head h2 {
+  margin: 8px 0 0;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+
+.znet-homepage .znet-auth-head p {
+  margin: 10px 0 0;
+  color: var(--znet-text-soft);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.znet-homepage .znet-auth-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--znet-text);
+  cursor: pointer;
+}
+
+.znet-homepage .znet-auth-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(134, 239, 172, 0.3);
+}
+
+.znet-homepage .znet-auth-form .form-label {
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.znet-homepage .znet-auth-form .form-control,
+.znet-homepage .znet-auth-form .form-select {
+  min-height: 48px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+  box-shadow: none;
+}
+
+.znet-homepage .znet-auth-form .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.znet-homepage .znet-auth-form .form-control:focus,
+.znet-homepage .znet-auth-form .form-select:focus {
+  border-color: rgba(134, 239, 172, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--znet-text);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.08);
+}
+
+.znet-homepage .znet-auth-form .form-text,
+.znet-homepage .znet-auth-legal {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.znet-homepage .znet-auth-form .form-check-input {
+  margin-top: 0.25rem;
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: rgba(134, 239, 172, 0.2);
+}
+
+.znet-homepage .znet-auth-form .form-check-label,
+.znet-homepage .znet-auth-form .form-check-label span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.znet-homepage .znet-auth-form a,
+.znet-homepage .znet-auth-foot a,
+.znet-homepage .znet-auth-foot button {
+  color: var(--znet-accent-soft);
+}
+
+.znet-homepage .znet-auth-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.znet-homepage .znet-auth-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.znet-homepage .znet-auth-phone-group {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.znet-homepage .znet-auth-submit {
+  width: 100%;
+}
+
+.znet-homepage .znet-auth-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.znet-homepage .znet-auth-text-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--znet-accent-soft);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
 .znet-homepage .znet-hero {
   padding: 0;
 }
@@ -812,6 +1003,18 @@
   .znet-homepage .znet-plans-grid {
     grid-template-columns: 1fr;
   }
+
+  .znet-homepage .znet-auth-shell {
+    justify-content: stretch;
+    padding-top: 10px;
+  }
+
+  .znet-homepage .znet-auth-panel,
+  .znet-homepage .znet-auth-panel-signup {
+    width: 100%;
+    max-height: calc(100vh - var(--znet-header-offset) - 20px);
+    padding: 20px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -866,6 +1069,18 @@
 
   .znet-homepage .znet-site-header-mobile .znet-header-actions .znet-btn {
     flex: 0 0 auto;
+  }
+
+  .znet-homepage .znet-auth-grid-two,
+  .znet-homepage .znet-auth-phone-group,
+  .znet-homepage .znet-auth-foot {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .znet-homepage .znet-auth-head h2 {
+    font-size: 26px;
   }
 
   .znet-homepage .znet-hero-actions .znet-btn-outline {

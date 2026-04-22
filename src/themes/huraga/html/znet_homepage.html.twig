@@ -62,6 +62,8 @@
         </div>
     </header>
 
+    {% include 'znet_auth_panels.html.twig' %}
+
     <main id="top">
         <section class="znet-hero znet-hero-desktop">
             <div class="znet-container znet-hero-grid">
@@ -355,6 +357,99 @@
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 closeMenu();
+            }
+        });
+    })();
+
+    (() => {
+        const layer = document.querySelector('[data-auth-layer]');
+        const panels = layer ? Array.from(layer.querySelectorAll('[data-auth-panel]')) : [];
+        const closers = layer ? Array.from(layer.querySelectorAll('[data-auth-close]')) : [];
+        const switchers = layer ? Array.from(layer.querySelectorAll('[data-auth-switch]')) : [];
+        const loginOpeners = Array.from(document.querySelectorAll(
+            '.znet-site-header-desktop .znet-btn-ghost.znet-btn-with-icon[href$="/login"], ' +
+            '.znet-site-header-mobile .znet-btn-icon-only[href$="/login"]'
+        ));
+        const signupOpeners = Array.from(document.querySelectorAll(
+            '.znet-site-header-desktop .znet-btn-accent[href$="/signup"], ' +
+            '.znet-hero-actions .znet-btn-outline[href$="/signup"]'
+        ));
+        const mobileHeader = document.querySelector('.znet-site-header-mobile');
+
+        if (!layer || panels.length === 0) {
+            return;
+        }
+
+        const setPanel = (panelName) => {
+            let activePanel = null;
+
+            panels.forEach((panel) => {
+                const isActive = panel.dataset.authPanel === panelName;
+                panel.hidden = !isActive;
+                if (isActive) {
+                    activePanel = panel;
+                }
+            });
+
+            if (mobileHeader) {
+                mobileHeader.classList.remove('is-menu-open');
+                const toggle = mobileHeader.querySelector('.znet-header-menu-toggle');
+                if (toggle) {
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            if (activePanel) {
+                const firstField = activePanel.querySelector('input, select, textarea, button');
+                if (firstField) {
+                    window.setTimeout(() => firstField.focus(), 20);
+                }
+            }
+        };
+
+        const openLayer = (panelName) => {
+            layer.hidden = false;
+            document.body.classList.add('znet-auth-open');
+            setPanel(panelName);
+        };
+
+        const closeLayer = () => {
+            layer.hidden = true;
+            panels.forEach((panel) => {
+                panel.hidden = true;
+            });
+            document.body.classList.remove('znet-auth-open');
+        };
+
+        const bindOpeners = (elements, panelName) => {
+            elements.forEach((element) => {
+                element.addEventListener('click', (event) => {
+                    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    openLayer(panelName);
+                });
+            });
+        };
+
+        bindOpeners(loginOpeners, 'login');
+        bindOpeners(signupOpeners, 'signup');
+
+        closers.forEach((closer) => {
+            closer.addEventListener('click', closeLayer);
+        });
+
+        switchers.forEach((switcher) => {
+            switcher.addEventListener('click', () => {
+                setPanel(switcher.dataset.authSwitch);
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !layer.hidden) {
+                closeLayer();
             }
         });
     })();
