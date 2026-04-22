@@ -16,6 +16,11 @@
   background: var(--znet-bg);
   color: var(--znet-text);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --znet-flyout-border: rgba(134, 239, 172, 0.14);
+  --znet-flyout-radius: 14px;
+  --znet-flyout-bg: rgba(1, 4, 9, 0.96);
+  --znet-flyout-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  --znet-flyout-blur: 16px;
 }
 
 html {
@@ -133,16 +138,12 @@ html {
   gap: 4px;
   min-width: 220px;
   padding: 12px;
-}
-
-.znet-homepage .znet-site-header-mobile .znet-nav,
-.znet-homepage .znet-auth-panel {
-  border: 1px solid rgba(134, 239, 172, 0.14);
-  border-radius: 14px;
-  background: rgba(1, 4, 9, 0.82);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--znet-flyout-border);
+  border-radius: var(--znet-flyout-radius);
+  background: var(--znet-flyout-bg);
+  box-shadow: var(--znet-flyout-shadow);
+  backdrop-filter: blur(var(--znet-flyout-blur));
+  -webkit-backdrop-filter: blur(var(--znet-flyout-blur));
 }
 
 .znet-homepage .znet-site-header-mobile.is-menu-open .znet-nav {
@@ -283,6 +284,12 @@ body.znet-auth-open {
   overflow: auto;
   margin-top: 0;
   padding: 24px;
+  border: 1px solid var(--znet-flyout-border);
+  border-radius: var(--znet-flyout-radius);
+  background: var(--znet-flyout-bg);
+  box-shadow: var(--znet-flyout-shadow);
+  backdrop-filter: blur(var(--znet-flyout-blur));
+  -webkit-backdrop-filter: blur(var(--znet-flyout-blur));
   pointer-events: auto;
 }
 
