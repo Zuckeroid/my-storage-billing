@@ -720,6 +720,8 @@
     width: 100%;
     min-width: 0;
     flex: none;
+    padding-inline: 18px;
+    font-size: 14px;
   }
 
   .znet-homepage .znet-footer-shell {
