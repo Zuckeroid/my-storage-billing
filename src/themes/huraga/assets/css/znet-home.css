@@ -18,6 +18,10 @@
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 .znet-homepage html {
   scroll-padding-top: calc(var(--znet-header-offset) + 12px);
 }
@@ -299,10 +303,10 @@ body.znet-auth-open {
 .znet-homepage .znet-auth-kicker {
   display: block;
   color: var(--znet-accent-soft);
-  font-size: 13px;
+  font-size: 24px;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  text-transform: none;
 }
 
 .znet-homepage .znet-auth-head h2 {
@@ -318,6 +322,10 @@ body.znet-auth-open {
   color: var(--znet-text-soft);
   font-size: 14px;
   line-height: 1.6;
+}
+
+.znet-homepage .znet-auth-head {
+  margin-bottom: 16px;
 }
 
 .znet-homepage .znet-auth-close {
