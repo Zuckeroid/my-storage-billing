@@ -1,26 +1,19 @@
 <div class="znet-page-shell">
-    <header class="znet-site-header">
+    <header class="znet-site-header znet-site-header-desktop">
         <div class="znet-container znet-header-bar">
-            <a class="znet-brand" href="{{ '/'|link }}" aria-label="Znet">
-                <span class="znet-brand-mark" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 3.25 5.75 5.6v5.09c0 3.89 2.46 7.39 6.25 8.92 3.79-1.53 6.25-5.03 6.25-8.92V5.6L12 3.25Z"></path>
-                        <path d="m9.35 11.85 1.9 1.9 3.6-4.1"></path>
-                    </svg>
-                </span>
-                <span class="znet-brand-text">
-                    <strong><span class="znet-brand-letter-accent">Z</span>net</strong>
-                </span>
+            <a class="znet-brand" href="#top" aria-label="Znet">
+                <img class="znet-brand-logo" src="{{ 'img/znet/Logo.png'|asset_url }}" alt="Znet">
             </a>
 
             <nav class="znet-nav" aria-label="{{ is_en ? 'Main navigation' : 'Основная навигация' }}">
                 <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
                 <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
-                <a href="{{ '/contacts'|link }}">{{ is_en ? 'Contacts' : 'Контакты' }}</a>
+                <a href="#faq">FAQ</a>
+                <a href="#support">{{ is_en ? 'Support' : 'Поддержка' }}</a>
             </nav>
 
             <div class="znet-header-actions">
-                <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'login'|link }}">
+                <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'login'|link }}" aria-label="{{ is_en ? 'Login' : 'Войти' }}">
                     <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="12" cy="8" r="4"></circle>
                         <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
@@ -32,12 +25,48 @@
         </div>
     </header>
 
+    <header class="znet-site-header znet-site-header-mobile">
+        <div class="znet-container znet-header-bar">
+            <a class="znet-brand" href="#top" aria-label="Znet">
+                <img class="znet-brand-logo" src="{{ 'img/znet/Logo.png'|asset_url }}" alt="Znet">
+            </a>
+
+            <div class="znet-header-actions">
+                <a class="znet-btn znet-btn-ghost znet-btn-icon-only" href="{{ 'login'|link }}" aria-label="{{ is_en ? 'Login' : 'Войти' }}">
+                    <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
+                    </svg>
+                </a>
+                <button
+                    class="znet-btn znet-btn-ghost znet-btn-icon-only znet-header-menu-toggle"
+                    type="button"
+                    aria-label="{{ is_en ? 'Menu' : 'Меню' }}"
+                    aria-expanded="false"
+                    aria-controls="znet-mobile-header-nav"
+                >
+                    <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 7h16"></path>
+                        <path d="M4 12h16"></path>
+                        <path d="M4 17h16"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="znet-nav" id="znet-mobile-header-nav" aria-label="{{ is_en ? 'Mobile navigation' : 'Мобильная навигация' }}">
+                <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
+                <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
+                <a href="#faq">FAQ</a>
+                <a href="#support">{{ is_en ? 'Support' : 'Поддержка' }}</a>
+            </nav>
+        </div>
+    </header>
+
     <main id="top">
-        <section class="znet-hero">
+        <section class="znet-hero znet-hero-desktop">
             <div class="znet-container znet-hero-grid">
                 <div class="znet-hero-content">
                     <div class="znet-hero-copy">
-                        <span class="znet-eyebrow">{{ is_en ? 'Private cloud storage' : 'Личное облачное хранилище' }}</span>
                         <h1>
                             {{ is_en ? 'Security.' : 'Безопасность.' }}<br>
                             {{ is_en ? 'Privacy.' : 'Приватность.' }}<br>
@@ -56,64 +85,143 @@
                         <div class="znet-hero-points">
                             <div class="znet-hero-point">
                                 <span class="znet-check">✓</span>
-                                <span>{{ is_en ? 'One account for plans, invoices, and statuses' : 'Один аккаунт для тарифов, счетов и статусов' }}</span>
+                                <span>{{ is_en ? 'Fast servers around the world.' : 'Быстрые серверы по всему миру.' }}</span>
                             </div>
                             <div class="znet-hero-point">
                                 <span class="znet-check">✓</span>
-                                <span>{{ is_en ? 'Access instructions arrive by email' : 'Доступ и инструкции приходят на email' }}</span>
+                                <span>{{ is_en ? 'Simple connection setup.' : 'Простая настройка подключения.' }}</span>
                             </div>
                             <div class="znet-hero-point">
                                 <span class="znet-check">✓</span>
-                                <span>{{ is_en ? 'Quick start without extra onboarding' : 'Простой старт без лишнего онбординга' }}</span>
+                                <span>{{ is_en ? 'Adaptive connection stability.' : 'Адаптивное поддержание соединения.' }}</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="znet-hero-actions">
                         <a class="znet-btn znet-btn-accent znet-btn-large znet-btn-with-icon znet-hero-primary-action" href="#plans">
+                            <span>{{ is_en ? 'Choose a subscription' : 'Выбрать подписку' }}</span>
                             <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M5 12h14"></path>
                                 <path d="M13 7l5 5-5 5"></path>
                             </svg>
-                            <span>{{ is_en ? 'Choose a subscription' : 'Выбрать подписку' }}</span>
                         </a>
                         <a class="znet-btn znet-btn-outline znet-btn-large" href="{{ 'signup'|link }}">{{ is_en ? 'Try for free' : 'Попробовать бесплатно' }}</a>
                     </div>
                 </div>
 
                 <div class="znet-hero-visual" aria-label="{{ is_en ? 'Earth visual' : 'Изображение Земли' }}">
-                    <img class="znet-hero-globe" src="{{ 'img/znet-earth.webp'|asset_url }}" alt="">
+                    <img class="znet-hero-globe" src="{{ 'img/znet/Earth-15.png'|asset_url }}" alt="">
                 </div>
             </div>
         </section>
 
+        <section class="znet-hero znet-hero-mobile">
+            <div class="znet-container znet-hero-grid">
+                <div class="znet-hero-visual" aria-label="{{ is_en ? 'Earth visual' : 'Изображение Земли' }}">
+                    <img class="znet-hero-globe" src="{{ 'img/znet/Earth-15.png'|asset_url }}" alt="">
+                </div>
+
+                <div class="znet-hero-content">
+                    <div class="znet-hero-copy">
+                        <h1>
+                            {{ is_en ? 'Security.' : 'Безопасность.' }}<br>
+                            {{ is_en ? 'Privacy.' : 'Приватность.' }}<br>
+                            <span>{{ is_en ? 'Freedom.' : 'Свобода.' }}</span>
+                        </h1>
+                        <p>
+                            {% if is_en %}
+                                Protect your data and enjoy<br>
+                                fast internet without borders.
+                            {% else %}
+                                Защищайте свои данные и наслаждайтесь<br>
+                                быстрым интернетом без границ.
+                            {% endif %}
+                        </p>
+
+                        <div class="znet-hero-points">
+                            <div class="znet-hero-point">
+                                <span class="znet-check">✓</span>
+                                <span>{{ is_en ? 'Fast servers around the world.' : 'Быстрые серверы по всему миру.' }}</span>
+                            </div>
+                            <div class="znet-hero-point">
+                                <span class="znet-check">✓</span>
+                                <span>{{ is_en ? 'Simple connection setup.' : 'Простая настройка подключения.' }}</span>
+                            </div>
+                            <div class="znet-hero-point">
+                                <span class="znet-check">✓</span>
+                                <span>{{ is_en ? 'Adaptive connection stability.' : 'Адаптивное поддержание соединения.' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="znet-hero-actions">
+                        <a class="znet-btn znet-btn-accent znet-btn-large znet-btn-with-icon znet-hero-primary-action" href="#plans">
+                            <span>{{ is_en ? 'Choose a subscription' : 'Выбрать подписку' }}</span>
+                            <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M5 12h14"></path>
+                                <path d="M13 7l5 5-5 5"></path>
+                            </svg>
+                        </a>
+                        <a class="znet-btn znet-btn-outline znet-btn-large" href="{{ 'signup'|link }}">{{ is_en ? 'Try for free' : 'Попробовать бесплатно' }}</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="znet-section-divider" aria-hidden="true">
+            <div class="znet-container">
+                <span class="znet-section-divider-line"></span>
+            </div>
+        </div>
+
         <section id="features" class="znet-feature-strip">
             <div class="znet-container znet-feature-grid">
                 <article class="znet-feature-card">
-                    <h2>{{ is_en ? 'Data protection' : 'Защита данных' }}</h2>
+                    <div class="znet-feature-title">
+                        <img class="znet-feature-icon" src="{{ 'img/znet/Shield.png'|asset_url }}" alt="" aria-hidden="true">
+                        <h2>{{ is_en ? 'Data protection' : 'Защита данных' }}</h2>
+                    </div>
                     <p>{{ is_en ? 'Your data is protected by reliable encryption.' : 'Ваши данные под защитой надежного шифрования.' }}</p>
                 </article>
                 <article class="znet-feature-card">
-                    <h2>{{ is_en ? 'Access without borders' : 'Доступ без границ' }}</h2>
+                    <div class="znet-feature-title">
+                        <img class="znet-feature-icon" src="{{ 'img/znet/Globe.png'|asset_url }}" alt="" aria-hidden="true">
+                        <h2>{{ is_en ? 'Access without borders' : 'Доступ без границ' }}</h2>
+                    </div>
                     <p>{{ is_en ? 'Access any content you need.' : 'Получайте доступ к любому контенту.' }}</p>
                 </article>
                 <article class="znet-feature-card">
-                    <h2>{{ is_en ? 'High speed' : 'Высокая скорость' }}</h2>
+                    <div class="znet-feature-title">
+                        <img class="znet-feature-icon" src="{{ 'img/znet/Lightning.png'|asset_url }}" alt="" aria-hidden="true">
+                        <h2>{{ is_en ? 'High speed' : 'Высокая скорость' }}</h2>
+                    </div>
                     <p>{{ is_en ? 'Optimized servers provide a fast connection.' : 'Оптимизированные серверы обеспечивают быстрое соединение.' }}</p>
                 </article>
                 <article class="znet-feature-card">
-                    <h2>{{ is_en ? 'All-device support' : 'Поддержка всех устройств' }}</h2>
+                    <div class="znet-feature-title">
+                        <img class="znet-feature-icon znet-feature-icon-phone" src="{{ 'img/znet/Phone.png'|asset_url }}" alt="" aria-hidden="true">
+                        <h2>{{ is_en ? 'All-device support' : 'Поддержка всех устройств' }}</h2>
+                    </div>
                     <p>{{ is_en ? 'Works on iOS, Android, Windows, macOS, and routers.' : 'Работает на: iOS, Android, Windows, macOS, роутерах.' }}</p>
                 </article>
             </div>
         </section>
 
+        <div class="znet-section-divider" aria-hidden="true">
+            <div class="znet-container">
+                <span class="znet-section-divider-line"></span>
+            </div>
+        </div>
+
+        <div id="faq" class="znet-anchor-target" aria-hidden="true"></div>
+
         <section id="plans" class="znet-plans-section">
             <div class="znet-container">
                 <div class="znet-section-head">
-                    <span class="znet-eyebrow">{{ is_en ? 'Plans' : 'Тарифы' }}</span>
-                    <h2>{{ is_en ? 'Choose the right volume and usage rhythm' : 'Выберите подходящий объем и ритм использования' }}</h2>
-                    <p>{{ is_en ? 'A clean plan grid without clutter or marketing noise.' : 'Четкая сетка тарифов без перегруза и рекламного шума.' }}</p>
+                    <span class="znet-eyebrow">{{ is_en ? 'Plans' : 'Тарифные планы' }}</span>
+                    <h2>{{ is_en ? 'Choose your ideal plan' : 'Выберите свой идеальный план' }}</h2>
+                    <p>{{ is_en ? 'Flexible plans for different goals and budgets.' : 'Гибкие тарифы для любых задач и бюджета.' }}</p>
                 </div>
 
                 <div class="znet-plans-grid">
@@ -128,6 +236,7 @@
                         {% elseif product.pricing.type == 'free' %}
                             {% set price = 0|money_convert %}
                         {% endif %}
+
                         {% set description = product.description ? product.description|striptags|trim : '' %}
                         {% set href = ('/order/' ~ product.slug)|link %}
 
@@ -159,7 +268,7 @@
                                 </li>
                                 <li>
                                     <span class="znet-check">✓</span>
-                                    <span>{{ is_en ? 'Manage everything in one cabinet' : 'Управление в одном кабинете' }}</span>
+                                    <span>{{ is_en ? 'Manage everything in one account' : 'Управление в одном кабинете' }}</span>
                                 </li>
                             </ul>
 
@@ -175,17 +284,63 @@
         </section>
     </main>
 
-    <footer id="contacts" class="znet-site-footer">
+    <footer id="support" class="znet-site-footer">
         <div class="znet-container znet-footer-shell">
             <div class="znet-footer-brand">
-                <strong><span class="znet-brand-letter-accent">Z</span>net</strong>
-                <span>{{ is_en ? 'Private storage and secure access' : 'Личное хранилище и безопасный доступ' }}</span>
+                <img class="znet-brand-logo znet-footer-brand-logo" src="{{ 'img/znet/Logo.png'|asset_url }}" alt="Znet">
             </div>
             <nav class="znet-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
                 <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
                 <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
-                <a href="{{ 'login'|link }}">{{ is_en ? 'Login' : 'Войти' }}</a>
+                <a href="#faq">FAQ</a>
+                <a href="#support">{{ is_en ? 'Support' : 'Поддержка' }}</a>
             </nav>
         </div>
     </footer>
 </div>
+
+<script>
+    (() => {
+        const header = document.querySelector('.znet-site-header-mobile');
+        const toggle = header?.querySelector('.znet-header-menu-toggle');
+        const nav = header?.querySelector('#znet-mobile-header-nav');
+
+        if (!header || !toggle || !nav) {
+            return;
+        }
+
+        const closeMenu = () => {
+            header.classList.remove('is-menu-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        };
+
+        const openMenu = () => {
+            header.classList.add('is-menu-open');
+            toggle.setAttribute('aria-expanded', 'true');
+        };
+
+        toggle.addEventListener('click', () => {
+            if (header.classList.contains('is-menu-open')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+
+        nav.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', closeMenu);
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!header.contains(event.target)) {
+                closeMenu();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeMenu();
+            }
+        });
+    })();
+</script>
