@@ -178,14 +178,6 @@
   display: none;
 }
 
-.znet-homepage .znet-login-card,
-.znet-homepage .znet-login-card input,
-.znet-homepage .znet-login-card button,
-.znet-homepage .znet-login-card a,
-.znet-homepage .znet-login-card label {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
 .znet-homepage .znet-login-card-head h3 {
   margin: 0 0 14px;
   font-size: 20px;
