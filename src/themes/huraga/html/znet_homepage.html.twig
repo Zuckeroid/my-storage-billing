@@ -219,6 +219,7 @@
                     {% for product in storage_products %}
                         {% set price = '' %}
                         {% set period = '' %}
+                        {% set base_href = ('/order/' ~ product.slug)|link %}
                         {% if product.pricing.type == 'recurrent' and product.pricing.recurrent['1M'] is defined and product.pricing.recurrent['1M'].enabled %}
                             {% set price = product.pricing.recurrent['1M'].price|money_convert|replace({'.00': ''}) %}
                             {% set period = is_en ? 'per month' : 'в месяц' %}
@@ -229,7 +230,6 @@
                         {% endif %}
 
                         {% set description = product.description ? product.description|striptags|trim : '' %}
-                        {% set href = ('/order/' ~ product.slug)|link %}
 
                         <article class="znet-plan-card{% if loop.index == 2 %} znet-plan-card-featured{% endif %}">
                             {% if loop.index == 2 %}
@@ -240,9 +240,27 @@
                                 <div class="znet-plan-summary">
                                     <span class="znet-plan-name">{{ product.title }}</span>
                                     {% if price %}
-                                        <strong class="znet-plan-price">{{ price }}</strong>
+                                        <strong class="znet-plan-price" data-plan-price>{{ price }}</strong>
                                     {% endif %}
-                                    {% if period %}
+                                    {% if product.pricing.type == 'recurrent' %}
+                                        <label class="znet-plan-period-control">
+                                            <span class="visually-hidden">{{ is_en ? 'Billing period' : 'Период оплаты' }}</span>
+                                            <select class="znet-plan-period-select" data-plan-period>
+                                                {% for code, prices in product.pricing.recurrent %}
+                                                    {% if prices.enabled %}
+                                                        <option
+                                                            value="{{ code }}"
+                                                            data-price="{{ prices.price|money_convert|replace({'.00': ''}) }}"
+                                                            data-href="{{ base_href }}?period={{ code }}"
+                                                            {% if code == '1M' %}selected="selected"{% endif %}
+                                                        >
+                                                            {{ guest.system_periods[code] }}
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </label>
+                                    {% elseif period %}
                                         <span class="znet-plan-period">{{ period }}</span>
                                     {% endif %}
                                     <div class="znet-plan-highlight">
@@ -263,7 +281,7 @@
                                 </li>
                             </ul>
 
-                            <a class="znet-btn {% if loop.index == 2 %}znet-btn-accent{% else %}znet-btn-outline{% endif %} znet-plan-btn" href="{{ href }}">{{ is_en ? 'Choose' : 'Выбрать' }}</a>
+                            <a class="znet-btn {% if loop.index == 2 %}znet-btn-accent{% else %}znet-btn-outline{% endif %} znet-plan-btn" href="{{ base_href }}{% if product.pricing.type == 'recurrent' and product.pricing.recurrent['1M'] is defined and product.pricing.recurrent['1M'].enabled %}?period=1M{% endif %}">{{ is_en ? 'Choose' : 'Выбрать' }}</a>
                         </article>
                     {% else %}
                         <div class="znet-plans-empty">
@@ -332,6 +350,37 @@
             if (event.key === 'Escape') {
                 closeMenu();
             }
+        });
+    })();
+
+    (() => {
+        document.querySelectorAll('.znet-plan-card').forEach((card) => {
+            const select = card.querySelector('[data-plan-period]');
+            const price = card.querySelector('[data-plan-price]');
+            const button = card.querySelector('.znet-plan-btn');
+
+            if (!select || !price || !button) {
+                return;
+            }
+
+            const syncPlanCard = () => {
+                const option = select.options[select.selectedIndex];
+
+                if (!option) {
+                    return;
+                }
+
+                if (option.dataset.price) {
+                    price.textContent = option.dataset.price;
+                }
+
+                if (option.dataset.href) {
+                    button.setAttribute('href', option.dataset.href);
+                }
+            };
+
+            select.addEventListener('change', syncPlanCard);
+            syncPlanCard();
         });
     })();
 </script>

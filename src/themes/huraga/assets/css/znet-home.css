@@ -494,15 +494,19 @@
 }
 
 .znet-homepage .znet-plan-card {
+  --znet-plan-border-color: var(--znet-border);
+  --znet-plan-badge-bg: rgba(1, 4, 9, 0.92);
   position: relative;
   padding: 30px;
-  border: 1px solid var(--znet-border);
+  border: 1px solid var(--znet-plan-border-color);
   border-radius: var(--znet-radius);
   background: var(--znet-surface);
 }
 
 .znet-homepage .znet-plan-card-featured {
-  border-color: rgba(74, 222, 128, 0.5);
+  --znet-plan-border-color: rgba(74, 222, 128, 0.5);
+  --znet-plan-badge-bg: rgb(12, 23, 17);
+  border-color: var(--znet-plan-border-color);
   background: linear-gradient(180deg, rgba(17, 24, 20, 0.98), rgba(4, 15, 11, 0.98));
   box-shadow: 0 0 50px rgba(74, 222, 128, 0.16);
 }
@@ -533,9 +537,9 @@
   top: 18px;
   right: 18px;
   padding: 8px 12px;
-  border: 1px solid rgba(134, 239, 172, 0.14);
+  border: 1px solid var(--znet-plan-border-color);
   border-radius: 999px;
-  background: rgba(34, 197, 94, 0.1);
+  background: var(--znet-plan-badge-bg);
   color: var(--znet-accent-soft);
   font-size: 12px;
   font-weight: 500;
@@ -562,6 +566,48 @@
   margin-top: 8px;
   color: rgba(255, 255, 255, 0.5);
   font-weight: 400;
+}
+
+.znet-homepage .znet-plan-period-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  align-self: flex-start;
+}
+
+.znet-homepage .znet-plan-period-control::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.54);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.54);
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+}
+
+.znet-homepage .znet-plan-period-select {
+  min-height: 26px;
+  padding: 0 18px 0 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.znet-homepage .znet-plan-period-select:focus {
+  outline: none;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .znet-homepage .znet-plan-list {
@@ -894,7 +940,6 @@
   }
 
   .znet-homepage .znet-plan-card-featured .znet-plan-badge {
-    background: rgb(12, 23, 17);
     box-shadow: 0 0 0 1px var(--znet-bg);
   }
 
@@ -927,6 +972,18 @@
     margin-top: 0;
     justify-self: start;
     white-space: nowrap;
+  }
+
+  .znet-homepage .znet-plan-period-control {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+    justify-self: start;
+    white-space: nowrap;
+  }
+
+  .znet-homepage .znet-plan-period-select {
+    font-size: 14px;
   }
 
   .znet-homepage .znet-plan-highlight {
