@@ -259,7 +259,7 @@ body.znet-auth-open {
 .znet-homepage .znet-auth-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(1, 4, 9, 0.56);
+  background: transparent;
   pointer-events: auto;
 }
 
