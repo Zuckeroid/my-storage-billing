@@ -776,7 +776,7 @@
     --znet-mobile-hero-gap: 14px;
     --znet-mobile-hero-copy-gap: 14px;
     --znet-mobile-hero-actions-gap: 10px;
-    --znet-mobile-hero-bottom: 18px;
+    --znet-mobile-hero-bottom: 0;
   }
 
   .znet-homepage .znet-hero-mobile .znet-hero-copy h1 {
@@ -788,7 +788,7 @@
   }
 
   .znet-homepage .znet-section-divider {
-    padding: 2px 0 16px;
+    padding: 16px 0;
   }
 
   .znet-homepage .znet-hero-actions,
@@ -820,6 +820,10 @@
 
   .znet-homepage .znet-feature-grid {
     grid-template-columns: 1fr;
+  }
+
+  .znet-homepage .znet-feature-strip {
+    padding: 0;
   }
 
   .znet-homepage .znet-feature-card::after {
@@ -873,7 +877,7 @@
   }
 
   .znet-homepage .znet-plans-section {
-    padding-top: 18px;
+    padding-top: 0;
   }
 
   .znet-homepage .znet-plan-top {
@@ -891,7 +895,7 @@
 
   .znet-homepage .znet-plan-card-featured .znet-plan-badge {
     background: rgb(12, 23, 17);
-    box-shadow: 0 0 0 6px var(--znet-bg);
+    box-shadow: 0 0 0 1px var(--znet-bg);
   }
 
   .znet-homepage .znet-plan-summary {
