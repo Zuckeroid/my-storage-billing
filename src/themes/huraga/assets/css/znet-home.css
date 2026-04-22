@@ -880,6 +880,15 @@
     min-height: 0;
   }
 
+  .znet-homepage .znet-plan-badge {
+    top: 0;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    white-space: nowrap;
+  }
+
   .znet-homepage .znet-plan-summary {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
