@@ -935,6 +935,10 @@
     padding-top: 0;
   }
 
+  .znet-homepage .znet-plans-grid {
+    margin-top: 16px;
+  }
+
   .znet-homepage .znet-plan-top {
     min-height: 0;
   }
