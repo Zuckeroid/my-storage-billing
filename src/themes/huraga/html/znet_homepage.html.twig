@@ -13,15 +13,16 @@
             </nav>
 
             <div class="znet-header-actions">
-                <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'login'|link }}" aria-label="{{ is_en ? 'Login' : 'Войти' }}">
+                <button class="znet-btn znet-btn-ghost znet-btn-with-icon znet-login-toggle" type="button" aria-label="{{ is_en ? 'Login' : 'Войти' }}" aria-expanded="false" aria-controls="znet-desktop-login" data-login-toggle>
                     <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="12" cy="8" r="4"></circle>
                         <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
                     </svg>
                     <span>{{ is_en ? 'Login' : 'Войти' }}</span>
-                </a>
+                </button>
                 <a class="znet-btn znet-btn-accent" href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>
             </div>
+            {{ include('znet_login_panel.html.twig', { panel_id: 'znet-desktop-login', login_panel_class: 'znet-login-card-desktop' }) }}
         </div>
     </header>
 
@@ -61,6 +62,8 @@
             </nav>
         </div>
     </header>
+
+    {{ include('znet_login_panel.html.twig', { panel_id: 'znet-mobile-login', login_panel_class: 'znet-login-card-mobile' }) }}
 
     <main id="top">
         <section class="znet-hero znet-hero-desktop">
@@ -316,46 +319,101 @@
 
 <script>
     (() => {
-        const header = document.querySelector('.znet-site-header-mobile');
-        const toggle = header?.querySelector('.znet-header-menu-toggle');
-        const nav = header?.querySelector('#znet-mobile-header-nav');
+        document.querySelectorAll('.znet-site-header').forEach((header) => {
+            const isMobile = header.classList.contains('znet-site-header-mobile');
+            const menuToggle = isMobile ? header.querySelector('.znet-header-menu-toggle') : null;
+            const menuPanel = isMobile ? header.querySelector('#znet-mobile-header-nav') : null;
+            const loginToggle = header.querySelector('[data-login-toggle]') || (isMobile ? header.querySelector('.znet-header-actions > .znet-btn-ghost:not(.znet-header-menu-toggle)') : null);
+            const loginPanel = document.getElementById(isMobile ? 'znet-mobile-login' : 'znet-desktop-login');
 
-        if (!header || !toggle || !nav) {
-            return;
-        }
+            const closeMenu = () => {
+                if (!isMobile || !menuToggle || !menuPanel) {
+                    return;
+                }
 
-        const closeMenu = () => {
-            header.classList.remove('is-menu-open');
-            toggle.setAttribute('aria-expanded', 'false');
-        };
+                header.classList.remove('is-menu-open');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            };
 
-        const openMenu = () => {
-            header.classList.add('is-menu-open');
-            toggle.setAttribute('aria-expanded', 'true');
-        };
+            const openMenu = () => {
+                if (!isMobile || !menuToggle || !menuPanel) {
+                    return;
+                }
 
-        toggle.addEventListener('click', () => {
-            if (header.classList.contains('is-menu-open')) {
+                closeLogin();
+                header.classList.add('is-menu-open');
+                menuToggle.setAttribute('aria-expanded', 'true');
+            };
+
+            const closeLogin = () => {
+                if (!loginToggle || !loginPanel) {
+                    return;
+                }
+
+                header.classList.remove('is-login-open');
+                loginToggle.setAttribute('aria-expanded', 'false');
+                loginPanel.setAttribute('aria-hidden', 'true');
+            };
+
+            const openLogin = () => {
+                if (!loginToggle || !loginPanel) {
+                    return;
+                }
+
                 closeMenu();
-            } else {
-                openMenu();
-            }
-        });
+                header.classList.add('is-login-open');
+                loginToggle.setAttribute('aria-expanded', 'true');
+                loginPanel.setAttribute('aria-hidden', 'false');
+            };
 
-        nav.querySelectorAll('a').forEach((link) => {
-            link.addEventListener('click', closeMenu);
-        });
+            if (isMobile && menuToggle && menuPanel) {
+                menuToggle.addEventListener('click', (event) => {
+                    event.preventDefault();
 
-        document.addEventListener('click', (event) => {
-            if (!header.contains(event.target)) {
-                closeMenu();
-            }
-        });
+                    if (header.classList.contains('is-menu-open')) {
+                        closeMenu();
+                    } else {
+                        openMenu();
+                    }
+                });
 
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                closeMenu();
+                menuPanel.querySelectorAll('a').forEach((link) => {
+                    link.addEventListener('click', closeMenu);
+                });
             }
+
+            if (loginToggle && loginPanel) {
+                loginToggle.addEventListener('click', (event) => {
+                    event.preventDefault();
+
+                    if (header.classList.contains('is-login-open')) {
+                        closeLogin();
+                    } else {
+                        openLogin();
+                    }
+                });
+
+                loginPanel.querySelectorAll('a').forEach((link) => {
+                    link.addEventListener('click', closeLogin);
+                });
+            }
+
+            document.addEventListener('click', (event) => {
+                if (isMobile && !header.contains(event.target)) {
+                    closeMenu();
+                }
+
+                if (loginPanel && !header.contains(event.target) && !loginPanel.contains(event.target)) {
+                    closeLogin();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeMenu();
+                    closeLogin();
+                }
+            });
         });
     })();
 
