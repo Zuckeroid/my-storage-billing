@@ -1,0 +1,191 @@
+<div class="znet-page-shell">
+    <header class="znet-site-header">
+        <div class="znet-container znet-header-bar">
+            <a class="znet-brand" href="{{ '/'|link }}" aria-label="Znet">
+                <span class="znet-brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 3.25 5.75 5.6v5.09c0 3.89 2.46 7.39 6.25 8.92 3.79-1.53 6.25-5.03 6.25-8.92V5.6L12 3.25Z"></path>
+                        <path d="m9.35 11.85 1.9 1.9 3.6-4.1"></path>
+                    </svg>
+                </span>
+                <span class="znet-brand-text">
+                    <strong><span class="znet-brand-letter-accent">Z</span>net</strong>
+                </span>
+            </a>
+
+            <nav class="znet-nav" aria-label="{{ is_en ? 'Main navigation' : 'Основная навигация' }}">
+                <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
+                <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
+                <a href="{{ '/contacts'|link }}">{{ is_en ? 'Contacts' : 'Контакты' }}</a>
+            </nav>
+
+            <div class="znet-header-actions">
+                <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'login'|link }}">
+                    <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
+                    </svg>
+                    <span>{{ is_en ? 'Login' : 'Войти' }}</span>
+                </a>
+                <a class="znet-btn znet-btn-accent" href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="top">
+        <section class="znet-hero">
+            <div class="znet-container znet-hero-grid">
+                <div class="znet-hero-content">
+                    <div class="znet-hero-copy">
+                        <span class="znet-eyebrow">{{ is_en ? 'Private cloud storage' : 'Личное облачное хранилище' }}</span>
+                        <h1>
+                            {{ is_en ? 'Security.' : 'Безопасность.' }}<br>
+                            {{ is_en ? 'Privacy.' : 'Приватность.' }}<br>
+                            <span>{{ is_en ? 'Freedom.' : 'Свобода.' }}</span>
+                        </h1>
+                        <p>
+                            {% if is_en %}
+                                Protect your data and enjoy<br>
+                                fast internet without borders.
+                            {% else %}
+                                Защищайте свои данные и наслаждайтесь<br>
+                                быстрым интернетом без границ.
+                            {% endif %}
+                        </p>
+
+                        <div class="znet-hero-points">
+                            <div class="znet-hero-point">
+                                <span class="znet-check">✓</span>
+                                <span>{{ is_en ? 'One account for plans, invoices, and statuses' : 'Один аккаунт для тарифов, счетов и статусов' }}</span>
+                            </div>
+                            <div class="znet-hero-point">
+                                <span class="znet-check">✓</span>
+                                <span>{{ is_en ? 'Access instructions arrive by email' : 'Доступ и инструкции приходят на email' }}</span>
+                            </div>
+                            <div class="znet-hero-point">
+                                <span class="znet-check">✓</span>
+                                <span>{{ is_en ? 'Quick start without extra onboarding' : 'Простой старт без лишнего онбординга' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="znet-hero-actions">
+                        <a class="znet-btn znet-btn-accent znet-btn-large znet-btn-with-icon znet-hero-primary-action" href="#plans">
+                            <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M5 12h14"></path>
+                                <path d="M13 7l5 5-5 5"></path>
+                            </svg>
+                            <span>{{ is_en ? 'Choose a subscription' : 'Выбрать подписку' }}</span>
+                        </a>
+                        <a class="znet-btn znet-btn-outline znet-btn-large" href="{{ 'signup'|link }}">{{ is_en ? 'Try for free' : 'Попробовать бесплатно' }}</a>
+                    </div>
+                </div>
+
+                <div class="znet-hero-visual" aria-label="{{ is_en ? 'Earth visual' : 'Изображение Земли' }}">
+                    <img class="znet-hero-globe" src="{{ 'img/znet-earth.webp'|asset_url }}" alt="">
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="znet-feature-strip">
+            <div class="znet-container znet-feature-grid">
+                <article class="znet-feature-card">
+                    <h2>{{ is_en ? 'Data protection' : 'Защита данных' }}</h2>
+                    <p>{{ is_en ? 'Your data is protected by reliable encryption.' : 'Ваши данные под защитой надежного шифрования.' }}</p>
+                </article>
+                <article class="znet-feature-card">
+                    <h2>{{ is_en ? 'Access without borders' : 'Доступ без границ' }}</h2>
+                    <p>{{ is_en ? 'Access any content you need.' : 'Получайте доступ к любому контенту.' }}</p>
+                </article>
+                <article class="znet-feature-card">
+                    <h2>{{ is_en ? 'High speed' : 'Высокая скорость' }}</h2>
+                    <p>{{ is_en ? 'Optimized servers provide a fast connection.' : 'Оптимизированные серверы обеспечивают быстрое соединение.' }}</p>
+                </article>
+                <article class="znet-feature-card">
+                    <h2>{{ is_en ? 'All-device support' : 'Поддержка всех устройств' }}</h2>
+                    <p>{{ is_en ? 'Works on iOS, Android, Windows, macOS, and routers.' : 'Работает на: iOS, Android, Windows, macOS, роутерах.' }}</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="plans" class="znet-plans-section">
+            <div class="znet-container">
+                <div class="znet-section-head">
+                    <span class="znet-eyebrow">{{ is_en ? 'Plans' : 'Тарифы' }}</span>
+                    <h2>{{ is_en ? 'Choose the right volume and usage rhythm' : 'Выберите подходящий объем и ритм использования' }}</h2>
+                    <p>{{ is_en ? 'A clean plan grid without clutter or marketing noise.' : 'Четкая сетка тарифов без перегруза и рекламного шума.' }}</p>
+                </div>
+
+                <div class="znet-plans-grid">
+                    {% for product in storage_products %}
+                        {% set price = '' %}
+                        {% set period = '' %}
+                        {% if product.pricing.type == 'recurrent' and product.pricing.recurrent['1M'] is defined and product.pricing.recurrent['1M'].enabled %}
+                            {% set price = product.pricing.recurrent['1M'].price|money_convert|replace({'.00': ''}) %}
+                            {% set period = is_en ? 'per month' : 'в месяц' %}
+                        {% elseif product.pricing.type == 'once' %}
+                            {% set price = product.pricing.once.price|money_convert|replace({'.00': ''}) %}
+                        {% elseif product.pricing.type == 'free' %}
+                            {% set price = 0|money_convert %}
+                        {% endif %}
+                        {% set description = product.description ? product.description|striptags|trim : '' %}
+                        {% set href = ('/order/' ~ product.slug)|link %}
+
+                        <article class="znet-plan-card{% if loop.index == 2 %} znet-plan-card-featured{% endif %}">
+                            {% if loop.index == 2 %}
+                                <div class="znet-plan-badge">{{ is_en ? 'Popular' : 'Оптимальный' }}</div>
+                            {% endif %}
+
+                            <div class="znet-plan-top">
+                                <div>
+                                    <span class="znet-plan-name">{{ product.title }}</span>
+                                    {% if price %}
+                                        <strong class="znet-plan-price">{{ price }}</strong>
+                                    {% endif %}
+                                    {% if period %}
+                                        <span class="znet-plan-period">{{ period }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <ul class="znet-plan-list">
+                                <li>
+                                    <span class="znet-check">✓</span>
+                                    <span>{{ description ?: (is_en ? 'Built for everyday private use.' : 'Подходит для повседневного личного использования.') }}</span>
+                                </li>
+                                <li>
+                                    <span class="znet-check">✓</span>
+                                    <span>{{ is_en ? 'Access instructions by email' : 'Доступ и инструкции на email' }}</span>
+                                </li>
+                                <li>
+                                    <span class="znet-check">✓</span>
+                                    <span>{{ is_en ? 'Manage everything in one cabinet' : 'Управление в одном кабинете' }}</span>
+                                </li>
+                            </ul>
+
+                            <a class="znet-btn {% if loop.index == 2 %}znet-btn-accent{% else %}znet-btn-outline{% endif %} znet-plan-btn" href="{{ href }}">{{ is_en ? 'Choose' : 'Выбрать' }}</a>
+                        </article>
+                    {% else %}
+                        <div class="znet-plans-empty">
+                            {{ is_en ? 'Plans are being updated.' : 'Тарифы обновляются.' }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="contacts" class="znet-site-footer">
+        <div class="znet-container znet-footer-shell">
+            <div class="znet-footer-brand">
+                <strong><span class="znet-brand-letter-accent">Z</span>net</strong>
+                <span>{{ is_en ? 'Private storage and secure access' : 'Личное хранилище и безопасный доступ' }}</span>
+            </div>
+            <nav class="znet-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
+                <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
+                <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
+                <a href="{{ 'login'|link }}">{{ is_en ? 'Login' : 'Войти' }}</a>
+            </nav>
+        </div>
+    </footer>
+</div>

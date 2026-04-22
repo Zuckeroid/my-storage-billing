@@ -1,0 +1,562 @@
+@font-face {
+  font-family: "Rubik";
+  src: url("https://fonts.gstatic.com/s/rubik/v31/iJWKBXyIfDnIV7nMrXyi0A.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Rubik";
+  src: url("https://fonts.gstatic.com/s/rubik/v31/iJWKBXyIfDnIV7nMrXyi0A.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Rubik";
+  src: url("https://fonts.gstatic.com/s/rubik/v31/iJWKBXyIfDnIV7nMrXyi0A.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+.znet-homepage {
+  --znet-text: #ffffff;
+  --znet-text-soft: rgba(255, 255, 255, 0.68);
+  --znet-accent: #4ade80;
+  --znet-accent-soft: #86efac;
+  --znet-accent-dark: #03250f;
+  --znet-border: rgba(255, 255, 255, 0.1);
+  --znet-container: 1440px;
+  --znet-radius-lg: 28px;
+  --znet-radius-md: 10px;
+  margin: 0;
+  min-height: 100vh;
+  background: #010409;
+  color: var(--znet-text);
+  font-family: "Rubik", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.znet-homepage a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.znet-homepage .znet-container {
+  width: min(var(--znet-container), calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.znet-page-shell {
+  overflow: hidden;
+  position: relative;
+}
+
+.znet-site-header,
+.znet-hero,
+.znet-feature-strip,
+.znet-plans-section,
+.znet-site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.znet-site-header {
+  padding-top: 24px;
+}
+
+.znet-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.znet-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.znet-brand-mark {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--znet-accent);
+}
+
+.znet-brand-mark svg,
+.znet-btn-svg-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.znet-brand-mark svg {
+  width: 24px;
+  height: 24px;
+}
+
+.znet-brand-text strong {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.znet-brand-letter-accent {
+  color: var(--znet-accent);
+}
+
+.znet-nav,
+.znet-footer-nav,
+.znet-header-actions,
+.znet-hero-actions {
+  display: flex;
+  align-items: center;
+}
+
+.znet-nav,
+.znet-footer-nav {
+  gap: 28px;
+}
+
+.znet-nav a,
+.znet-footer-nav a {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.znet-nav a:hover,
+.znet-footer-nav a:hover {
+  color: var(--znet-accent);
+}
+
+.znet-header-actions,
+.znet-hero-actions {
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.znet-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: var(--znet-radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  transition: 0.2s ease;
+}
+
+.znet-btn-with-icon {
+  gap: 10px;
+}
+
+.znet-btn-svg-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.znet-btn-large {
+  width: 250px;
+  min-height: 54px;
+  padding: 0 24px;
+}
+
+.znet-btn-accent {
+  background: radial-gradient(circle at top left, #b7ef73 0%, #5bd774 38%, #22c55e 100%);
+  color: var(--znet-accent-dark);
+  box-shadow: none;
+}
+
+.znet-btn-accent:hover {
+  transform: translateY(-1px);
+}
+
+.znet-btn-ghost,
+.znet-btn-outline {
+  background: transparent;
+  color: var(--znet-text);
+  border-color: rgba(134, 239, 172, 0.18);
+}
+
+.znet-btn-ghost:hover,
+.znet-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(134, 239, 172, 0.3);
+}
+
+.znet-hero {
+  padding: 0;
+}
+
+.znet-hero-grid {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0;
+  align-items: start;
+}
+
+.znet-hero-content {
+  width: max-content;
+  max-width: 100%;
+}
+
+.znet-hero-copy {
+  width: max-content;
+  max-width: 100%;
+}
+
+.znet-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(134, 239, 172, 0.16);
+  background: rgba(34, 197, 94, 0.08);
+  color: var(--znet-accent-soft);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.znet-hero-copy h1 {
+  margin: 24px 0 0;
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+  font-weight: 400;
+}
+
+.znet-hero-copy h1 span {
+  color: var(--znet-accent);
+}
+
+.znet-hero-copy p {
+  margin: 22px 0 0;
+  max-width: 620px;
+  color: var(--znet-text-soft);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.znet-hero-points {
+  margin-top: 26px;
+  display: grid;
+  gap: 14px;
+}
+
+.znet-hero-point,
+.znet-plan-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.znet-hero-point span:last-child,
+.znet-plan-list li span:last-child {
+  font-weight: 400;
+}
+
+.znet-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(134, 239, 172, 0.18);
+  color: var(--znet-accent-soft);
+  font-size: 14px;
+}
+
+.znet-hero-actions {
+  margin-top: 34px;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.znet-hero-visual {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 560px;
+  width: 100%;
+}
+
+.znet-hero-globe {
+  display: block;
+  width: min(100%, 820px);
+  height: auto;
+  object-fit: contain;
+}
+
+.znet-feature-strip {
+  padding-bottom: 24px;
+}
+
+.znet-feature-grid,
+.znet-plans-grid {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.znet-feature-grid {
+  grid-template-columns: repeat(4, 1fr);
+  border-radius: 10px;
+  border: 1px solid rgba(134, 239, 172, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 60px rgba(0, 0, 0, 0.18);
+}
+
+.znet-feature-card {
+  padding: 32px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+}
+
+.znet-feature-card:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.znet-feature-card:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.znet-feature-card h2,
+.znet-section-head h2 {
+  margin: 0;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+
+.znet-feature-card h2 {
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.znet-feature-card p,
+.znet-section-head p {
+  color: var(--znet-text-soft);
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.znet-feature-card p {
+  margin: 14px 0 0;
+  font-size: 16px;
+}
+
+.znet-plans-section {
+  padding: 82px 0 24px;
+}
+
+.znet-section-head {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.znet-section-head h2 {
+  font-size: clamp(34px, 4.5vw, 52px);
+  line-height: 1.06;
+}
+
+.znet-section-head p {
+  margin: 14px 0 0;
+  font-size: 18px;
+}
+
+.znet-plans-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 54px;
+  overflow: visible;
+}
+
+.znet-plan-card {
+  position: relative;
+  padding: 32px;
+  border-radius: var(--znet-radius-lg);
+  border: 1px solid var(--znet-border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.znet-plan-card-featured {
+  border-color: rgba(74, 222, 128, 0.5);
+  background: linear-gradient(180deg, rgba(17, 24, 20, 0.98), rgba(4, 15, 11, 0.98));
+  box-shadow: 0 0 50px rgba(74, 222, 128, 0.16);
+}
+
+.znet-plan-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  color: var(--znet-accent-soft);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.znet-plan-name {
+  display: block;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.znet-plan-price {
+  display: block;
+  margin-top: 18px;
+  font-size: 52px;
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+  font-weight: 600;
+}
+
+.znet-plan-period {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+}
+
+.znet-plan-list {
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.znet-plan-btn {
+  width: 100%;
+  margin-top: 30px;
+}
+
+.znet-plans-empty {
+  padding: 24px 0;
+  color: var(--znet-text-soft);
+  font-size: 16px;
+}
+
+.znet-site-footer {
+  padding: 28px 0 48px;
+}
+
+.znet-footer-shell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 22px;
+}
+
+.znet-footer-brand {
+  display: grid;
+  gap: 4px;
+}
+
+.znet-footer-brand strong {
+  font-weight: 600;
+}
+
+.znet-footer-brand span {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+}
+
+@media (max-width: 1180px) {
+  .znet-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .znet-hero-content {
+    width: 100%;
+  }
+
+  .znet-hero-visual {
+    min-height: auto;
+  }
+
+  .znet-hero-globe {
+    max-width: 560px;
+  }
+
+  .znet-feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 920px) {
+  .znet-header-bar,
+  .znet-nav,
+  .znet-footer-shell {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .znet-plans-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .znet-homepage .znet-container {
+    width: min(var(--znet-container), calc(100% - 20px));
+  }
+
+  .znet-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .znet-hero {
+    padding-top: 42px;
+  }
+
+  .znet-hero-grid {
+    gap: 24px;
+  }
+
+  .znet-hero-copy p,
+  .znet-section-head p {
+    font-size: 16px;
+  }
+
+  .znet-brand-text strong {
+    font-size: 22px;
+  }
+
+  .znet-header-actions,
+  .znet-hero-actions {
+    width: 100%;
+  }
+
+  .znet-header-actions .znet-btn,
+  .znet-hero-actions .znet-btn {
+    flex: 1 1 100%;
+  }
+
+  .znet-hero-actions {
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,130 @@
+{% extends request.ajax ? "layout_blank.html.twig" : (client ? "layout_default.html.twig" : "layout_public.html.twig") %}
+
+{% import "macro_functions.html.twig" as mf %}
+
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
+{% set company = guest.system_company %}
+{% set storage_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false, 'type': 'custom' }).list|default([]) %}
+
+{% block meta_title %}
+    {% if client %}
+        {{ is_en ? 'Client area' : 'Личный кабинет' }}
+    {% else %}
+        {{ is_en ? 'Znet — secure access without extra noise' : 'Znet — безопасность, приватность, свобода' }}
+    {% endif %}
+{% endblock %}
+
+{% block meta_description %}
+    {% if client %}
+        {{ is_en ? 'Manage your storage plans, invoices, and access details.' : 'Управляйте тарифами хранения, счетами и доступом в одном кабинете.' }}
+    {% else %}
+        {{ is_en ? 'Private storage, secure access, clear plans, and fast setup in one account.' : 'Личное хранилище, безопасный доступ, понятные тарифы и быстрый старт в одном аккаунте.' }}
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+    {% if not client %}
+        <link rel="stylesheet" href="{{ 'css/znet-home.css' | asset_url }}?v=znet-home-20260422a">
+    {% endif %}
+{% endblock %}
+
+{% block page_header %}{{ is_en ? 'Storage' : 'Хранилище' }}{% endblock %}
+{% block body_class %}{% if client %}dashboard storage-dashboard{% else %}public-homepage znet-homepage{% endif %}{% endblock %}
+
+{% block breadcrumbs %}
+    {% if client and not settings.hide_dashboard_breadcrumb %}
+        <ul class="breadcrumb">
+            <li><a href="{{ '/'|link }}">{{ is_en ? 'Home' : 'Главная' }}</a> <span class="dropdown-divider">/</span></li>
+            <li class="active">{{ is_en ? 'Storage' : 'Хранилище' }}</li>
+        </ul>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if client %}
+        {% set dashboard = client.index_get_dashboard %}
+        {% set profile = dashboard.profile %}
+
+        <section class="storage-page-head mb-4">
+            <div>
+                <span class="storage-kicker">{{ is_en ? 'Account' : 'Личный кабинет' }}</span>
+                <h1 class="mb-2">{{ is_en ? 'Your cloud storage' : 'Ваше облачное хранилище' }}</h1>
+                <p class="text-secondary mb-0">
+                    {{ is_en ? 'Choose a plan, pay the invoice, and access instructions will be sent to your account email.' : 'Выберите тариф, оплатите счет, и инструкции по доступу придут на email аккаунта.' }}
+                </p>
+            </div>
+            <div class="storage-email-panel">
+                <span>{{ is_en ? 'Instructions will be sent to' : 'Инструкции будут отправлены на' }}</span>
+                <strong>{{ profile.email }}</strong>
+            </div>
+        </section>
+
+        <section class="storage-metric-grid mb-4" aria-label="Account summary">
+            <div class="storage-metric green">
+                <span>{{ is_en ? 'Active services' : 'Активные услуги' }}</span>
+                <strong>{{ dashboard.orders.active }}</strong>
+            </div>
+            <div class="storage-metric teal">
+                <span>{{ is_en ? 'Unpaid invoices' : 'Неоплаченные счета' }}</span>
+                <strong>{{ dashboard.invoices.unpaid }}</strong>
+            </div>
+            <div class="storage-metric yellow">
+                <span>{{ is_en ? 'Available plans' : 'Тарифов доступно' }}</span>
+                <strong>{{ storage_products|length }}</strong>
+            </div>
+        </section>
+
+        <section class="row mb-4">
+            {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'card_items', is_en: is_en } %}
+        </section>
+
+        <section class="storage-panel-grid">
+            <div class="storage-panel">
+                <div class="storage-panel-head">
+                    <h2>{{ is_en ? 'My services' : 'Мои услуги' }}</h2>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ 'order/service'|link }}">{{ is_en ? 'Open' : 'Открыть' }}</a>
+                </div>
+                <p class="mb-2">{{ is_en ? 'Active services:' : 'Активные услуги:' }} <strong>{{ dashboard.orders.active }}</strong></p>
+                <p class="mb-0 text-secondary">
+                    {{ is_en ? 'After payment, access details and instructions are sent to your email.' : 'После оплаты доступ и инструкции отправляются на email.' }}
+                </p>
+            </div>
+
+            <div class="storage-panel">
+                <div class="storage-panel-head">
+                    <h2>{{ is_en ? 'Invoices' : 'Счета' }}</h2>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ is_en ? 'Open' : 'Открыть' }}</a>
+                </div>
+                <p class="mb-2">{{ is_en ? 'Unpaid invoices:' : 'Неоплаченные счета:' }} <strong>{{ dashboard.invoices.unpaid }}</strong></p>
+                <p class="mb-0 text-secondary">
+                    {{ is_en ? 'You can review and pay all invoices in this section.' : 'В этом разделе можно проверить и оплатить все счета.' }}
+                </p>
+            </div>
+        </section>
+
+        {% if dashboard.recent_orders %}
+            <section class="card mt-3">
+                <div class="card-header">
+                    <h2 class="h6 m-0">{{ is_en ? 'Recent services' : 'Последние услуги' }}</h2>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for order in dashboard.recent_orders %}
+                        <a href="{{ 'order/service/manage'|link }}/{{ order.id }}" class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>#{{ order.id }} {{ order.title|truncate(45) }}</span>
+                            <span class="badge {% if order.status == 'active' %}text-bg-success{% elseif order.status == 'pending_setup' %}text-bg-warning{% elseif order.status == 'failed_setup' or order.status == 'suspended' or order.status == 'failed_renew' %}text-bg-danger{% elseif order.status == 'canceled' %}text-bg-secondary{% endif %}">
+                                {{ mf.status_name(order.status) }}
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    {% if not client %}
+        {% include 'znet_homepage.html.twig' %}
+    {% endif %}
+{% endblock %}
