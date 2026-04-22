@@ -692,6 +692,10 @@
     margin: 0;
   }
 
+  .znet-homepage .znet-hero-mobile .znet-hero-copy p {
+    display: none;
+  }
+
   .znet-homepage .znet-hero-mobile .znet-hero-points {
     display: grid;
   }
