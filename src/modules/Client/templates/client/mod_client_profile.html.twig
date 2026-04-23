@@ -39,16 +39,6 @@
                                 <label class="form-label" for="first_name">{{ is_en ? 'Nickname' : 'Псевдоним' }}</label>
                                 <input type="text" class="form-control" name="first_name" id="first_name" value="{{ profile.first_name }}" required>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="email">{{ is_en ? 'Email address' : 'Адрес электронной почты' }}</label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ profile.email }}" required>
-                            </div>
-                        </div>
-
-                        <div class="row">
                             <div class="mb-3 col-md-6">
                                 <label class="form-label" for="phone">{{ is_en ? 'Phone number' : 'Номер телефона' }}</label>
                                 <input type="hidden" name="phone_cc" value="{{ profile.phone_cc }}">
@@ -57,6 +47,10 @@
                         </div>
 
                         <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label class="form-label" for="email">{{ is_en ? 'Email address' : 'Адрес электронной почты' }}</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ profile.email }}" required>
+                            </div>
                             <div class="mb-3 col-md-6">
                                 <label class="form-label" for="country">{{ is_en ? 'Country' : 'Страна' }}</label>
                                 <select class="form-select" id="country" name="country" {% if "country" in required %} required {% endif %}>
