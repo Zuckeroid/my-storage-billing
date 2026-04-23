@@ -94,10 +94,11 @@
                                     <a class="znet-btn znet-btn-accent" href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Pay' : 'Оплатить' }}</a>
                                     <a
                                         class="znet-btn znet-btn-outline znet-btn-icon-only"
-                                        href="{{ 'api/client/invoice/cancel'|link({ hash: invoice.hash }) }}"
+                                        href="#"
                                         aria-label="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
                                         title="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
                                         {{ fb_api_link({
+                                            href: 'api/client/invoice/cancel'|link({ hash: invoice.hash }),
                                             modal: {type: 'confirm', title: is_en ? 'Cancel this invoice?' : 'Отменить этот счет?'},
                                             reload: true
                                         }) }}

@@ -816,8 +816,8 @@ html {
 }
 
 .znet-shell-page .znet-shell-inline-tabs {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -834,7 +834,9 @@ html {
   color: rgba(255, 255, 255, 0.84);
   font-size: 14px;
   font-weight: 600;
+  line-height: 1;
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  align-self: flex-start;
 }
 
 .znet-shell-page .znet-shell-inline-tab:hover,
@@ -861,7 +863,7 @@ html {
 
 .znet-shell-page .znet-shell-table-actions {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   flex-wrap: nowrap;
 }
@@ -877,6 +879,7 @@ html {
   min-width: 40px;
   min-height: 40px;
   padding: 0;
+  align-self: flex-start;
 }
 
 .znet-shell-page .breadcrumb {
