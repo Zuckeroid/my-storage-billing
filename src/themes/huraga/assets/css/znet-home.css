@@ -124,7 +124,7 @@ html {
   color: var(--znet-accent);
 }
 
-.znet-homepage .znet-site-header-mobile .znet-header-bar {
+.znet-homepage .znet-header-bar {
   position: relative;
 }
 
@@ -251,40 +251,35 @@ html {
 }
 
 .znet-homepage .znet-auth-layer {
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: absolute;
+  top: calc(100% + 10px);
   right: 0;
-  z-index: 45;
-  pointer-events: none;
-  padding-top: calc(var(--znet-header-offset) - 8px);
-}
-
-.znet-homepage .znet-auth-shell {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  pointer-events: none;
-}
-
-.znet-homepage .znet-auth-panel {
-  width: min(440px, 100%);
-  max-height: calc(100vh - var(--znet-header-offset) - 32px);
-  overflow: auto;
-  margin-top: 0;
-  padding: 24px;
+  z-index: 5;
+  width: min(440px, calc(100vw - 32px));
   border: 1px solid var(--znet-flyout-border);
   border-radius: var(--znet-flyout-radius);
   background: var(--znet-flyout-bg);
   box-shadow: var(--znet-flyout-shadow);
   backdrop-filter: blur(var(--znet-flyout-blur));
   -webkit-backdrop-filter: blur(var(--znet-flyout-blur));
-  pointer-events: auto;
+  overflow: hidden;
 }
 
-.znet-homepage .znet-auth-panel-signup {
-  width: min(560px, 100%);
+.znet-homepage .znet-auth-layer[data-auth-panel-state="signup"] {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.znet-homepage .znet-auth-shell {
+  display: block;
+}
+
+.znet-homepage .znet-auth-panel {
+  width: 100%;
+  max-height: calc(100vh - var(--znet-header-offset) - 32px);
+  overflow: auto;
+  margin-top: 0;
+  padding: 24px;
+  background: transparent;
 }
 
 .znet-homepage .znet-auth-head {
@@ -1014,12 +1009,12 @@ html {
     grid-template-columns: 1fr;
   }
 
-  .znet-homepage .znet-auth-shell {
-    justify-content: stretch;
+  .znet-homepage .znet-auth-layer,
+  .znet-homepage .znet-auth-layer[data-auth-panel-state="signup"] {
+    width: min(100%, calc(100vw - 20px));
   }
 
-  .znet-homepage .znet-auth-panel,
-  .znet-homepage .znet-auth-panel-signup {
+  .znet-homepage .znet-auth-panel {
     width: 100%;
     max-height: calc(100vh - var(--znet-header-offset) - 20px);
     padding: 20px;

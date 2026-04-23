@@ -375,6 +375,8 @@
             '.znet-hero-actions .znet-btn-outline'
         ));
         const openers = [...loginOpeners, ...signupOpeners];
+        const desktopHeaderBar = document.querySelector('.znet-site-header-desktop .znet-header-bar');
+        const mobileHeaderBar = document.querySelector('.znet-site-header-mobile .znet-header-bar');
         const mobileHeader = document.querySelector('.znet-site-header-mobile');
         let activePanelName = null;
 
@@ -382,9 +384,20 @@
             return;
         }
 
+        const getMountTarget = () => window.matchMedia('(max-width: 920px)').matches ? mobileHeaderBar : desktopHeaderBar;
+
+        const mountLayer = () => {
+            const target = getMountTarget();
+
+            if (target && layer.parentElement !== target) {
+                target.appendChild(layer);
+            }
+        };
+
         const setPanel = (panelName) => {
             let activePanel = null;
             activePanelName = panelName;
+            layer.dataset.authPanelState = panelName;
 
             panels.forEach((panel) => {
                 const isActive = panel.dataset.authPanel === panelName;
@@ -416,12 +429,14 @@
                 return;
             }
 
+            mountLayer();
             layer.hidden = false;
             setPanel(panelName);
         };
 
         const closeLayer = () => {
             layer.hidden = true;
+            delete layer.dataset.authPanelState;
             panels.forEach((panel) => {
                 panel.hidden = true;
             });
@@ -457,6 +472,12 @@
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && !layer.hidden) {
                 closeLayer();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (!layer.hidden) {
+                mountLayer();
             }
         });
 
