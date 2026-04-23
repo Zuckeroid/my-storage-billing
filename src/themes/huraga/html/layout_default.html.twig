@@ -33,6 +33,8 @@
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
 {% set shell_context = client ? 'client' : 'public' %}
+{% block shell_title %}{% endblock %}
+{% block shell_description %}{% endblock %}
 {% set shell_title_text = block('shell_title')|striptags|trim %}
 {% if shell_title_text is empty %}
     {% set shell_title_text = block('meta_title')|striptags|trim %}
