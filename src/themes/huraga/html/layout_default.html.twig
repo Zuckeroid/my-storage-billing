@@ -13,7 +13,7 @@
     {% block opengraph %}{% endblock %}
     <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
-    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260423g">
+    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260423h">
     <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
 
     {{ "Api/API.js" | library_url | script_tag }}
@@ -32,6 +32,9 @@
 {% set languages = guest.extension_languages(true) %}
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
+{% set next_locale = is_en ? 'ru_RU' : 'en_US' %}
+{% set next_locale_flag = is_en ? 'ru' : 'us' %}
+{% set next_locale_label = is_en ? 'RU' : 'US' %}
 {% set shell_context = client ? 'client' : 'public' %}
 {% set cart = client ? guest.cart_get : null %}
 {% set cart_count = 0 %}
@@ -128,21 +131,15 @@
 
                 {% if languages|length > 1 %}
                     <div class="znet-shell-locale-switch" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
-                        {% for lang in languages %}
-                            {% set locale_is_ru = lang.locale starts with 'ru' %}
-                            {% set locale_is_en = lang.locale starts with 'en' %}
-                            {% set locale_flag = locale_is_ru ? 'ru' : (locale_is_en ? 'us' : (lang.locale|split('_')|last|lower)) %}
-                            {% set locale_label = locale_is_ru ? 'RU' : (locale_is_en ? 'US' : (lang.locale|split('_')|last|upper)) %}
-                            <button
-                                class="znet-shell-locale-btn{% if lang.locale == current_locale %} is-active{% endif %}"
-                                type="button"
-                                data-znet-locale="{{ lang.locale }}"
-                                aria-pressed="{% if lang.locale == current_locale %}true{% else %}false{% endif %}"
-                            >
-                                <span class="fi fi-{{ locale_flag }}" aria-hidden="true"></span>
-                                <span>{{ locale_label }}</span>
-                            </button>
-                        {% endfor %}
+                        <button
+                            class="znet-shell-locale-btn"
+                            type="button"
+                            data-znet-locale="{{ next_locale }}"
+                            aria-label="{{ is_en ? 'Switch language to Russian' : 'Переключить язык на английский' }}"
+                        >
+                            <span class="fi fi-{{ next_locale_flag }}" aria-hidden="true"></span>
+                            <span>{{ next_locale_label }}</span>
+                        </button>
                     </div>
                 {% endif %}
             </div>
@@ -211,21 +208,15 @@
                 {% if languages|length > 1 %}
                     <div class="znet-shell-menu-language">
                         <div class="znet-shell-locale-switch" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
-                            {% for lang in languages %}
-                                {% set locale_is_ru = lang.locale starts with 'ru' %}
-                                {% set locale_is_en = lang.locale starts with 'en' %}
-                                {% set locale_flag = locale_is_ru ? 'ru' : (locale_is_en ? 'us' : (lang.locale|split('_')|last|lower)) %}
-                                {% set locale_label = locale_is_ru ? 'RU' : (locale_is_en ? 'US' : (lang.locale|split('_')|last|upper)) %}
-                                <button
-                                    class="znet-shell-locale-btn{% if lang.locale == current_locale %} is-active{% endif %}"
-                                    type="button"
-                                    data-znet-locale="{{ lang.locale }}"
-                                    aria-pressed="{% if lang.locale == current_locale %}true{% else %}false{% endif %}"
-                                >
-                                    <span class="fi fi-{{ locale_flag }}" aria-hidden="true"></span>
-                                    <span>{{ locale_label }}</span>
-                                </button>
-                            {% endfor %}
+                            <button
+                                class="znet-shell-locale-btn"
+                                type="button"
+                                data-znet-locale="{{ next_locale }}"
+                                aria-label="{{ is_en ? 'Switch language to Russian' : 'Переключить язык на английский' }}"
+                            >
+                                <span class="fi fi-{{ next_locale_flag }}" aria-hidden="true"></span>
+                                <span>{{ next_locale_label }}</span>
+                            </button>
                         </div>
                     </div>
                 {% endif %}
