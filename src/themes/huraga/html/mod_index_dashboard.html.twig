@@ -146,7 +146,9 @@
 {% endblock %}
 
 {% block body %}
-    {% if not client %}
+    {% if client %}
+        {{ parent() }}
+    {% else %}
         {% include 'znet_homepage.html.twig' %}
     {% endif %}
 {% endblock %}
