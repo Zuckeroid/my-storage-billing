@@ -86,21 +86,26 @@
                             <td>
                                 <div class="znet-shell-table-actions">
                                     <a class="znet-btn znet-btn-accent" href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Pay' : 'Оплатить' }}</a>
-                                    <a
-                                        class="znet-btn znet-btn-outline znet-btn-icon-only"
-                                        aria-label="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
-                                        title="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
-                                        {{ fb_api_link({
-                                            href: 'api/client/invoice/cancel'|link({ hash: invoice.hash }),
-                                            modal: {type: 'confirm', title: is_en ? 'Cancel this invoice?' : 'Отменить этот счет?'},
-                                            reload: true
-                                        }) }}
+                                    <form
+                                        method="post"
+                                        action="{{ 'api/client/invoice/cancel'|link }}"
+                                        class="znet-shell-inline-form"
+                                        onsubmit="return confirm('{{ (is_en ? 'Cancel this invoice?' : 'Отменить этот счет?')|e('js') }}');"
+                                        {{ fb_api_form({reload: true}) }}
                                     >
-                                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M6 6l12 12"></path>
-                                            <path d="M18 6L6 18"></path>
-                                        </svg>
-                                    </a>
+                                        <input type="hidden" name="hash" value="{{ invoice.hash }}">
+                                        <button
+                                            type="submit"
+                                            class="znet-btn znet-btn-outline znet-btn-icon-only"
+                                            aria-label="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
+                                            title="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
+                                        >
+                                            <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M6 6l12 12"></path>
+                                                <path d="M18 6L6 18"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

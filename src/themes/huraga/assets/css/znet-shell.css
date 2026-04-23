@@ -486,11 +486,15 @@ html {
 
 .znet-shell-page .znet-shell-main {
   display: grid;
+  align-content: start;
+  align-items: start;
 }
 
 .znet-shell-page .znet-shell-content {
   display: grid;
   gap: 24px;
+  align-content: start;
+  align-items: start;
 }
 
 .znet-shell-page .znet-shell-mobile-links {
@@ -502,6 +506,8 @@ html {
   gap: 18px;
   padding-bottom: 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  align-content: start;
+  align-items: start;
 }
 
 .znet-shell-page .znet-shell-section:last-child {
@@ -866,6 +872,12 @@ html {
   align-items: flex-start;
   gap: 10px;
   flex-wrap: nowrap;
+}
+
+.znet-shell-page .znet-shell-inline-form {
+  margin: 0;
+  display: inline-flex;
+  align-items: flex-start;
 }
 
 .znet-shell-page .znet-shell-table-actions .znet-btn {
