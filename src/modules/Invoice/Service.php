@@ -965,6 +965,27 @@ class Service implements InjectionAwareInterface
         return true;
     }
 
+    public function cancelInvoiceByClient(\Model_Invoice $model): bool
+    {
+        if ($model->status !== \Model_Invoice::STATUS_UNPAID) {
+            throw new InformationException('Only unpaid invoices can be canceled');
+        }
+
+        $sql = '
+            UPDATE client_order
+            SET unpaid_invoice_id = NULL
+            WHERE unpaid_invoice_id = :id';
+        $this->di['db']->exec($sql, ['id' => $model->id]);
+
+        $model->status = \Model_Invoice::STATUS_CANCELED;
+        $model->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($model);
+
+        $this->di['logger']->info('Client canceled invoice #%s', $model->id);
+
+        return true;
+    }
+
     public function renewInvoice(\Model_ClientOrder $model, array $data)
     {
         $this->di['events_manager']->fire(['event' => 'onBeforeAdminGenerateRenewalInvoice', 'params' => ['order_id' => $model->id]]);

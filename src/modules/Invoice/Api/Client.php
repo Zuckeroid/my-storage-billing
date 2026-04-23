@@ -87,6 +87,29 @@ class Client extends \Api_Abstract
     }
 
     /**
+     * Cancel unpaid invoice for current client.
+     *
+     * @return bool
+     *
+     * @throws \FOSSBilling\Exception
+     */
+    #[RequiredParams(['hash' => 'Invoice hash was not passed'])]
+    public function cancel($data)
+    {
+        $identity = $this->getIdentity();
+        $invoice = $this->di['db']->findOne('Invoice', 'hash = :hash AND client_id = :client_id', ['hash' => $data['hash'], 'client_id' => $identity->id]);
+        if (!$invoice instanceof \Model_Invoice) {
+            throw new \FOSSBilling\Exception('Invoice was not found');
+        }
+
+        if ($invoice->status !== \Model_Invoice::STATUS_UNPAID) {
+            throw new \FOSSBilling\InformationException('Only unpaid invoices can be canceled');
+        }
+
+        return $this->getService()->cancelInvoiceByClient($invoice);
+    }
+
+    /**
      * Generates new invoice for selected order. If unpaid invoice for selected order
      * already exists, new invoice will not be generated, and old invoice hash
      * is returned.

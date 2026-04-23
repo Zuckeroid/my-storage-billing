@@ -667,6 +667,87 @@ html {
   color: var(--znet-text);
 }
 
+.znet-shell-page .table-responsive {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page .table {
+  --bs-table-color: var(--znet-text);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: rgba(255, 255, 255, 0.08);
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+  --bs-table-striped-color: var(--znet-text);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+  --bs-table-hover-color: var(--znet-text);
+  margin-bottom: 0;
+  color: var(--znet-text);
+}
+
+.znet-shell-page .table > :not(caption) > * > * {
+  padding: 14px 16px;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: transparent;
+  box-shadow: none;
+}
+
+.znet-shell-page .table > thead > tr > th {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.znet-shell-page .table > tbody > tr > td {
+  vertical-align: middle;
+}
+
+.znet-shell-page .table a {
+  color: var(--znet-text);
+}
+
+.znet-shell-page .table a:hover {
+  color: var(--znet-accent-soft);
+}
+
+.znet-shell-page .pagination {
+  gap: 8px;
+}
+
+.znet-shell-page .pagination .page-item .page-link {
+  min-width: 42px;
+  min-height: 42px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.84);
+  box-shadow: none;
+}
+
+.znet-shell-page .pagination .page-item.active .page-link,
+.znet-shell-page .pagination .page-item .page-link:hover {
+  border-color: rgba(134, 239, 172, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--znet-accent-soft);
+}
+
+.znet-shell-page .pagination .page-item.disabled .page-link {
+  opacity: 0.38;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.znet-shell-page .pagination .svg-icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
 .znet-shell-page .badge.text-bg-success,
 .znet-shell-page .badge.text-bg-warning,
 .znet-shell-page .badge.text-bg-danger,
@@ -732,6 +813,50 @@ html {
 .znet-shell-page .form-check-label,
 .znet-shell-page .form-check-label span {
   color: var(--znet-text-soft);
+}
+
+.znet-shell-page .znet-shell-inline-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.znet-shell-page .znet-shell-inline-tab {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 600;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.znet-shell-page .znet-shell-inline-tab:hover,
+.znet-shell-page .znet-shell-inline-tab.is-active {
+  border-color: rgba(134, 239, 172, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--znet-accent-soft);
+}
+
+.znet-shell-page .znet-shell-inline-tab-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(134, 239, 172, 0.16);
+  color: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .znet-shell-page .breadcrumb {
