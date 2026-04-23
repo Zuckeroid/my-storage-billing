@@ -245,10 +245,6 @@ html {
   box-shadow: 0 14px 30px rgba(74, 222, 128, 0.16);
 }
 
-body.znet-auth-open {
-  overflow: hidden;
-}
-
 .znet-homepage .znet-auth-layer[hidden],
 .znet-homepage .znet-auth-panel[hidden] {
   display: none !important;
@@ -256,16 +252,12 @@ body.znet-auth-open {
 
 .znet-homepage .znet-auth-layer {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 45;
   pointer-events: none;
-}
-
-.znet-homepage .znet-auth-backdrop {
-  position: absolute;
-  inset: 0;
-  background: transparent;
-  pointer-events: auto;
+  padding-top: calc(var(--znet-header-offset) - 8px);
 }
 
 .znet-homepage .znet-auth-shell {
@@ -273,8 +265,6 @@ body.znet-auth-open {
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-  min-height: 100%;
-  padding-top: calc(var(--znet-header-offset) - 8px);
   pointer-events: none;
 }
 
@@ -1026,7 +1016,6 @@ body.znet-auth-open {
 
   .znet-homepage .znet-auth-shell {
     justify-content: stretch;
-    padding-top: calc(var(--znet-header-offset) - 10px);
   }
 
   .znet-homepage .znet-auth-panel,

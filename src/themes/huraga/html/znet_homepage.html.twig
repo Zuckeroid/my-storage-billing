@@ -367,14 +367,16 @@
         const closers = layer ? Array.from(layer.querySelectorAll('[data-auth-close]')) : [];
         const switchers = layer ? Array.from(layer.querySelectorAll('[data-auth-switch]')) : [];
         const loginOpeners = Array.from(document.querySelectorAll(
-            '.znet-site-header-desktop .znet-btn-ghost.znet-btn-with-icon[href$="/login"], ' +
-            '.znet-site-header-mobile .znet-btn-icon-only[href$="/login"]'
+            '.znet-site-header-desktop .znet-btn-ghost.znet-btn-with-icon, ' +
+            '.znet-site-header-mobile .znet-header-actions > a.znet-btn-icon-only'
         ));
         const signupOpeners = Array.from(document.querySelectorAll(
-            '.znet-site-header-desktop .znet-btn-accent[href$="/signup"], ' +
-            '.znet-hero-actions .znet-btn-outline[href$="/signup"]'
+            '.znet-site-header-desktop .znet-btn-accent, ' +
+            '.znet-hero-actions .znet-btn-outline'
         ));
+        const openers = [...loginOpeners, ...signupOpeners];
         const mobileHeader = document.querySelector('.znet-site-header-mobile');
+        let activePanelName = null;
 
         if (!layer || panels.length === 0) {
             return;
@@ -382,6 +384,7 @@
 
         const setPanel = (panelName) => {
             let activePanel = null;
+            activePanelName = panelName;
 
             panels.forEach((panel) => {
                 const isActive = panel.dataset.authPanel === panelName;
@@ -408,8 +411,12 @@
         };
 
         const openLayer = (panelName) => {
+            if (!layer.hidden && activePanelName === panelName) {
+                closeLayer();
+                return;
+            }
+
             layer.hidden = false;
-            document.body.classList.add('znet-auth-open');
             setPanel(panelName);
         };
 
@@ -418,7 +425,7 @@
             panels.forEach((panel) => {
                 panel.hidden = true;
             });
-            document.body.classList.remove('znet-auth-open');
+            activePanelName = null;
         };
 
         const bindOpeners = (elements, panelName) => {
@@ -449,6 +456,20 @@
 
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && !layer.hidden) {
+                closeLayer();
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (layer.hidden) {
+                return;
+            }
+
+            const target = event.target;
+            const clickedInsidePanel = panels.some((panel) => !panel.hidden && panel.contains(target));
+            const clickedOpener = openers.some((opener) => opener.contains(target));
+
+            if (!clickedInsidePanel && !clickedOpener) {
                 closeLayer();
             }
         });
