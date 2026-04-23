@@ -15,13 +15,7 @@
     {% endif %}
 {% endblock %}
 
-{% block meta_description %}
-    {% if client %}
-        {{ is_en ? 'Manage your storage plans, invoices, and access details.' : 'Управляйте тарифами хранения, счетами и доступом в одном кабинете.' }}
-    {% else %}
-        {{ is_en ? 'Private storage, secure access, clear plans, and fast setup in one account.' : 'Личное хранилище, безопасный доступ, понятные тарифы и быстрый старт в одном аккаунте.' }}
-    {% endif %}
-{% endblock %}
+{% block meta_description %}{% if not client %}{{ is_en ? 'Private storage, secure access, clear plans, and fast setup in one account.' : 'Личное хранилище, безопасный доступ, понятные тарифы и быстрый старт в одном аккаунте.' }}{% endif %}{% endblock %}
 
 {% block head %}
     {% if not client %}
@@ -31,9 +25,9 @@
 
 {% block page_header %}{{ is_en ? 'Storage' : 'Хранилище' }}{% endblock %}
 {% block body_class %}{% if client %}dashboard storage-dashboard{% else %}public-homepage znet-homepage{% endif %}{% endblock %}
-{% block shell_eyebrow %}{% if client %}{{ is_en ? 'Client area' : 'Клиентская зона' }}{% else %}{{ parent() }}{% endif %}{% endblock %}
+{% block shell_eyebrow %}{% if not client %}{{ parent() }}{% endif %}{% endblock %}
 {% block shell_title %}{% if client %}{{ is_en ? 'Your workspace' : 'Ваше рабочее пространство' }}{% endif %}{% endblock %}
-{% block shell_description %}{% if client %}{{ is_en ? 'Manage services, invoices, and access details in one place.' : 'Управляйте услугами, счетами и доступом в одном спокойном рабочем пространстве.' }}{% endif %}{% endblock %}
+{% block shell_description %}{% endblock %}
 {% block shell_head_actions %}
     {% if client %}
         <a class="znet-btn znet-btn-accent" href="{{ 'invoice'|link }}">{{ is_en ? 'Open invoices' : 'Открыть счета' }}</a>

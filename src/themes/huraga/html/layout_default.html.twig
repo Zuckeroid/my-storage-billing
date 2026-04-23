@@ -13,7 +13,7 @@
     {% block opengraph %}{% endblock %}
     <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
-    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260423f">
+    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260423g">
     <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
 
     {{ "Api/API.js" | library_url | script_tag }}
@@ -38,8 +38,10 @@
 {% if cart and cart.items is defined %}
     {% set cart_count = cart.items|length %}
 {% endif %}
+{% block shell_eyebrow %}{{ client ? '' : (is_en ? 'Page' : 'Страница') }}{% endblock %}
 {% block shell_title %}{% endblock %}
 {% block shell_description %}{% endblock %}
+{% set shell_eyebrow_text = block('shell_eyebrow')|striptags|trim %}
 {% set shell_title_text = block('shell_title')|striptags|trim %}
 {% if shell_title_text is empty %}
     {% set shell_title_text = block('meta_title')|striptags|trim %}
@@ -95,7 +97,7 @@
 
             <div class="znet-shell-header-actions">
                 {% if client %}
-                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'order'|link({ 'checkout': 1 }) }}" aria-label="{{ is_en ? 'Cart' : 'Корзина' }}">
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'orderbutton'|link({ 'checkout': 1 }) }}" aria-label="{{ is_en ? 'Cart' : 'Корзина' }}">
                         <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="9" cy="20" r="1.5"></circle>
                             <circle cx="18" cy="20" r="1.5"></circle>
@@ -155,7 +157,7 @@
 
             <div class="znet-shell-header-actions">
                 {% if client %}
-                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'order'|link({ 'checkout': 1 }) }}" aria-label="{{ is_en ? 'Cart' : 'Корзина' }}">
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'orderbutton'|link({ 'checkout': 1 }) }}" aria-label="{{ is_en ? 'Cart' : 'Корзина' }}">
                         <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="9" cy="20" r="1.5"></circle>
                             <circle cx="18" cy="20" r="1.5"></circle>
@@ -242,7 +244,9 @@
                     {% if shell_title_text %}
                         <div class="znet-shell-panel-head">
                             <div>
-                                <span class="znet-shell-eyebrow">{% block shell_eyebrow %}{{ client ? (is_en ? 'Client area' : 'Клиентская зона') : (is_en ? 'Page' : 'Страница') }}{% endblock %}</span>
+                                {% if shell_eyebrow_text %}
+                                    <span class="znet-shell-eyebrow">{{ shell_eyebrow_text }}</span>
+                                {% endif %}
                                 <h1>{{ shell_title_text }}</h1>
                                 {% if shell_description_text %}
                                     <p>{{ shell_description_text }}</p>

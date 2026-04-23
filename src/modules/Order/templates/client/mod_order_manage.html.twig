@@ -3,6 +3,8 @@
 {% import "macro_functions.html.twig" as mf %}
 
 {% block meta_title %}{{ order.title }}{% endblock %}
+{% block meta_description %}{% endblock %}
+{% block shell_description %}{% endblock %}
 
 {% set addons = client.order_addons({ "id": order.id }) %}
 
