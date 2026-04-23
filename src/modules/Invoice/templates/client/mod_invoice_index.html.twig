@@ -70,8 +70,8 @@
                             <td>{{ invoice.paid_at|format_date }}</td>
                             <td>{{ invoice.total | money(invoice.currency) }}</td>
                             <td>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <a href="{{ 'invoice'|link }}/{{ invoice.hash }}" class="btn btn-outline-primary btn-sm">{{ is_en ? 'View' : 'Открыть' }}</a>
+                                <div class="znet-shell-table-actions">
+                                    <a href="{{ 'invoice'|link }}/{{ invoice.hash }}" class="znet-btn znet-btn-outline">{{ is_en ? 'View' : 'Открыть' }}</a>
                                 </div>
                             </td>
                         </tr>
@@ -90,16 +90,23 @@
                             <td>{{ invoice.due_at|format_date }}</td>
                             <td>{{ invoice.total | money(invoice.currency) }}</td>
                             <td>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <a class="btn btn-primary btn-sm" href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Pay' : 'Оплатить' }}</a>
+                                <div class="znet-shell-table-actions">
+                                    <a class="znet-btn znet-btn-accent" href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Pay' : 'Оплатить' }}</a>
                                     <a
-                                        class="btn btn-outline-primary btn-sm"
+                                        class="znet-btn znet-btn-outline znet-btn-icon-only"
                                         href="{{ 'api/client/invoice/cancel'|link({ hash: invoice.hash }) }}"
+                                        aria-label="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
+                                        title="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
                                         {{ fb_api_link({
                                             modal: {type: 'confirm', title: is_en ? 'Cancel this invoice?' : 'Отменить этот счет?'},
                                             reload: true
                                         }) }}
-                                    >{{ is_en ? 'Cancel' : 'Отменить' }}</a>
+                                    >
+                                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M6 6l12 12"></path>
+                                            <path d="M18 6L6 18"></path>
+                                        </svg>
+                                    </a>
                                 </div>
                             </td>
                         </tr>

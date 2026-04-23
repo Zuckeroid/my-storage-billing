@@ -859,6 +859,26 @@ html {
   line-height: 1;
 }
 
+.znet-shell-page .znet-shell-table-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.znet-shell-page .znet-shell-table-actions .znet-btn {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.znet-shell-page .znet-shell-table-actions .znet-btn-icon-only {
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+}
+
 .znet-shell-page .breadcrumb {
   display: none !important;
 }
