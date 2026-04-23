@@ -13,7 +13,7 @@
     {% block opengraph %}{% endblock %}
     <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
-    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260423a">
+    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260423b">
     <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
 
     {{ "Api/API.js" | library_url | script_tag }}
@@ -33,6 +33,11 @@
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
 {% set shell_context = client ? 'client' : 'public' %}
+{% set cart = client ? guest.cart_get : null %}
+{% set cart_count = 0 %}
+{% if cart and cart.items is defined %}
+    {% set cart_count = cart.items|length %}
+{% endif %}
 {% block shell_title %}{% endblock %}
 {% block shell_description %}{% endblock %}
 {% set shell_title_text = block('shell_title')|striptags|trim %}
@@ -97,6 +102,16 @@
 
             <div class="znet-shell-header-actions">
                 {% if client %}
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'order'|link({ 'checkout': 1 }) }}" aria-label="{{ is_en ? 'Cart' : 'Корзина' }}">
+                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="9" cy="20" r="1.5"></circle>
+                            <circle cx="18" cy="20" r="1.5"></circle>
+                            <path d="M3 4h2.5l2.1 9.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L20 7H7.2"></path>
+                        </svg>
+                        {% if cart_count %}
+                            <span class="znet-shell-cart-count">{{ cart_count > 9 ? '9+' : cart_count }}</span>
+                        {% endif %}
+                    </a>
                     <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'client/profile'|link }}" aria-label="{{ is_en ? 'Profile' : 'Профиль' }}">
                         <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="12" cy="8" r="4"></circle>
@@ -117,12 +132,23 @@
                 {% endif %}
 
                 {% if languages|length > 1 %}
-                    <select name="lang" class="form-select form-select-sm znet-shell-language js-language-selector" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
+                    <div class="znet-shell-locale-switch" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
                         {% for lang in languages %}
-                            {% set lang_label = lang.locale starts with 'ru' ? 'Русский' : 'English' %}
-                            <option value="{{ lang.locale }}" {% if lang.locale == current_locale %}selected{% endif %}>{{ lang_label }}</option>
+                            {% set locale_is_ru = lang.locale starts with 'ru' %}
+                            {% set locale_is_en = lang.locale starts with 'en' %}
+                            {% set locale_flag = locale_is_ru ? 'ru' : (locale_is_en ? 'us' : (lang.locale|split('_')|last|lower)) %}
+                            {% set locale_label = locale_is_ru ? 'RU' : (locale_is_en ? 'US' : (lang.locale|split('_')|last|upper)) %}
+                            <button
+                                class="znet-shell-locale-btn{% if lang.locale == current_locale %} is-active{% endif %}"
+                                type="button"
+                                data-znet-locale="{{ lang.locale }}"
+                                aria-pressed="{% if lang.locale == current_locale %}true{% else %}false{% endif %}"
+                            >
+                                <span class="fi fi-{{ locale_flag }}" aria-hidden="true"></span>
+                                <span>{{ locale_label }}</span>
+                            </button>
                         {% endfor %}
-                    </select>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -136,6 +162,16 @@
 
             <div class="znet-shell-header-actions">
                 {% if client %}
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'order'|link({ 'checkout': 1 }) }}" aria-label="{{ is_en ? 'Cart' : 'Корзина' }}">
+                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="9" cy="20" r="1.5"></circle>
+                            <circle cx="18" cy="20" r="1.5"></circle>
+                            <path d="M3 4h2.5l2.1 9.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L20 7H7.2"></path>
+                        </svg>
+                        {% if cart_count %}
+                            <span class="znet-shell-cart-count">{{ cart_count > 9 ? '9+' : cart_count }}</span>
+                        {% endif %}
+                    </a>
                     <a class="znet-btn znet-btn-ghost znet-btn-icon-only" href="{{ 'client/profile'|link }}" aria-label="{{ is_en ? 'Profile' : 'Профиль' }}">
                         <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="12" cy="8" r="4"></circle>
@@ -183,12 +219,23 @@
 
                 {% if languages|length > 1 %}
                     <div class="znet-shell-menu-language">
-                        <select name="lang" class="form-select form-select-sm znet-shell-language js-language-selector" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
+                        <div class="znet-shell-locale-switch" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
                             {% for lang in languages %}
-                                {% set lang_label = lang.locale starts with 'ru' ? 'Русский' : 'English' %}
-                                <option value="{{ lang.locale }}" {% if lang.locale == current_locale %}selected{% endif %}>{{ lang_label }}</option>
+                                {% set locale_is_ru = lang.locale starts with 'ru' %}
+                                {% set locale_is_en = lang.locale starts with 'en' %}
+                                {% set locale_flag = locale_is_ru ? 'ru' : (locale_is_en ? 'us' : (lang.locale|split('_')|last|lower)) %}
+                                {% set locale_label = locale_is_ru ? 'RU' : (locale_is_en ? 'US' : (lang.locale|split('_')|last|upper)) %}
+                                <button
+                                    class="znet-shell-locale-btn{% if lang.locale == current_locale %} is-active{% endif %}"
+                                    type="button"
+                                    data-znet-locale="{{ lang.locale }}"
+                                    aria-pressed="{% if lang.locale == current_locale %}true{% else %}false{% endif %}"
+                                >
+                                    <span class="fi fi-{{ locale_flag }}" aria-hidden="true"></span>
+                                    <span>{{ locale_label }}</span>
+                                </button>
                             {% endfor %}
-                        </select>
+                        </div>
                     </div>
                 {% endif %}
             </nav>
@@ -309,6 +356,18 @@
 {{ DebugBar_render() }}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const setCookie = function (name, value, days) {
+            let expires = '';
+
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+                expires = '; expires=' + date.toUTCString();
+            }
+
+            document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/';
+        };
+
         const normalizePath = function (value) {
             try {
                 const url = new URL(value, window.location.origin);
@@ -330,6 +389,19 @@
             } else {
                 item.removeAttribute('aria-current');
             }
+        });
+
+        document.querySelectorAll('[data-znet-locale]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const locale = button.getAttribute('data-znet-locale');
+
+                if (!locale || locale === '{{ current_locale }}') {
+                    return;
+                }
+
+                setCookie('fb_locale', locale, 365);
+                window.location.reload();
+            });
         });
 
         const mobileHeader = document.querySelector('.znet-shell-header-mobile');

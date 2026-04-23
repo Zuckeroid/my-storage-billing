@@ -21,6 +21,10 @@
   background: var(--znet-bg);
   color: var(--znet-text);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 html {
@@ -43,6 +47,8 @@ html {
 }
 
 .znet-shell-page-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   padding-top: var(--znet-header-offset);
   overflow-x: hidden;
@@ -120,6 +126,28 @@ html {
   flex-wrap: nowrap;
 }
 
+.znet-shell-page .znet-shell-cart-link {
+  position: relative;
+}
+
+.znet-shell-page .znet-shell-cart-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--znet-accent);
+  color: var(--znet-accent-dark);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .znet-shell-page .znet-btn {
   display: inline-flex;
   align-items: center;
@@ -193,18 +221,39 @@ html {
   box-shadow: 0 14px 30px rgba(74, 222, 128, 0.16);
 }
 
-.znet-shell-page .znet-shell-language {
-  min-width: 128px;
-  min-height: 40px;
-  padding-right: 34px;
-  border-color: rgba(134, 239, 172, 0.12);
-  background-color: rgba(255, 255, 255, 0.03);
-  color: var(--znet-text);
+.znet-shell-page .znet-shell-locale-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.znet-shell-page .znet-shell-language:focus {
+.znet-shell-page .znet-shell-locale-btn {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.znet-shell-page .znet-shell-locale-btn:hover,
+.znet-shell-page .znet-shell-locale-btn.is-active {
   border-color: rgba(134, 239, 172, 0.28);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--znet-accent-soft);
+}
+
+.znet-shell-page .znet-shell-locale-btn .fi {
+  width: 1.15em;
+  height: 0.9em;
+  border-radius: 2px;
 }
 
 .znet-shell-page .znet-shell-menu {
@@ -244,8 +293,15 @@ html {
   padding-top: 6px;
 }
 
+.znet-shell-page .znet-shell-menu-language .znet-shell-locale-switch {
+  width: 100%;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
 .znet-shell-page .znet-shell-stage {
   position: relative;
+  flex: 1 0 auto;
   min-height: calc(100vh - var(--znet-header-offset));
   padding: 28px 0 56px;
 }
@@ -632,6 +688,17 @@ html {
   border: 1px solid rgba(134, 239, 172, 0.12);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+}
+
+.znet-shell-page .form-select {
+  color-scheme: dark;
+  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23d1fae5' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.znet-shell-page .form-select option,
+.znet-shell-page .form-select optgroup {
+  background: #06110b;
   color: var(--znet-text);
 }
 
