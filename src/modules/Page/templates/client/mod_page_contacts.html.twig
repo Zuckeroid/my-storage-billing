@@ -25,4 +25,132 @@
             </div>
         </div>
     </section>
+
+    <section class="znet-shell-section">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" action="" id="public-ticket-create" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="support-name">{{ is_en ? 'Name' : 'Имя' }}</label>
+                        <input class="form-control" type="text" id="support-name" name="name" value="{{ request.name }}" required="required">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="support-email">{{ is_en ? 'Email' : 'Email' }}</label>
+                        <input class="form-control" type="email" id="support-email" name="email" value="{{ request.email|default(client ? profile.email : '') }}" required="required">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="support-subject">{{ is_en ? 'Subject' : 'Тема' }}</label>
+                        <input class="form-control" type="text" id="support-subject" name="subject" value="{{ request.subject }}" required="required">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="support-message">{{ is_en ? 'Message' : 'Сообщение' }}</label>
+                        <textarea class="form-control" id="support-message" name="message" rows="6" required="required">{{ request.message }}</textarea>
+                    </div>
+
+                    {% if guest.extension_is_on({ "mod": "spamchecker" }) %}
+                        {% set rc = guest.spamchecker_recaptcha %}
+                        {% if rc.enabled %}
+                            <div class="col-12">
+                                {% if rc.version == 2 %}
+                                    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                                    <div class="g-recaptcha" data-sitekey="{{ rc.publickey }}"></div>
+                                {% else %}
+                                    {% set server = "https://www.google.com/recaptcha/api" %}
+                                    <script>
+                                        var RecaptchaOptions = {
+                                            theme: 'custom',
+                                            custom_theme_widget: 'recaptcha_widget'
+                                        };
+                                    </script>
+
+                                    <div id="recaptcha_widget" style="display:none">
+                                        <div id="recaptcha_image"></div>
+                                        <div class="recaptcha_only_if_incorrect_sol text-danger">{{ is_en ? 'Incorrect, please try again.' : 'Неверно, попробуйте еще раз.' }}</div>
+
+                                        <label class="form-label mt-3" for="recaptcha_response_field">{{ is_en ? 'Enter the words above' : 'Введите символы выше' }}</label>
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <input class="form-control" type="text" id="recaptcha_response_field" name="recaptcha_response_field">
+                                            <a class="znet-btn znet-btn-outline" href="javascript:Recaptcha.reload()">{{ is_en ? 'Reload' : 'Обновить' }}</a>
+                                        </div>
+                                    </div>
+
+                                    <script src="{{ server }}/challenge?k={{ rc.publickey }}"></script>
+
+                                    <noscript>
+                                        <iframe src="{{ server }}/noscript?k={{ rc.publickey }}" height="300" width="500" frameborder="0"></iframe><br/>
+                                        <textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
+                                        <input type="hidden" name="recaptcha_response_field" value="manual_challenge"/>
+                                    </noscript>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="col-12 d-flex align-items-center gap-3 flex-wrap">
+                        <button class="znet-btn znet-btn-accent" type="submit">{{ is_en ? 'Send message' : 'Отправить сообщение' }}</button>
+                        <p class="text-secondary mb-0" id="public-ticket-status"></p>
+                    </div>
+
+                    <input type="hidden" name="anti-spam" value="1" id="anti-spam" required="required"/>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('public-ticket-create');
+            const status = document.getElementById('public-ticket-status');
+            const antiSpam = document.getElementById('anti-spam');
+
+            if (!form) {
+                return;
+            }
+
+            if (antiSpam) {
+                antiSpam.remove();
+            }
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                if (status) {
+                    status.textContent = '';
+                }
+
+                const formData = new FormData(form);
+                const data = new URLSearchParams(formData);
+
+                fetch("{{ constant('SYSTEM_URL') }}api/guest/support/ticket_create", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: data
+                })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (json) {
+                        if (json.error) {
+                            throw new Error(json.error.message);
+                        }
+
+                        form.reset();
+
+                        if (status) {
+                            status.textContent = "{{ is_en ? 'Message sent. We will reply to your email.' : 'Сообщение отправлено. Мы ответим на ваш email.' }}";
+                        }
+                    })
+                    .catch(function (error) {
+                        if (status) {
+                            status.textContent = error.message;
+                        }
+                    });
+            });
+        });
+    </script>
 {% endblock %}
