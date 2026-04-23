@@ -563,23 +563,31 @@ html {
 
 .znet-shell-page .znet-shell-stat {
   display: grid;
-  gap: 8px;
-  min-height: 118px;
+  min-height: 92px;
   padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
 }
 
+.znet-shell-page .znet-shell-stat-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
 .znet-shell-page .znet-shell-stat span {
   color: rgba(255, 255, 255, 0.58);
   font-size: 13px;
+  line-height: 1.4;
 }
 
 .znet-shell-page .znet-shell-stat strong {
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .znet-shell-page .znet-shell-stat p {
@@ -587,6 +595,114 @@ html {
   color: var(--znet-text-soft);
   font-size: 14px;
   line-height: 1.55;
+}
+
+.znet-shell-page .znet-shell-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.znet-shell-page .znet-plan-card {
+  --znet-plan-border-color: rgba(255, 255, 255, 0.1);
+  --znet-plan-badge-bg: rgba(1, 4, 9, 0.92);
+  position: relative;
+  padding: 26px;
+  border: 1px solid var(--znet-plan-border-color);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.znet-shell-page .znet-plan-card-featured {
+  --znet-plan-border-color: rgba(74, 222, 128, 0.5);
+  --znet-plan-badge-bg: rgb(12, 23, 17);
+  border-color: var(--znet-plan-border-color);
+  background: linear-gradient(180deg, rgba(17, 24, 20, 0.98), rgba(4, 15, 11, 0.98));
+  box-shadow: 0 0 50px rgba(74, 222, 128, 0.12);
+}
+
+.znet-shell-page .znet-plan-top {
+  min-height: 0;
+}
+
+.znet-shell-page .znet-plan-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  white-space: nowrap;
+  padding: 8px 12px;
+  border: 1px solid var(--znet-plan-border-color);
+  border-radius: 999px;
+  background: var(--znet-plan-badge-bg);
+  color: var(--znet-accent-soft);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.znet-shell-page .znet-plan-card-featured .znet-plan-badge {
+  box-shadow: 0 0 0 1px var(--znet-bg);
+}
+
+.znet-shell-page .znet-plan-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: end;
+}
+
+.znet-shell-page .znet-plan-name {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.znet-shell-page .znet-plan-price {
+  grid-column: 2;
+  grid-row: 1;
+  margin-top: 0;
+  font-size: 36px;
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+  font-weight: 600;
+  justify-self: start;
+  white-space: nowrap;
+}
+
+.znet-shell-page .znet-plan-period {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 0;
+  justify-self: start;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+}
+
+.znet-shell-page .znet-plan-highlight {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 0;
+}
+
+.znet-shell-page .znet-plan-highlight span:last-child {
+  color: var(--znet-text-soft);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.znet-shell-page .znet-plan-btn {
+  width: 100%;
+  margin-top: 18px;
 }
 
 .znet-shell-page .znet-shell-card-grid {
@@ -951,6 +1067,10 @@ html {
     width: min(88vw, 860px);
   }
 
+  .znet-shell-page .znet-shell-plan-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .znet-shell-page .znet-shell-layout-client {
     grid-template-columns: 220px minmax(0, 1fr);
   }
@@ -999,7 +1119,8 @@ html {
   }
 
   .znet-shell-page .znet-shell-layout-client,
-  .znet-shell-page .znet-shell-layout-public {
+  .znet-shell-page .znet-shell-layout-public,
+  .znet-shell-page .znet-shell-plan-grid {
     grid-template-columns: 1fr;
     gap: 24px;
   }
@@ -1061,6 +1182,22 @@ html {
   }
 
   .znet-shell-page .znet-shell-panel-head h1 {
+    font-size: 34px;
+  }
+
+  .znet-shell-page .znet-plan-card {
+    padding: 22px 18px;
+  }
+
+  .znet-shell-page .znet-plan-summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .znet-shell-page .znet-plan-name {
+    font-size: 22px;
+  }
+
+  .znet-shell-page .znet-plan-price {
     font-size: 34px;
   }
 

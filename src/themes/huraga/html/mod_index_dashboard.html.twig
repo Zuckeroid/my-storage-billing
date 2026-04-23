@@ -28,12 +28,7 @@
 {% block shell_eyebrow %}{% if not client %}{{ parent() }}{% endif %}{% endblock %}
 {% block shell_title %}{% if client %}{{ is_en ? 'Your workspace' : 'Ваше рабочее пространство' }}{% endif %}{% endblock %}
 {% block shell_description %}{% endblock %}
-{% block shell_head_actions %}
-    {% if client %}
-        <a class="znet-btn znet-btn-accent" href="{{ 'invoice'|link }}">{{ is_en ? 'Open invoices' : 'Открыть счета' }}</a>
-        <a class="znet-btn znet-btn-outline" href="{{ 'order/service'|link }}">{{ is_en ? 'Manage services' : 'Управлять услугами' }}</a>
-    {% endif %}
-{% endblock %}
+{% block shell_head_actions %}{% endblock %}
 
 {% block breadcrumbs %}
     {% if client and not settings.hide_dashboard_breadcrumb %}
@@ -51,19 +46,22 @@
         <section class="znet-shell-section" aria-label="Account summary">
             <div class="znet-shell-stat-grid">
                 <article class="znet-shell-stat">
-                    <span>{{ is_en ? 'Active services' : 'Активные услуги' }}</span>
-                    <strong>{{ dashboard.orders.active }}</strong>
-                    <p>{{ is_en ? 'Everything already connected inside your account.' : 'Все, что уже подключено и работает внутри аккаунта.' }}</p>
+                    <div class="znet-shell-stat-line">
+                        <span>{{ is_en ? 'Active services' : 'Активные услуги' }}</span>
+                        <strong>{{ dashboard.orders.active }}</strong>
+                    </div>
                 </article>
                 <article class="znet-shell-stat">
-                    <span>{{ is_en ? 'Unpaid invoices' : 'Неоплаченные счета' }}</span>
-                    <strong>{{ dashboard.invoices.unpaid }}</strong>
-                    <p>{{ is_en ? 'Invoices waiting for payment or review.' : 'Счета, которые ждут оплаты или проверки.' }}</p>
+                    <div class="znet-shell-stat-line">
+                        <span>{{ is_en ? 'Unpaid invoices' : 'Неоплаченные счета' }}</span>
+                        <strong>{{ dashboard.invoices.unpaid }}</strong>
+                    </div>
                 </article>
                 <article class="znet-shell-stat">
-                    <span>{{ is_en ? 'Available plans' : 'Тарифов доступно' }}</span>
-                    <strong>{{ storage_products|length }}</strong>
-                    <p>{{ is_en ? 'The current catalog available to this account.' : 'Текущий каталог тарифов, доступных для этого аккаунта.' }}</p>
+                    <div class="znet-shell-stat-line">
+                        <span>{{ is_en ? 'Available plans' : 'Тарифов доступно' }}</span>
+                        <strong>{{ storage_products|length }}</strong>
+                    </div>
                 </article>
             </div>
         </section>
@@ -72,12 +70,11 @@
             <div class="znet-shell-section-head">
                 <div>
                     <h2>{{ is_en ? 'Plans and upgrades' : 'Тарифы и продление' }}</h2>
-                    <p>{{ is_en ? 'Choose a plan and move to payment without leaving the same workspace.' : 'Выберите тариф и перейдите к оплате, не выпадая из одного рабочего пространства.' }}</p>
                 </div>
             </div>
 
-            <div class="row">
-                {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'card_items', is_en: is_en } %}
+            <div class="znet-shell-plan-grid">
+                {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'dashboard_cards', is_en: is_en } %}
             </div>
         </section>
 
