@@ -54,10 +54,55 @@
 
             <div class="znet-auth-foot">
                 {% if settings.show_password_reset_link %}
-                    <a class="znet-auth-text-link" href="{{ 'password-reset'|link }}">
+                    <a class="znet-auth-text-link" href="{{ 'password-reset'|link }}" data-auth-switch="reset">
                         {{ 'Forgot password?'|trans }}
                     </a>
                 {% endif %}
+
+                <button class="znet-auth-text-link" type="button" data-auth-switch="signup">
+                    {{ is_en ? 'Registration' : 'Регистрация' }}
+                </button>
+            </div>
+        </section>
+
+        <section class="znet-auth-panel" data-auth-panel="reset" hidden aria-labelledby="znet-auth-reset-title">
+            <div class="znet-auth-head">
+                <div>
+                    <span class="znet-auth-kicker" id="znet-auth-reset-title">{{ is_en ? 'Reset password' : 'Сброс пароля' }}</span>
+                </div>
+
+                <button class="znet-auth-close" type="button" data-auth-close aria-label="{{ is_en ? 'Close' : 'Закрыть' }}">
+                    <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12"></path>
+                        <path d="M18 6L6 18"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form method="post" action="{{ 'api/guest/client/reset_password'|link }}" class="auth znet-auth-form" {{ fb_api_form({message: 'A password reset confirmation email will be sent to you if we found an account with that email address.'|trans}) }}>
+                <div class="mb-3">
+                    <label class="form-label" for="znet-reset-email">{{ 'Email'|trans }}</label>
+                    <input
+                        class="form-control"
+                        id="znet-reset-email"
+                        type="email"
+                        name="email"
+                        value="{{ request.email }}"
+                        placeholder="{{ 'Enter your email address'|trans }}"
+                        required="required"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <button type="submit" class="znet-btn znet-btn-accent znet-auth-submit">
+                    {{ is_en ? 'Reset password' : 'Сбросить пароль' }}
+                </button>
+            </form>
+
+            <div class="znet-auth-foot">
+                <button class="znet-auth-text-link" type="button" data-auth-switch="login">
+                    {{ is_en ? 'Back to login' : 'Назад ко входу' }}
+                </button>
 
                 <button class="znet-auth-text-link" type="button" data-auth-switch="signup">
                     {{ is_en ? 'Registration' : 'Регистрация' }}
@@ -121,7 +166,6 @@
                         required="required"
                         autocomplete="email"
                     >
-                    <div class="form-text">{{ 'Access instructions will be sent to this email after payment.'|trans }}</div>
                 </div>
 
                 {% if 'company' in required_fields %}
@@ -295,7 +339,7 @@
                 </button>
 
                 {% if settings.show_password_reset_link %}
-                    <a class="znet-auth-text-link" href="{{ 'password-reset'|link }}">
+                    <a class="znet-auth-text-link" href="{{ 'password-reset'|link }}" data-auth-switch="reset">
                         {{ 'Forgot password?'|trans }}
                     </a>
                 {% endif %}

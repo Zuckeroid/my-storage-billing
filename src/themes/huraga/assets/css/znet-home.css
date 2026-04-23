@@ -430,6 +430,7 @@ html {
   font: inherit;
   font-size: 14px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .znet-homepage .znet-hero {
@@ -1076,11 +1077,18 @@ html {
   }
 
   .znet-homepage .znet-auth-grid-two,
-  .znet-homepage .znet-auth-phone-group,
-  .znet-homepage .znet-auth-foot {
+  .znet-homepage .znet-auth-phone-group {
     grid-template-columns: 1fr;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .znet-homepage .znet-auth-foot {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: nowrap;
   }
 
   .znet-homepage .znet-auth-head h2 {
