@@ -84,14 +84,7 @@
                 <img class="znet-shell-brand-logo" src="{{ 'img/znet/Logo.png' | asset_url }}" alt="Znet">
             </a>
 
-            {% if client %}
-                <nav class="znet-shell-nav" aria-label="{{ is_en ? 'Client navigation' : 'Навигация клиента' }}">
-                    <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
-                    <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
-                    <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
-                    <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
-                </nav>
-            {% else %}
+            {% if not client %}
                 <nav class="znet-shell-nav" aria-label="{{ is_en ? 'Public navigation' : 'Публичная навигация' }}">
                     <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
                     <a href="{{ '/about-us'|link }}" data-znet-nav>{{ is_en ? 'About' : 'О сервисе' }}</a>
@@ -204,10 +197,6 @@
 
             <nav class="znet-shell-menu" id="znet-shell-mobile-menu" aria-label="{{ is_en ? 'Mobile navigation' : 'Мобильная навигация' }}">
                 {% if client %}
-                    <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
-                    <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
-                    <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
-                    <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
                     <a href="{{ 'client/logout'|link }}">{{ is_en ? 'Logout' : 'Выйти' }}</a>
                 {% else %}
                     <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
@@ -327,19 +316,14 @@
                     <img class="znet-shell-brand-logo znet-shell-footer-brand-logo" src="{{ 'img/znet/Logo.png' | asset_url }}" alt="Znet">
                 </div>
 
-                <nav class="znet-shell-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
-                    {% if client %}
-                        <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
-                        <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
-                        <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
-                        <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
-                    {% else %}
+                {% if not client %}
+                    <nav class="znet-shell-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
                         <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
                         <a href="{{ '/offer'|link }}" data-znet-nav>{{ is_en ? 'Offer' : 'Оферта' }}</a>
                         <a href="{{ '/tos'|link }}" data-znet-nav>{{ is_en ? 'Agreement' : 'Соглашение' }}</a>
                         <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
-                    {% endif %}
-                </nav>
+                    </nav>
+                {% endif %}
             </div>
         </footer>
     {% endif %}

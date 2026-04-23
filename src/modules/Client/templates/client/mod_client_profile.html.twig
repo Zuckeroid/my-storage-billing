@@ -2,15 +2,20 @@
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
 
-{% block meta_title %}{{ 'Profile Details'|trans }}{% endblock %}
+{% block meta_title %}{{ is_en ? 'Profile details' : 'Детали профиля' }}{% endblock %}
+{% block meta_description %}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Profile details' : 'Детали профиля' }}{% endblock %}
+{% block shell_description %}{% endblock %}
 {% block page_header %}{{ is_en ? 'Profile' : 'Профиль' }}{% endblock %}
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Profile' : 'Профиль' }}</li>{% endblock %}
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Profile' : 'Профиль' }}</li>
+{% endblock %}
 
 {% block body_class %}client-profile{% endblock %}
 {% set required = guest.client_required %}
+
 {% block content %}
-    {% if (guest.client_is_email_validation_required) and (not profile.email_approved) %}
+    {% if guest.client_is_email_validation_required and not profile.email_approved %}
         <div class="alert alert-block alert-danger">
             <div class="row">
                 <span>{{ is_en ? 'You must verify your email address before you may access our services.' : 'Подтвердите адрес электронной почты, чтобы пользоваться сервисом.' }}</span>
@@ -24,18 +29,15 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title mb-1">{{ is_en ? 'Personal details' : 'Личные данные' }}</h5>
-                    <p class="card-text fs-7 text-muted">{{ is_en ? 'Keep only the contact details needed for your account and payment documents.' : 'Здесь хранятся только данные, нужные для аккаунта и платежных документов.' }}</p>
-
                     <form method="post" action="client/profile/update" id="profile-update" {{ fb_api_form({message: is_en ? 'Profile updated' : 'Профиль обновлен'}) }}>
+                        <input type="hidden" name="last_name" value="{{ profile.last_name }}">
+                        <input type="hidden" name="gender" value="{{ profile.gender }}">
+                        <input type="hidden" name="birthday" value="{{ profile.birthday }}">
+
                         <div class="row">
                             <div class="mb-3 col-md-6">
-                                <label class="form-label" for="first_name">{{ is_en ? 'First name' : 'Имя' }}</label>
+                                <label class="form-label" for="first_name">{{ is_en ? 'Nickname' : 'Псевдоним' }}</label>
                                 <input type="text" class="form-control" name="first_name" id="first_name" value="{{ profile.first_name }}" required>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="last_name">{{ is_en ? 'Last name' : 'Фамилия' }}</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ profile.last_name }}" {% if "last_name" in required %} required {% endif %}>
                             </div>
                         </div>
 
@@ -44,21 +46,9 @@
                                 <label class="form-label" for="email">{{ is_en ? 'Email address' : 'Адрес электронной почты' }}</label>
                                 <input type="email" class="form-control" id="email" name="email" value="{{ profile.email }}" required>
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="birthday">{{ is_en ? 'Date of birth' : 'Дата рождения' }}</label>
-                                <input type="date" class="form-control" id="birthday" name="birthday"
-                                       value="{{ profile.birthday }}" {% if "birthday" in required %} required {% endif %}>
-                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="gender">{{ is_en ? 'Gender' : 'Пол' }}</label>
-                                <select class="form-select" name="gender" id="gender" {% if "gender" in required %} required {% endif %}>
-                                    <option value="male" {{ profile.gender == 'male' ? 'selected' : '' }}>{{ is_en ? 'Male' : 'Мужской' }}</option>
-                                    <option value="female" {{ profile.gender == 'female' ? 'selected' : '' }}>{{ is_en ? 'Female' : 'Женский' }}</option>
-                                </select>
-                            </div>
                             <div class="mb-3 col-md-6">
                                 <label class="form-label" for="phone">{{ is_en ? 'Phone number' : 'Номер телефона' }}</label>
                                 <input type="hidden" name="phone_cc" value="{{ profile.phone_cc }}">
@@ -71,9 +61,8 @@
                                 <label class="form-label" for="country">{{ is_en ? 'Country' : 'Страна' }}</label>
                                 <select class="form-select" id="country" name="country" {% if "country" in required %} required {% endif %}>
                                     <option value="">{{ is_en ? '-- Select country --' : '-- Выберите страну --' }}</option>
-                                    {% for val,label in guest.system_countries %}
-                                        <option value="{{ val }}" label="{{ label|e }}"
-                                                {% if val == profile.country %}selected="selected"{% endif %}>{{ label|e }}</option>
+                                    {% for val, label in guest.system_countries %}
+                                        <option value="{{ val }}" label="{{ label|e }}" {% if val == profile.country %}selected="selected"{% endif %}>{{ label|e }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
