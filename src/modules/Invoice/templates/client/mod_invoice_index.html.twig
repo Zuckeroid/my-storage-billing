@@ -17,12 +17,6 @@
 
 {% block content %}
     <section class="znet-shell-section">
-        <div class="znet-shell-section-head">
-            <div>
-                <h2>{{ active_tab == 'paid' ? (is_en ? 'Paid invoices' : 'Оплаченные счета') : (is_en ? 'Unpaid invoices' : 'Неоплаченные счета') }}</h2>
-            </div>
-        </div>
-
         <nav class="znet-shell-inline-tabs" aria-label="{{ is_en ? 'Invoice filters' : 'Фильтры счетов' }}">
             <a class="znet-shell-inline-tab{% if active_tab == 'unpaid' %} is-active{% endif %}" href="{{ 'invoice'|link }}">
                 <span>{{ is_en ? 'Unpaid' : 'Неоплаченные' }}</span>
@@ -94,7 +88,6 @@
                                     <a class="znet-btn znet-btn-accent" href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Pay' : 'Оплатить' }}</a>
                                     <a
                                         class="znet-btn znet-btn-outline znet-btn-icon-only"
-                                        href="#"
                                         aria-label="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
                                         title="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
                                         {{ fb_api_link({
