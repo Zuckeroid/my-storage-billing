@@ -1,0 +1,822 @@
+.znet-shell-page {
+  --znet-bg: #010409;
+  --znet-surface: rgba(255, 255, 255, 0.04);
+  --znet-surface-strong: rgba(255, 255, 255, 0.06);
+  --znet-border: rgba(255, 255, 255, 0.1);
+  --znet-border-accent: rgba(134, 239, 172, 0.18);
+  --znet-text: #ffffff;
+  --znet-text-soft: rgba(255, 255, 255, 0.68);
+  --znet-accent: #4ade80;
+  --znet-accent-soft: #86efac;
+  --znet-accent-dark: #03250f;
+  --znet-container: 1440px;
+  --znet-radius: 20px;
+  --znet-radius-sm: 10px;
+  --znet-header-offset: 84px;
+  --znet-flyout-border: rgba(134, 239, 172, 0.14);
+  --znet-flyout-radius: 14px;
+  --znet-flyout-bg: rgba(1, 4, 9, 0.96);
+  --znet-flyout-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  --znet-flyout-blur: 16px;
+  background: var(--znet-bg);
+  color: var(--znet-text);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+.znet-shell-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.znet-shell-page img {
+  display: block;
+  max-width: 100%;
+}
+
+.znet-shell-page .znet-container {
+  width: min(var(--znet-container), calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.znet-shell-page-shell {
+  min-height: 100vh;
+  padding-top: var(--znet-header-offset);
+  overflow-x: hidden;
+}
+
+.znet-shell-page .znet-shell-header,
+.znet-shell-page .znet-shell-stage,
+.znet-shell-page .znet-shell-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.znet-shell-page .znet-shell-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 40;
+  background: rgba(1, 4, 9, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.znet-shell-page .znet-shell-header-mobile {
+  display: none;
+}
+
+.znet-shell-page .znet-shell-header-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 8px 0;
+}
+
+.znet-shell-page .znet-shell-brand {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.znet-shell-page .znet-shell-brand-logo {
+  width: auto;
+  height: 60px;
+  object-fit: contain;
+}
+
+.znet-shell-page .znet-shell-nav,
+.znet-shell-page .znet-shell-footer-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.znet-shell-page .znet-shell-nav a,
+.znet-shell-page .znet-shell-footer-nav a {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  font-weight: 400;
+  transition: color 0.2s ease;
+}
+
+.znet-shell-page .znet-shell-nav a:hover,
+.znet-shell-page .znet-shell-nav a.is-active,
+.znet-shell-page .znet-shell-footer-nav a:hover,
+.znet-shell-page .znet-shell-footer-nav a.is-active {
+  color: var(--znet-accent);
+}
+
+.znet-shell-page .znet-shell-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: nowrap;
+}
+
+.znet-shell-page .znet-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 1px solid transparent;
+  border-radius: var(--znet-radius-sm);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.znet-shell-page .znet-btn-with-icon {
+  gap: 10px;
+}
+
+.znet-shell-page .znet-btn-icon-only {
+  width: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0;
+}
+
+.znet-shell-page .znet-btn-svg-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.znet-shell-page .znet-btn-accent,
+.znet-shell-page .btn-primary {
+  background: var(--znet-accent);
+  color: var(--znet-accent-dark);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.znet-shell-page .znet-btn-accent:hover,
+.znet-shell-page .btn-primary:hover,
+.znet-shell-page .btn-primary:focus {
+  background: var(--znet-accent);
+  color: var(--znet-accent-dark);
+  box-shadow: 0 16px 36px rgba(74, 222, 128, 0.22);
+}
+
+.znet-shell-page .znet-btn-ghost,
+.znet-shell-page .znet-btn-outline,
+.znet-shell-page .btn-outline-primary {
+  background: transparent;
+  color: var(--znet-text);
+  border-color: var(--znet-border-accent);
+}
+
+.znet-shell-page .znet-btn-ghost:hover,
+.znet-shell-page .znet-btn-outline:hover,
+.znet-shell-page .btn-outline-primary:hover,
+.znet-shell-page .btn-outline-primary:focus {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--znet-text);
+  border-color: rgba(134, 239, 172, 0.32);
+  box-shadow: 0 14px 30px rgba(74, 222, 128, 0.16);
+}
+
+.znet-shell-page .znet-shell-language {
+  min-width: 128px;
+  min-height: 40px;
+  padding-right: 34px;
+  border-color: rgba(134, 239, 172, 0.12);
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+}
+
+.znet-shell-page .znet-shell-language:focus {
+  border-color: rgba(134, 239, 172, 0.28);
+  box-shadow: none;
+}
+
+.znet-shell-page .znet-shell-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 240px;
+  padding: 12px;
+  border: 1px solid var(--znet-flyout-border);
+  border-radius: var(--znet-flyout-radius);
+  background: var(--znet-flyout-bg);
+  box-shadow: var(--znet-flyout-shadow);
+  backdrop-filter: blur(var(--znet-flyout-blur));
+  -webkit-backdrop-filter: blur(var(--znet-flyout-blur));
+}
+
+.znet-shell-page .znet-shell-header-mobile.is-menu-open .znet-shell-menu {
+  display: flex;
+}
+
+.znet-shell-page .znet-shell-menu a {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.znet-shell-page .znet-shell-menu a:hover,
+.znet-shell-page .znet-shell-menu a.is-active {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.znet-shell-page .znet-shell-menu-language {
+  padding-top: 6px;
+}
+
+.znet-shell-page .znet-shell-stage {
+  position: relative;
+  min-height: calc(100vh - var(--znet-header-offset));
+  padding: 28px 0 56px;
+}
+
+.znet-shell-page .znet-shell-stage-inner {
+  position: relative;
+  min-height: calc(100vh - var(--znet-header-offset) - 84px);
+}
+
+.znet-shell-page .znet-shell-globe {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(78vw, 1040px);
+  pointer-events: none;
+  opacity: 0.94;
+}
+
+.znet-shell-page .znet-shell-globe img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 26px 70px rgba(0, 0, 0, 0.36));
+}
+
+.znet-shell-page .znet-shell-panel-shell {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.znet-shell-page .znet-shell-panel {
+  min-height: min(820px, calc(100vh - var(--znet-header-offset) - 84px));
+  padding: 28px;
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  border-radius: 14px;
+  background: rgba(1, 4, 9, 0.9);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.znet-shell-page .znet-shell-panel-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.znet-shell-page .znet-shell-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--znet-accent-soft);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.znet-shell-page .znet-shell-panel-head h1 {
+  margin: 14px 0 0;
+  font-size: clamp(34px, 4vw, 48px);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  font-weight: 600;
+}
+
+.znet-shell-page .znet-shell-panel-head p {
+  max-width: 720px;
+  margin: 14px 0 0;
+  color: var(--znet-text-soft);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.znet-shell-page .znet-shell-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.znet-shell-page .znet-shell-layout {
+  display: grid;
+  gap: 28px;
+  padding-top: 28px;
+}
+
+.znet-shell-page .znet-shell-layout-client {
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+
+.znet-shell-page .znet-shell-layout-public {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.znet-shell-page .znet-shell-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.znet-shell-page .znet-shell-sidebar-block {
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.znet-shell-page .znet-shell-sidebar-block:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.znet-shell-page .znet-shell-side-label {
+  margin: 0 0 12px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.znet-shell-page .znet-shell-side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.znet-shell-page .znet-shell-side-nav a,
+.znet-shell-page .znet-shell-mobile-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.znet-shell-page .znet-shell-side-nav a::after,
+.znet-shell-page .znet-shell-mobile-links a::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(134, 239, 172, 0.24);
+}
+
+.znet-shell-page .znet-shell-side-nav a:hover,
+.znet-shell-page .znet-shell-side-nav a.is-active,
+.znet-shell-page .znet-shell-mobile-links a:hover,
+.znet-shell-page .znet-shell-mobile-links a.is-active {
+  border-color: rgba(134, 239, 172, 0.24);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--znet-accent-soft);
+}
+
+.znet-shell-page .znet-shell-account-list {
+  display: grid;
+  gap: 10px;
+}
+
+.znet-shell-page .znet-shell-account-item {
+  display: grid;
+  gap: 4px;
+}
+
+.znet-shell-page .znet-shell-account-item span:first-child {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 13px;
+}
+
+.znet-shell-page .znet-shell-account-item strong {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.znet-shell-page .znet-shell-main {
+  display: grid;
+}
+
+.znet-shell-page .znet-shell-content {
+  display: grid;
+  gap: 24px;
+}
+
+.znet-shell-page .znet-shell-mobile-links {
+  display: none;
+}
+
+.znet-shell-page .znet-shell-section {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.znet-shell-page .znet-shell-section:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.znet-shell-page .znet-shell-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.znet-shell-page .znet-shell-section-head h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+
+.znet-shell-page .znet-shell-section-head p {
+  margin: 10px 0 0;
+  color: var(--znet-text-soft);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.znet-shell-page .znet-shell-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.znet-shell-page .znet-shell-stat {
+  display: grid;
+  gap: 8px;
+  min-height: 118px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.znet-shell-page .znet-shell-stat span {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+}
+
+.znet-shell-page .znet-shell-stat strong {
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 500;
+}
+
+.znet-shell-page .znet-shell-stat p {
+  margin: 0;
+  color: var(--znet-text-soft);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.znet-shell-page .znet-shell-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.znet-shell-page .znet-shell-card-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.znet-shell-page .znet-shell-inline-note {
+  padding: 16px 18px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text-soft);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.znet-shell-page .znet-shell-checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.znet-shell-page .znet-shell-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--znet-text-soft);
+}
+
+.znet-shell-page .znet-shell-check-item .znet-check {
+  margin-top: 1px;
+}
+
+.znet-shell-page .znet-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 222, 128, 0.18);
+  color: var(--znet-accent-soft);
+  font-size: 12px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.znet-shell-page .znet-shell-auth-wrap {
+  width: min(640px, 100%);
+}
+
+.znet-shell-page .znet-shell-auth-card {
+  width: 100%;
+}
+
+.znet-shell-page .znet-shell-link-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.znet-shell-page .znet-shell-link-row .btn {
+  flex: 1 1 220px;
+}
+
+.znet-shell-page .content-block,
+.znet-shell-page .row,
+.znet-shell-page .col,
+.znet-shell-page [class*="col-"] {
+  min-width: 0;
+}
+
+.znet-shell-page .card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--znet-text);
+  box-shadow: none;
+}
+
+.znet-shell-page .card-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.znet-shell-page .text-secondary,
+.znet-shell-page .text-muted,
+.znet-shell-page .small,
+.znet-shell-page .form-text {
+  color: var(--znet-text-soft) !important;
+}
+
+.znet-shell-page .list-group-item {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+}
+
+.znet-shell-page .badge.text-bg-success,
+.znet-shell-page .badge.text-bg-warning,
+.znet-shell-page .badge.text-bg-danger,
+.znet-shell-page .badge.text-bg-secondary {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--znet-text) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.znet-shell-page .form-label {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.znet-shell-page .form-control,
+.znet-shell-page .form-select {
+  min-height: 48px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+}
+
+.znet-shell-page textarea.form-control {
+  min-height: 140px;
+}
+
+.znet-shell-page .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.znet-shell-page .form-control:focus,
+.znet-shell-page .form-select:focus {
+  outline: none;
+  border-color: rgba(134, 239, 172, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--znet-text);
+  box-shadow: none;
+}
+
+.znet-shell-page .form-check-input {
+  border-color: rgba(134, 239, 172, 0.18);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page .form-check-input:checked {
+  background-color: var(--znet-accent);
+  border-color: var(--znet-accent);
+}
+
+.znet-shell-page .form-check-label,
+.znet-shell-page .form-check-label span {
+  color: var(--znet-text-soft);
+}
+
+.znet-shell-page .breadcrumb {
+  display: none !important;
+}
+
+.znet-shell-page .znet-shell-footer {
+  margin-top: 12px;
+  padding-bottom: 24px;
+}
+
+.znet-shell-page .znet-shell-footer-shell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.znet-shell-page .znet-shell-footer-brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.znet-shell-page .znet-shell-footer-brand-logo {
+  height: 44px;
+}
+
+@media (max-width: 1100px) {
+  .znet-shell-page .znet-shell-globe {
+    width: min(88vw, 860px);
+  }
+
+  .znet-shell-page .znet-shell-layout-client {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 920px) {
+  .znet-shell-page .znet-shell-header-desktop {
+    display: none;
+  }
+
+  .znet-shell-page .znet-shell-header-mobile {
+    display: block;
+  }
+
+  .znet-shell-page .znet-shell-stage {
+    padding: 18px 0 36px;
+  }
+
+  .znet-shell-page .znet-shell-stage-inner {
+    min-height: auto;
+  }
+
+  .znet-shell-page .znet-shell-globe {
+    top: 10px;
+    width: min(94vw, 560px);
+    opacity: 0.9;
+  }
+
+  .znet-shell-page .znet-shell-panel-shell {
+    padding-top: min(46vw, 280px);
+  }
+
+  .znet-shell-page .znet-shell-panel {
+    min-height: auto;
+    padding: 22px 20px;
+  }
+
+  .znet-shell-page .znet-shell-panel-head,
+  .znet-shell-page .znet-shell-section-head {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-shell-layout-client,
+  .znet-shell-page .znet-shell-layout-public {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .znet-shell-page .znet-shell-sidebar {
+    display: none;
+  }
+
+  .znet-shell-page .znet-shell-mobile-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding-top: 20px;
+  }
+
+  .znet-shell-page .znet-shell-stat-grid,
+  .znet-shell-page .znet-shell-card-grid,
+  .znet-shell-page .znet-shell-card-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-shell-footer-shell {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .znet-shell-page {
+    --znet-header-offset: 72px;
+  }
+
+  .znet-shell-page .znet-container {
+    width: min(var(--znet-container), calc(100% - 20px));
+  }
+
+  .znet-shell-page .znet-shell-brand-logo {
+    height: 46px;
+  }
+
+  .znet-shell-page .znet-shell-stage {
+    padding: 12px 0 28px;
+  }
+
+  .znet-shell-page .znet-shell-globe {
+    width: min(108vw, 520px);
+  }
+
+  .znet-shell-page .znet-shell-panel-shell {
+    padding-top: min(52vw, 250px);
+  }
+
+  .znet-shell-page .znet-shell-panel {
+    padding: 18px 16px;
+  }
+
+  .znet-shell-page .znet-shell-panel-head h1 {
+    font-size: 34px;
+  }
+
+  .znet-shell-page .znet-shell-section-head h2 {
+    font-size: 24px;
+  }
+
+  .znet-shell-page .znet-shell-mobile-links {
+    grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-shell-head-actions,
+  .znet-shell-page .znet-shell-link-row {
+    width: 100%;
+  }
+
+  .znet-shell-page .znet-shell-head-actions .znet-btn,
+  .znet-shell-page .znet-shell-link-row .btn {
+    flex: 1 1 100%;
+  }
+}

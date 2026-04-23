@@ -1,7 +1,7 @@
 {% extends "layout_default.html.twig" %}
 
 {% block meta_title %}Политика конфиденциальности{% endblock %}
-{% block meta_description %}Политика обработки персональных данных пользователей My Storage.{% endblock %}
+{% block meta_description %}Политика обработки персональных данных пользователей Znet.{% endblock %}
 {% block body_class %}privacy-policy{% endblock %}
 
 {% block breadcrumb %}
@@ -11,14 +11,6 @@
 {% block content %}
     {% set company = guest.system_company %}
     {% set support_email = company.email|default('support@my-storage.org') %}
-
-    <section class="mb-4">
-        <h1 class="mb-2">Политика конфиденциальности</h1>
-        <p class="text-secondary mb-0">
-            Настоящая политика описывает, какие данные обрабатывает My Storage при регистрации,
-            оплате и использовании личного облачного хранилища.
-        </p>
-    </section>
 
     <section class="card mb-3">
         <div class="card-body">

@@ -1,7 +1,7 @@
 {% extends "layout_default.html.twig" %}
 
 {% block meta_title %}Возврат средств{% endblock %}
-{% block meta_description %}Правила отмены услуги и возврата средств My Storage.{% endblock %}
+{% block meta_description %}Правила отмены услуги и возврата средств Znet.{% endblock %}
 {% block body_class %}page-refund-policy{% endblock %}
 
 {% block breadcrumb %}
@@ -11,13 +11,6 @@
 {% block content %}
     {% set company = guest.system_company %}
     {% set support_email = company.email|default('support@my-storage.org') %}
-
-    <section class="mb-4">
-        <h1 class="mb-2">Возврат средств</h1>
-        <p class="text-secondary mb-0">
-            Запросы на отмену услуги и возврат рассматриваются поддержкой My Storage по обращению клиента.
-        </p>
-    </section>
 
     <section class="card mb-3">
         <div class="card-body">

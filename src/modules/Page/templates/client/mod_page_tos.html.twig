@@ -1,7 +1,7 @@
 {% extends "layout_default.html.twig" %}
 
 {% block meta_title %}Пользовательское соглашение{% endblock %}
-{% block meta_description %}Пользовательское соглашение My Storage для клиентов личного облачного хранилища.{% endblock %}
+{% block meta_description %}Пользовательское соглашение Znet для клиентов личного облачного хранилища.{% endblock %}
 {% block body_class %}tos{% endblock %}
 
 {% block breadcrumb %}
@@ -12,19 +12,11 @@
     {% set company = guest.system_company %}
     {% set support_email = company.email|default('support@my-storage.org') %}
 
-    <section class="mb-4">
-        <h1 class="mb-2">Пользовательское соглашение</h1>
-        <p class="text-secondary mb-0">
-            Используя сайт и оплачивая тариф My Storage, пользователь принимает условия настоящего соглашения
-            и публичной оферты.
-        </p>
-    </section>
-
     <section class="card mb-3">
         <div class="card-body">
             <h2 class="h5">1. Назначение сервиса</h2>
             <p class="mb-0">
-                My Storage предназначен для личного облачного хранения документов, фотографий и важных файлов.
+                Znet предназначен для личного облачного хранения документов, фотографий и важных файлов.
                 Доступ предоставляется в соответствии с выбранным тарифом.
             </p>
         </div>

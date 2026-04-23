@@ -1,7 +1,7 @@
 {% extends "layout_default.html.twig" %}
 
 {% block meta_title %}Контакты{% endblock %}
-{% block meta_description %}Контактная информация My Storage: email поддержки, телефон, адрес и реквизиты ИП.{% endblock %}
+{% block meta_description %}Контактная информация Znet: email поддержки, телефон, адрес и реквизиты ИП.{% endblock %}
 {% block body_class %}page-contacts{% endblock %}
 
 {% block breadcrumb %}
@@ -13,14 +13,6 @@
     {% set support_email = company.email|default('support@my-storage.org') %}
     {% set support_tel = company.tel|default('') %}
     {% set support_tel_href = support_tel|replace({' ': '', '-': '', '(': '', ')': ''}) %}
-
-    <section class="mb-4">
-        <h1 class="mb-2">Контакты</h1>
-        <p class="text-secondary mb-0">
-            My Storage помогает хранить документы, фотографии и важные личные файлы в облаке.
-            По вопросам сервиса и оплаты напишите в поддержку.
-        </p>
-    </section>
 
     <section class="row">
         <div class="col-md-6 mb-3">

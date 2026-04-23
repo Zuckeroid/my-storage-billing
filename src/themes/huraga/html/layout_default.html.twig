@@ -13,6 +13,7 @@
     {% block opengraph %}{% endblock %}
     <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
+    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260423a">
     <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
 
     {{ "Api/API.js" | library_url | script_tag }}
@@ -24,8 +25,24 @@
     {% block js %}{% endblock %}
 </head>
 
-<body class="{% block body_class %}{% endblock %}">
+{% if client and profile is not defined %}
+    {% set profile = client.profile_get %}
+{% endif %}
+{% set company = guest.system_company %}
+{% set languages = guest.extension_languages(true) %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
+{% set shell_context = client ? 'client' : 'public' %}
+{% set shell_title_text = block('shell_title')|striptags|trim %}
+{% if shell_title_text is empty %}
+    {% set shell_title_text = block('meta_title')|striptags|trim %}
+{% endif %}
+{% set shell_description_text = block('shell_description')|striptags|trim %}
+{% if shell_description_text is empty %}
+    {% set shell_description_text = block('meta_description')|striptags|trim %}
+{% endif %}
 
+<body class="znet-shell-page znet-shell-{{ shell_context }} {% block body_class %}{% endblock %}">
 {% block body %}
 {% if not client and settings.require_login %}
     <script>
@@ -40,11 +57,12 @@
                 '/tos',
                 '/privacy-policy',
                 '/signup',
-                '/login'
+                '/login',
+                '/password-reset'
             ];
             const currentPath = window.location.pathname;
-
             const isAllowed = publicPaths.some(path => currentPath === path || currentPath.startsWith(path + '/'));
+
             if (!isAllowed) {
                 window.location.href = '{{ "login"|link }}';
             }
@@ -52,183 +70,231 @@
     </script>
 {% endif %}
 
-{% if client and profile is not defined %}
-    {% set profile = client.profile_get %}
-{% endif %}
-{% set company = guest.system_company %}
-{% set languages = guest.extension_languages(true) %}
-{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
-{% set is_en = current_locale starts with 'en' %}
-
-<div class="storage-shell">
-    <aside class="storage-sidebar" aria-label="My Storage navigation">
-        <a class="storage-sidebar-brand" href="{{ '/'|link }}">
-            <span class="brand-folder-icon" aria-hidden="true">
-                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M3 6.75C3 5.78 3.78 5 4.75 5h5.4l2 2h7.1C20.22 7 21 7.78 21 8.75v8.5c0 .97-.78 1.75-1.75 1.75H4.75C3.78 19 3 18.22 3 17.25V6.75Z"/>
-                </svg>
-            </span>
-            <span>{{ company.name }}</span>
-        </a>
-
-        <nav class="storage-tree" aria-label="Site sections">
-            <details class="storage-tree-folder storage-tree-root-folder">
-                <summary>
-                    <span class="storage-folder-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Information' : 'Информация' }}</span>
-                </summary>
-
-                <a class="storage-tree-item" href="{{ '/'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Home' : 'Главная' }}</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/payment'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Payment' : 'Оплата' }}</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/about-us'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'About' : 'О сервисе' }}</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/contacts'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Contacts' : 'Контакты' }}</span>
-                </a>
-            </details>
-
-            <details class="storage-tree-folder storage-tree-root-folder">
-                <summary>
-                    <span class="storage-folder-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Documents' : 'Документы' }}</span>
-                </summary>
-                <a class="storage-tree-item" href="{{ '/offer'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Offer' : 'Оферта' }}</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/tos'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Agreement' : 'Соглашение' }}</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/privacy-policy'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Privacy' : 'Конфиденциальность' }}</span>
-                </a>
-                <a class="storage-tree-item" href="{{ '/refund-policy'|link }}">
-                    <span class="storage-file-icon" aria-hidden="true"></span>
-                    <span>{{ is_en ? 'Refunds' : 'Возврат' }}</span>
-                </a>
-            </details>
+<div class="znet-shell-page-shell">
+    <header class="znet-shell-header znet-shell-header-desktop">
+        <div class="znet-container znet-shell-header-bar">
+            <a class="znet-shell-brand" href="{{ '/'|link }}" aria-label="Znet">
+                <img class="znet-shell-brand-logo" src="{{ 'img/znet/Logo.png' | asset_url }}" alt="Znet">
+            </a>
 
             {% if client %}
-                <details class="storage-tree-folder storage-tree-root-folder">
-                    <summary>
-                        <span class="storage-folder-icon" aria-hidden="true"></span>
-                        <span>{{ is_en ? 'Account' : 'Аккаунт' }}</span>
-                    </summary>
-                    <a class="storage-tree-item" href="{{ '/'|link }}">
-                        <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>{{ is_en ? 'Dashboard' : 'Панель' }}</span>
-                    </a>
-                    <a class="storage-tree-item" href="{{ '/order/service'|link }}">
-                        <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>{{ is_en ? 'Services' : 'Услуги' }}</span>
-                    </a>
-                    <a class="storage-tree-item" href="{{ '/invoice'|link }}">
-                        <span class="storage-file-icon" aria-hidden="true"></span>
-                        <span>{{ is_en ? 'Invoices' : 'Счета' }}</span>
-                    </a>
-                    <a class="storage-tree-item" href="{{ 'client/profile'|link }}">
-                        <span class="storage-file-icon" aria-hidden="true"></span>
+                <nav class="znet-shell-nav" aria-label="{{ is_en ? 'Client navigation' : 'Навигация клиента' }}">
+                    <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
+                    <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
+                    <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                    <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                </nav>
+            {% else %}
+                <nav class="znet-shell-nav" aria-label="{{ is_en ? 'Public navigation' : 'Публичная навигация' }}">
+                    <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                    <a href="{{ '/about-us'|link }}" data-znet-nav>{{ is_en ? 'About' : 'О сервисе' }}</a>
+                    <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                    <a href="{{ '/offer'|link }}" data-znet-nav>{{ is_en ? 'Offer' : 'Оферта' }}</a>
+                </nav>
+            {% endif %}
+
+            <div class="znet-shell-header-actions">
+                {% if client %}
+                    <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'client/profile'|link }}" aria-label="{{ is_en ? 'Profile' : 'Профиль' }}">
+                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
+                        </svg>
                         <span>{{ is_en ? 'Profile' : 'Профиль' }}</span>
                     </a>
-                </details>
-            {% endif %}
-        </nav>
-
-        <div class="storage-sidebar-footer">
-            {% if client %}
-                <div class="storage-account-chip">
-                    <div class="db-avatar rounded-circle" data-avatar-seed="{{ profile.email|hash('xxh128') }}" data-avatar-size="28" style="width: 28px; height: 28px;"></div>
-                    <span>{{ profile.first_name }} {{ profile.last_name }}</span>
-                </div>
-            {% endif %}
-        </div>
-    </aside>
-
-    <main class="storage-viewer">
-        <div class="storage-viewer-toolbar">
-            <div class="storage-path">
-                <span class="storage-folder-icon" aria-hidden="true"></span>
-                <span data-storage-path-root>{{ is_en ? 'Information' : 'Информация' }}</span>
-                <span>/</span>
-                <strong data-storage-path-page>{% block page_header %}Обзор{% endblock %}</strong>
-            </div>
-            <div class="storage-toolbar-actions">
-                {% if client %}
-                    <span class="storage-toolbar-user">{{ profile.first_name }} {{ profile.last_name }}</span>
-                    <a class="btn btn-outline-primary btn-sm" href="{{ 'client/logout'|link }}">{{ is_en ? 'Logout' : 'Выйти' }}</a>
+                    <a class="znet-btn znet-btn-accent" href="{{ 'client/logout'|link }}">{{ is_en ? 'Logout' : 'Выйти' }}</a>
                 {% else %}
-                    <a class="btn btn-outline-primary btn-sm" href="{{ 'login'|link }}">{{ is_en ? 'Login' : 'Войти' }}</a>
-                    <a class="btn btn-primary btn-sm" href="{{ 'signup'|link }}">{{ is_en ? 'Sign up' : 'Регистрация' }}</a>
+                    <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'login'|link }}" aria-label="{{ is_en ? 'Login' : 'Войти' }}">
+                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
+                        </svg>
+                        <span>{{ is_en ? 'Login' : 'Войти' }}</span>
+                    </a>
+                    <a class="znet-btn znet-btn-accent" href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>
                 {% endif %}
+
                 {% if languages|length > 1 %}
-                    <select name="lang" class="form-select form-select-sm storage-language-selector js-language-selector" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
+                    <select name="lang" class="form-select form-select-sm znet-shell-language js-language-selector" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
                         {% for lang in languages %}
-                            {% set lang_label = lang.locale starts with 'ru' ? 'Русский (RU)' : 'English (US)' %}
-                            <option value="{{ lang.locale }}" {% if lang.locale == current_locale %}selected{% endif %} data-custom-properties="&lt;span class=&quot;fi fi-{{ lang.locale|split('_')[1]|lower }}&quot;&gt;&lt;/span&gt;">{{ lang_label }}</option>
+                            {% set lang_label = lang.locale starts with 'ru' ? 'Русский' : 'English' %}
+                            <option value="{{ lang.locale }}" {% if lang.locale == current_locale %}selected{% endif %}>{{ lang_label }}</option>
                         {% endfor %}
                     </select>
                 {% endif %}
             </div>
         </div>
+    </header>
 
-        <section class="storage-content-pane" role="main">
-            {% block content_before %}{% endblock %}
-            <div class="content-block" role="main">
-                {% if settings.show_breadcrumb %}
-                    {% block breadcrumbs %}
-                        <nav aria-label="{{ 'breadcrumb'|trans }}">
-                            <ol class="breadcrumb d-none d-md-flex">
-                                <li class="breadcrumb-item"><a href="{{ '/'|link }}">{{ is_en ? 'Home' : 'Главная' }}</a></li>
-                                {% block breadcrumb %}
-                                    <li class="active breadcrumb-item">{{ is_en ? 'Overview' : 'Обзор' }}</li>
-                                {% endblock %}
-                            </ol>
-                        </nav>
-                    {% endblock %}
+    <header class="znet-shell-header znet-shell-header-mobile">
+        <div class="znet-container znet-shell-header-bar">
+            <a class="znet-shell-brand" href="{{ '/'|link }}" aria-label="Znet">
+                <img class="znet-shell-brand-logo" src="{{ 'img/znet/Logo.png' | asset_url }}" alt="Znet">
+            </a>
+
+            <div class="znet-shell-header-actions">
+                {% if client %}
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only" href="{{ 'client/profile'|link }}" aria-label="{{ is_en ? 'Profile' : 'Профиль' }}">
+                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
+                        </svg>
+                    </a>
+                {% else %}
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only" href="{{ 'login'|link }}" aria-label="{{ is_en ? 'Login' : 'Войти' }}">
+                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
+                        </svg>
+                    </a>
                 {% endif %}
 
-                {{ render_widgets('client.theme.content.before') }}
-                {% block content %}{% endblock %}
-                {{ render_widgets('client.theme.content.after') }}
-
-                {{ include('partial_message.html.twig') }}
-
-                {% block content_after %}{% endblock %}
+                <button
+                    class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-menu-toggle"
+                    type="button"
+                    aria-label="{{ is_en ? 'Menu' : 'Меню' }}"
+                    aria-expanded="false"
+                    aria-controls="znet-shell-mobile-menu"
+                >
+                    <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 7h16"></path>
+                        <path d="M4 12h16"></path>
+                        <path d="M4 17h16"></path>
+                    </svg>
+                </button>
             </div>
-        </section>
 
-        {% if settings.footer_enabled %}
-            <footer id="footer" class="storage-footer small text-muted">
-                <span>&copy; {{ now|format_date(pattern='yyyy') }} {{ settings.footer_signature | default(company.name) }}</span>
-                <nav aria-label="Legal links">
-                    <a href="{{ '/offer'|link }}">{{ is_en ? 'Offer' : 'Оферта' }}</a>
-                    <a href="{{ '/tos'|link }}">{{ is_en ? 'Agreement' : 'Соглашение' }}</a>
-                    <a href="{{ '/privacy-policy'|link }}">{{ is_en ? 'Privacy' : 'Конфиденциальность' }}</a>
-                    <a href="{{ '/contacts'|link }}">{{ is_en ? 'Legal details' : 'Реквизиты' }}</a>
-                </nav>
-            </footer>
-        {% endif %}
+            <nav class="znet-shell-menu" id="znet-shell-mobile-menu" aria-label="{{ is_en ? 'Mobile navigation' : 'Мобильная навигация' }}">
+                {% if client %}
+                    <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
+                    <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
+                    <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                    <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                    <a href="{{ 'client/logout'|link }}">{{ is_en ? 'Logout' : 'Выйти' }}</a>
+                {% else %}
+                    <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                    <a href="{{ '/about-us'|link }}" data-znet-nav>{{ is_en ? 'About' : 'О сервисе' }}</a>
+                    <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                    <a href="{{ '/offer'|link }}" data-znet-nav>{{ is_en ? 'Offer' : 'Оферта' }}</a>
+                    <a href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>
+                {% endif %}
+
+                {% if languages|length > 1 %}
+                    <div class="znet-shell-menu-language">
+                        <select name="lang" class="form-select form-select-sm znet-shell-language js-language-selector" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
+                            {% for lang in languages %}
+                                {% set lang_label = lang.locale starts with 'ru' ? 'Русский' : 'English' %}
+                                <option value="{{ lang.locale }}" {% if lang.locale == current_locale %}selected{% endif %}>{{ lang_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main id="top" class="znet-shell-stage">
+        <div class="znet-container znet-shell-stage-inner">
+            <div class="znet-shell-globe" aria-hidden="true">
+                <img src="{{ 'img/znet/Earth-15.png' | asset_url }}" alt="">
+            </div>
+
+            <div class="znet-shell-panel-shell">
+                <section class="znet-shell-panel">
+                    {% if shell_title_text %}
+                        <div class="znet-shell-panel-head">
+                            <div>
+                                <span class="znet-shell-eyebrow">{% block shell_eyebrow %}{{ client ? (is_en ? 'Client area' : 'Клиентская зона') : (is_en ? 'Page' : 'Страница') }}{% endblock %}</span>
+                                <h1>{{ shell_title_text }}</h1>
+                                {% if shell_description_text %}
+                                    <p>{{ shell_description_text }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="znet-shell-head-actions">
+                                {% block shell_head_actions %}{% endblock %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if client %}
+                        <div class="znet-shell-mobile-links">
+                            <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
+                            <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
+                            <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                            <a href="{{ 'client/profile'|link }}" data-znet-nav>{{ is_en ? 'Profile' : 'Профиль' }}</a>
+                        </div>
+                    {% endif %}
+
+                    <div class="znet-shell-layout {% if client %}znet-shell-layout-client{% else %}znet-shell-layout-public{% endif %}">
+                        {% if client %}
+                            <aside class="znet-shell-sidebar" aria-label="{{ is_en ? 'Client sections' : 'Разделы клиента' }}">
+                                <div class="znet-shell-sidebar-block">
+                                    <p class="znet-shell-side-label">{{ is_en ? 'Sections' : 'Разделы' }}</p>
+                                    <nav class="znet-shell-side-nav">
+                                        <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
+                                        <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
+                                        <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                                        <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                                    </nav>
+                                </div>
+
+                                <div class="znet-shell-sidebar-block">
+                                    <p class="znet-shell-side-label">{{ is_en ? 'Account' : 'Аккаунт' }}</p>
+                                    <div class="znet-shell-account-list">
+                                        <div class="znet-shell-account-item">
+                                            <span>Email</span>
+                                            <strong>{{ profile.email }}</strong>
+                                        </div>
+                                        <div class="znet-shell-account-item">
+                                            <span>{{ is_en ? 'Name' : 'Имя' }}</span>
+                                            <strong>{{ profile.first_name }} {{ profile.last_name }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </aside>
+                        {% endif %}
+
+                        <div class="znet-shell-main">
+                            {% block content_before %}{% endblock %}
+                            <div class="znet-shell-content" role="main">
+                                {{ render_widgets('client.theme.content.before') }}
+                                {% block content %}{% endblock %}
+                                {{ render_widgets('client.theme.content.after') }}
+                                {{ include('partial_message.html.twig') }}
+                                {% block content_after %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
     </main>
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1070;"></div>
-    <div class="wait" style="display:none" onclick="this.style.display='none'">
-        <div class="spinner-border"
-             style="width: 4rem; height: 4rem; top: 50%; left: 50%; position: fixed; z-index: 999"></div>
-    </div>
-    <noscript>Для работы аккаунта My Storage включите JavaScript и cookies в настройках браузера.</noscript>
-</div>
+    {% if settings.footer_enabled %}
+        <footer class="znet-shell-footer">
+            <div class="znet-container znet-shell-footer-shell">
+                <div class="znet-shell-footer-brand">
+                    <img class="znet-shell-brand-logo znet-shell-footer-brand-logo" src="{{ 'img/znet/Logo.png' | asset_url }}" alt="Znet">
+                </div>
 
+                <nav class="znet-shell-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
+                    {% if client %}
+                        <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
+                        <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
+                        <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                        <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                    {% else %}
+                        <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                        <a href="{{ '/offer'|link }}" data-znet-nav>{{ is_en ? 'Offer' : 'Оферта' }}</a>
+                        <a href="{{ '/tos'|link }}" data-znet-nav>{{ is_en ? 'Agreement' : 'Соглашение' }}</a>
+                        <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </footer>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% if settings.inject_javascript %}
@@ -249,47 +315,59 @@
                 return '/';
             }
         };
+
         const currentPath = normalizePath(window.location.href);
 
-        document.querySelectorAll('.storage-tree-item[href]').forEach(function (item) {
+        document.querySelectorAll('[data-znet-nav]').forEach(function (item) {
             const itemPath = normalizePath(item.href);
             const isActive = itemPath === currentPath || (itemPath !== '/' && currentPath.startsWith(itemPath + '/'));
-
             item.classList.toggle('is-active', isActive);
+
             if (isActive) {
                 item.setAttribute('aria-current', 'page');
-                const parentFolder = item.closest('details');
-                if (parentFolder) {
-                    parentFolder.setAttribute('open', '');
-                }
             } else {
                 item.removeAttribute('aria-current');
             }
         });
 
-        const activeItems = Array.from(document.querySelectorAll('.storage-tree-item.is-active'));
-        const activeItem = activeItems.length > 0 ? activeItems[activeItems.length - 1] : null;
-        const pathRoot = document.querySelector('[data-storage-path-root]');
-        const pathPage = document.querySelector('[data-storage-path-page]');
+        const mobileHeader = document.querySelector('.znet-shell-header-mobile');
+        const toggle = mobileHeader?.querySelector('.znet-shell-menu-toggle');
+        const menu = mobileHeader?.querySelector('#znet-shell-mobile-menu');
 
-        activeItems.forEach(function (item) {
-            if (item !== activeItem) {
-                item.classList.remove('is-active');
-                item.removeAttribute('aria-current');
-            }
-        });
+        if (mobileHeader && toggle && menu) {
+            const closeMenu = function () {
+                mobileHeader.classList.remove('is-menu-open');
+                toggle.setAttribute('aria-expanded', 'false');
+            };
 
-        if (activeItem && pathRoot && pathPage) {
-            const activeFolder = activeItem.closest('details');
-            const folderLabel = activeFolder ? activeFolder.querySelector('summary span:last-child') : null;
-            const itemLabel = activeItem.querySelector('span:last-child');
+            const openMenu = function () {
+                mobileHeader.classList.add('is-menu-open');
+                toggle.setAttribute('aria-expanded', 'true');
+            };
 
-            if (folderLabel) {
-                pathRoot.textContent = folderLabel.textContent.trim();
-            }
-            if (itemLabel) {
-                pathPage.textContent = itemLabel.textContent.trim();
-            }
+            toggle.addEventListener('click', function () {
+                if (mobileHeader.classList.contains('is-menu-open')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+
+            menu.querySelectorAll('a').forEach(function (link) {
+                link.addEventListener('click', closeMenu);
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!mobileHeader.contains(event.target)) {
+                    closeMenu();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeMenu();
+                }
+            });
         }
     });
 </script>

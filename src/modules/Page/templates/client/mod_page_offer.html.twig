@@ -1,7 +1,7 @@
 {% extends "layout_default.html.twig" %}
 
 {% block meta_title %}Публичная оферта{% endblock %}
-{% block meta_description %}Публичная оферта My Storage на оказание услуг личного облачного хранения.{% endblock %}
+{% block meta_description %}Публичная оферта Znet на оказание услуг личного облачного хранения.{% endblock %}
 {% block body_class %}page-offer{% endblock %}
 
 {% block breadcrumb %}
@@ -12,14 +12,6 @@
     {% set company = guest.system_company %}
     {% set support_email = company.email|default('support@my-storage.org') %}
 
-    <section class="mb-4">
-        <h1 class="mb-2">Публичная оферта</h1>
-        <p class="text-secondary mb-0">
-            Настоящий документ является предложением {{ company.address_2 }}
-            заключить договор на условиях, изложенных ниже.
-        </p>
-    </section>
-
     <section class="card mb-3">
         <div class="card-body">
             <h2 class="h5">1. Стороны</h2>
@@ -27,7 +19,7 @@
                 Исполнитель: {{ company.address_2 }}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
             </p>
             <p class="mb-0">
-                Клиент: физическое лицо, зарегистрировавшее аккаунт на сайте My Storage и оплатившее выбранный тариф.
+                Клиент: физическое лицо, зарегистрировавшее аккаунт на сайте Znet и оплатившее выбранный тариф.
             </p>
         </div>
     </section>
