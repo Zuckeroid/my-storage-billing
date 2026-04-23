@@ -31,8 +31,8 @@
             <div class="card-body">
                 <form method="post" action="" id="public-ticket-create" class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label" for="support-name">{{ is_en ? 'Name' : 'Имя' }}</label>
-                        <input class="form-control" type="text" id="support-name" name="name" value="{{ request.name }}" required="required">
+                        <label class="form-label" for="support-name">{{ is_en ? 'Nickname' : 'Псевдоним' }}</label>
+                        <input class="form-control" type="text" id="support-name" name="name" value="{{ request.name|default(client ? profile.first_name : '') }}" required="required">
                     </div>
 
                     <div class="col-md-6">
