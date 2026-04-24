@@ -55,6 +55,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         self::dispatchOrderEvent($event, 'subscription_expired');
     }
 
+    public static function onBeforeAdminOrderDelete(\Box_Event $event): void
+    {
+        self::dispatchOrderEvent($event, 'subscription_delete', null, true);
+    }
+
     public function assertApiKey(): void
     {
         $config = $this->getConfig();
@@ -244,7 +249,12 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
     }
 
-    private static function dispatchOrderEvent(\Box_Event $event, string $eventName, ?string $transition = null): void
+    private static function dispatchOrderEvent(
+        \Box_Event $event,
+        string $eventName,
+        ?string $transition = null,
+        bool $strict = false
+    ): void
     {
         $params = $event->getParameters();
         $orderId = isset($params['id']) ? (int) $params['id'] : 0;
@@ -271,6 +281,10 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                     'message' => $e->getMessage(),
                 ]
             );
+
+            if ($strict) {
+                throw $e;
+            }
         }
     }
 
