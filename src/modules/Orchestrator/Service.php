@@ -37,12 +37,12 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
     public static function onAfterAdminOrderActivate(\Box_Event $event): void
     {
-        self::dispatchOrderEvent($event, 'payment_paid');
+        self::dispatchOrderEvent($event, 'payment_paid', 'activate');
     }
 
     public static function onAfterAdminOrderRenew(\Box_Event $event): void
     {
-        self::dispatchOrderEvent($event, 'payment_paid');
+        self::dispatchOrderEvent($event, 'payment_paid', 'renew');
     }
 
     public static function onAfterAdminOrderCancel(\Box_Event $event): void
@@ -75,6 +75,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $this->setOrderMeta($order->id, 'orchestrator_status', $status);
         $this->setOrderMeta($order->id, 'orchestrator_error', $error !== null ? trim($error) : '');
         $this->setOrderMeta($order->id, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
+        $this->syncOrderStatusFromProvisioning($order, $status, $error);
         $this->sendAccessReadyEmailIfNeeded($order);
 
         return true;
@@ -243,7 +244,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
     }
 
-    private static function dispatchOrderEvent(\Box_Event $event, string $eventName): void
+    private static function dispatchOrderEvent(\Box_Event $event, string $eventName, ?string $transition = null): void
     {
         $params = $event->getParameters();
         $orderId = isset($params['id']) ? (int) $params['id'] : 0;
@@ -255,12 +256,13 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $service->setDi($event->getDi());
 
         try {
-            $service->sendOrderEvent($orderId, $eventName);
+            $service->sendOrderEvent($orderId, $eventName, $transition);
         } catch (\Throwable $e) {
             if ($eventName === 'payment_paid') {
                 $service->setOrderMeta($orderId, 'orchestrator_status', 'failed');
                 $service->setOrderMeta($orderId, 'orchestrator_error', $e->getMessage());
                 $service->setOrderMeta($orderId, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
+                $service->markProvisioningFailure($orderId, $transition ?? 'activate', $e->getMessage());
             }
             $event->getDi()['logger']->error(
                 'Failed to deliver Orchestrator webhook for order {order_id}: {message}',
@@ -272,7 +274,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
     }
 
-    private function sendOrderEvent(int $orderId, string $eventName): void
+    private function sendOrderEvent(int $orderId, string $eventName, ?string $transition = null): void
     {
         $config = $this->getConfig();
         $enabled = !empty($config['enabled']);
@@ -288,14 +290,23 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         $order = $this->di['db']->getExistingModelById('ClientOrder', $orderId, 'Order not found');
+        if ($eventName === 'payment_paid') {
+            $this->setOrderMeta($order->id, 'orchestrator_pending_transition', $transition ?? 'activate');
+            $this->setOrderMeta($order->id, 'orchestrator_status', 'pending');
+            $this->setOrderMeta($order->id, 'orchestrator_error', '');
+
+            if (($transition ?? 'activate') === 'activate') {
+                $this->markOrderStatus(
+                    $order,
+                    \Model_ClientOrder::STATUS_PENDING_SETUP,
+                    'Waiting for Orchestrator provisioning'
+                );
+            }
+        }
+
         $payload = $this->buildPayload($order, $eventName);
         if ($payload === null) {
             return;
-        }
-
-        if ($eventName === 'payment_paid') {
-            $this->setOrderMeta($order->id, 'orchestrator_status', 'pending');
-            $this->setOrderMeta($order->id, 'orchestrator_error', '');
         }
 
         $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -594,6 +605,60 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $value = trim((string) $meta->value);
 
         return $value === '' ? null : $value;
+    }
+
+    private function syncOrderStatusFromProvisioning(
+        \Model_ClientOrder $order,
+        string $status,
+        ?string $error = null
+    ): void {
+        $transition = $this->getOrderMetaValue($order->id, 'orchestrator_pending_transition');
+        if ($transition === null) {
+            return;
+        }
+
+        if ($status === 'active') {
+            $this->markOrderStatus($order, \Model_ClientOrder::STATUS_ACTIVE, 'Provisioning completed');
+            $this->setOrderMeta($order->id, 'orchestrator_pending_transition', '');
+
+            return;
+        }
+
+        if ($status === 'failed') {
+            $failedStatus = $transition === 'renew'
+                ? \Model_ClientOrder::STATUS_FAILED_RENEW
+                : \Model_ClientOrder::STATUS_FAILED_SETUP;
+
+            $this->markOrderStatus(
+                $order,
+                $failedStatus,
+                $error !== null && trim($error) !== '' ? $error : 'Provisioning failed'
+            );
+            $this->setOrderMeta($order->id, 'orchestrator_pending_transition', '');
+        }
+    }
+
+    private function markProvisioningFailure(int $orderId, string $transition, string $message): void
+    {
+        $order = $this->di['db']->getExistingModelById('ClientOrder', $orderId, 'Order not found');
+        $failedStatus = $transition === 'renew'
+            ? \Model_ClientOrder::STATUS_FAILED_RENEW
+            : \Model_ClientOrder::STATUS_FAILED_SETUP;
+
+        $this->markOrderStatus($order, $failedStatus, $message);
+        $this->setOrderMeta($orderId, 'orchestrator_pending_transition', '');
+    }
+
+    private function markOrderStatus(\Model_ClientOrder $order, string $status, string $note): void
+    {
+        if ($order->status === $status) {
+            return;
+        }
+
+        $order->status = $status;
+        $order->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($order);
+        $this->di['mod_service']('order')->saveStatusChange($order, $note);
     }
 
     private function sendAccessReadyEmailIfNeeded(\Model_ClientOrder $order): void
