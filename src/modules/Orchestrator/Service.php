@@ -458,6 +458,10 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         ?\Model_Product $product
     ): ?string {
         $config = $this->getConfig();
+        $allowDefaultFallback = filter_var(
+            $config['allow_default_plan_fallback'] ?? false,
+            FILTER_VALIDATE_BOOL
+        );
         $map = $this->parsePlanMap((string) ($config['product_plan_map_json'] ?? ''));
 
         $orderKey = 'order:' . $order->id;
@@ -470,6 +474,10 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             if (isset($map[$productKey]) && is_string($map[$productKey]) && $map[$productKey] !== '') {
                 return $map[$productKey];
             }
+        }
+
+        if (!$allowDefaultFallback) {
+            return null;
         }
 
         $default = trim((string) ($config['default_external_plan_id'] ?? ''));

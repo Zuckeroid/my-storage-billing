@@ -96,7 +96,17 @@
                     <div class="col-md-6">
                         <label class="form-label" for="default_external_plan_id">{{ 'Default external plan ID'|trans }}</label>
                         <input class="form-control" id="default_external_plan_id" name="default_external_plan_id" type="text" value="{{ params.default_external_plan_id|default('') }}" placeholder="storage_start">
+                        <small class="form-hint">{{ 'Used only when the fallback switch below is enabled. Otherwise every product or order must have an explicit mapping.'|trans }}</small>
                     </div>
+                </div>
+
+                <div class="mt-3">
+                    <input type="hidden" name="allow_default_plan_fallback" value="0">
+                    <label class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="allow_default_plan_fallback" value="1" {% if params.allow_default_plan_fallback|default(false) %}checked{% endif %}>
+                        <span class="form-check-label">{{ 'Allow default external plan fallback for unmapped products'|trans }}</span>
+                    </label>
+                    <small class="form-hint d-block mt-1">{{ 'Keep this disabled if orders without an explicit mapping must fail instead of provisioning against a fallback plan.'|trans }}</small>
                 </div>
 
                 <div class="mt-3">
