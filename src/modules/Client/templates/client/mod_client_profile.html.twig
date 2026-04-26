@@ -205,10 +205,23 @@
                                             type="button"
                                             data-appbridge-create
                                             data-order-id="{{ group.order_id }}"
-                                            {% if not group.eligible_for_app or (not appbridge_unlimited and group.available < 1) %}disabled{% endif %}
+                                            {% if not group.eligible_for_app or (group.pending_tokens|default(0) < 1 and not appbridge_unlimited and group.available < 1) %}disabled{% endif %}
                                         >
-                                            {{ is_en ? 'Add device' : 'Добавить устройство' }}
+                                            {{ group.pending_tokens|default(0) > 0
+                                                ? (is_en ? 'Open token' : 'Открыть токен')
+                                                : (is_en ? 'Add device' : 'Добавить устройство') }}
                                         </button>
+                                        {% if group.pending_tokens|default(0) > 0 %}
+                                            <button
+                                                class="btn btn-outline-primary"
+                                                type="button"
+                                                data-appbridge-rotate-trigger
+                                                data-order-id="{{ group.order_id }}"
+                                                {% if not group.eligible_for_app %}disabled{% endif %}
+                                            >
+                                                {{ is_en ? 'Create new token' : 'Создать новый токен' }}
+                                            </button>
+                                        {% endif %}
                                     </div>
 
                                     <div class="znet-appbridge-stats mt-3">
@@ -364,6 +377,7 @@
             const tokenValue = modal?.querySelector('[data-appbridge-token]');
             const meta = modal?.querySelector('[data-appbridge-meta]');
             const createButtons = document.querySelectorAll('[data-appbridge-create], [data-appbridge-open-trigger]');
+            const rotateTriggers = document.querySelectorAll('[data-appbridge-rotate-trigger]');
             const closeButtons = modal?.querySelectorAll('[data-appbridge-close]') || [];
             const copyButton = modal?.querySelector('[data-appbridge-copy-btn]');
             const rotateButton = modal?.querySelector('[data-appbridge-rotate-btn]');
@@ -530,6 +544,35 @@
                     }, (error) => {
                         updateStats(initialState);
                         setCreateButtonsDisabled(false);
+                        setMessage(`${error.message} (${error.code})`, 'error');
+                    });
+                });
+            });
+
+            rotateTriggers.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const orderId = Number(button.getAttribute('data-order-id') || 0);
+                    currentOrderId = orderId > 0 ? orderId : null;
+                    if (!currentOrderId) {
+                        setMessage('{{ is_en ? 'Service is not selected for token rotation.' : 'Для перевыпуска токена не выбрана услуга.' }}', 'error');
+                        return;
+                    }
+
+                    button.disabled = true;
+                    API.client.post('appbridge/token_rotate', { order_id: currentOrderId }, (result) => {
+                        const activation = result.activation_token || {};
+                        currentToken = activation.token || '';
+                        tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
+                        meta.textContent = '{{ is_en ? 'New single-use token created.' : 'Создан новый одноразовый токен.' }}';
+                        const sourceTitle = activation.source_title || result?.service?.title || '';
+                        if (sourceTitle) {
+                            meta.textContent = `{{ is_en ? 'New single-use token created for service:' : 'Создан новый одноразовый токен для услуги:' }} ${sourceTitle}`;
+                        }
+                        updateStats(result);
+                        openModal();
+                        button.disabled = false;
+                    }, (error) => {
+                        button.disabled = false;
                         setMessage(`${error.message} (${error.code})`, 'error');
                     });
                 });
