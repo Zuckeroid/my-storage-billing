@@ -180,6 +180,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->createActivationTokenBundleForClient($client, $orderId);
     }
 
+    public function resolveProvisioningDeviceLimitForOrder(\Model_ClientOrder $order): int
+    {
+        return $this->resolveConfiguredPositiveOrderDeviceLimit($order) ?? 1;
+    }
+
     public function revokeDeviceForClient(\Model_Client $client, int $deviceId): array
     {
         $this->ensureStorage();
@@ -714,31 +719,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
     private function resolveOrderDeviceLimit(\Model_ClientOrder $order, array $access): int
     {
-        $config = json_decode($order->config ?? '', true);
-        if (!is_array($config)) {
-            $config = [];
-        }
-
-        foreach (self::DEVICE_LIMIT_KEYS as $key) {
-            if (isset($config[$key]) && is_numeric($config[$key]) && (int) $config[$key] > 0) {
-                return (int) $config[$key];
-            }
-        }
-
-        if (!empty($order->product_id)) {
-            $product = $this->di['db']->findOne('Product', 'id = :id', [':id' => $order->product_id]);
-            if ($product instanceof OODBBean) {
-                $productConfig = json_decode($product->config ?? '', true);
-                if (!is_array($productConfig)) {
-                    $productConfig = [];
-                }
-
-                foreach (self::DEVICE_LIMIT_KEYS as $key) {
-                    if (isset($productConfig[$key]) && is_numeric($productConfig[$key]) && (int) $productConfig[$key] > 0) {
-                        return (int) $productConfig[$key];
-                    }
-                }
-            }
+        $configuredLimit = $this->resolveConfiguredPositiveOrderDeviceLimit($order);
+        if ($configuredLimit !== null) {
+            return $configuredLimit;
         }
 
         if (
@@ -750,6 +733,42 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         return 0;
+    }
+
+    private function resolveConfiguredPositiveOrderDeviceLimit(\Model_ClientOrder $order): ?int
+    {
+        $config = json_decode($order->config ?? '', true);
+        if (!is_array($config)) {
+            $config = [];
+        }
+
+        foreach (self::DEVICE_LIMIT_KEYS as $key) {
+            if (isset($config[$key]) && is_numeric($config[$key]) && (int) $config[$key] > 0) {
+                return (int) $config[$key];
+            }
+        }
+
+        if (empty($order->product_id)) {
+            return null;
+        }
+
+        $product = $this->di['db']->findOne('Product', 'id = :id', [':id' => $order->product_id]);
+        if (!$product instanceof OODBBean) {
+            return null;
+        }
+
+        $productConfig = json_decode($product->config ?? '', true);
+        if (!is_array($productConfig)) {
+            $productConfig = [];
+        }
+
+        foreach (self::DEVICE_LIMIT_KEYS as $key) {
+            if (isset($productConfig[$key]) && is_numeric($productConfig[$key]) && (int) $productConfig[$key] > 0) {
+                return (int) $productConfig[$key];
+            }
+        }
+
+        return null;
     }
 
     private function sanitizeDeviceData(array $deviceData): array

@@ -422,6 +422,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             }
 
             $payload['externalPlanId'] = $externalPlanId;
+            $payload['deviceLimit'] = $this->di['mod_service']('Appbridge')->resolveProvisioningDeviceLimitForOrder($order);
             $payload['status'] = 'paid';
             $payload['externalPaymentId'] = $this->buildExternalPaymentId($order, $invoice, $transaction);
         }
