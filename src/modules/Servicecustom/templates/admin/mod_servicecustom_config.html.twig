@@ -15,8 +15,14 @@
     <hr>
 
     <form method="post" action="{{ 'api/admin/product/update_config'|link }}" {{ fb_api_form({reload: true}) }}>
-        {% set appbridge_device_limit = product.config.appbridge_device_limit|default(product.config.device_limit|default(product.config.devices_limit|default(''))) %}
-        {% set appbridge_reserved_keys = ['appbridge_device_limit', 'device_limit', 'devices_limit'] %}
+        {% set appbridge_device_limit = product.config.appbridge_device_limit
+            |default(product.config.device_limit
+            |default(product.config.devices_limit
+            |default(product.config.ip_limit
+            |default(product.config.ipLimit
+            |default(product.config.max_devices
+            |default(product.config.maxDevices|default(''))))))) %}
+        {% set appbridge_reserved_keys = ['appbridge_device_limit', 'device_limit', 'devices_limit', 'ip_limit', 'ipLimit', 'max_devices', 'maxDevices'] %}
 
         <h6>{{ 'Application access'|trans }}</h6>
         <div class="form-group mb-3 row">

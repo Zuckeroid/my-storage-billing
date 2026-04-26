@@ -19,6 +19,15 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     public const string CONTRACT_VERSION = 'appbridge-v1';
     private const string ACTIVATION_TOKEN_BEAN = 'mod_appbridge_activation_token';
     private const string DEVICE_BEAN = 'mod_appbridge_device';
+    private const array DEVICE_LIMIT_KEYS = [
+        'appbridge_device_limit',
+        'device_limit',
+        'devices_limit',
+        'ip_limit',
+        'ipLimit',
+        'max_devices',
+        'maxDevices',
+    ];
     private const int DEVICE_TOKEN_TTL_DAYS = 30;
     private const bool UNLIMITED_DEVICE_TEST_MODE = false;
     private const int UNLIMITED_DEVICE_SENTINEL = 9999;
@@ -710,7 +719,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             $config = [];
         }
 
-        foreach (['appbridge_device_limit', 'device_limit', 'devices_limit'] as $key) {
+        foreach (self::DEVICE_LIMIT_KEYS as $key) {
             if (isset($config[$key]) && is_numeric($config[$key]) && (int) $config[$key] > 0) {
                 return (int) $config[$key];
             }
@@ -724,7 +733,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                     $productConfig = [];
                 }
 
-                foreach (['appbridge_device_limit', 'device_limit', 'devices_limit'] as $key) {
+                foreach (self::DEVICE_LIMIT_KEYS as $key) {
                     if (isset($productConfig[$key]) && is_numeric($productConfig[$key]) && (int) $productConfig[$key] > 0) {
                         return (int) $productConfig[$key];
                     }
