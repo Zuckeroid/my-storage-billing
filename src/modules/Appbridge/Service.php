@@ -12,17 +12,22 @@ declare(strict_types=1);
 
 namespace Box\Mod\Appbridge;
 
+use RedBeanPHP\OODBBean;
+
 class Service implements \FOSSBilling\InjectionAwareInterface
 {
-    private const string EXTENSION_NAME = 'mod_appbridge';
-    private const string META_APP_CODE = 'app_code';
-    private const string META_TOKEN_HASH = 'app_token_hash';
-    private const string META_TOKEN_EXPIRES_AT = 'app_token_expires_at';
-    private const string META_TOKEN_LAST_ISSUED_AT = 'app_token_last_issued_at';
-    private const int TOKEN_TTL_DAYS = 30;
-    private const string CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    private const string ACTIVATION_TOKEN_BEAN = 'mod_appbridge_activation_token';
+    private const string DEVICE_BEAN = 'mod_appbridge_device';
+    private const int ACTIVATION_TOKEN_TTL_MINUTES = 15;
+    private const int DEVICE_TOKEN_TTL_DAYS = 30;
+    private const string STATUS_PENDING = 'pending';
+    private const string STATUS_USED = 'used';
+    private const string STATUS_ACTIVE = 'active';
+    private const string STATUS_REVOKED = 'revoked';
+    private const string STATUS_EXPIRED = 'expired';
 
     protected ?\Pimple\Container $di = null;
+    private bool $storageEnsured = false;
 
     public function setDi(\Pimple\Container $di): void
     {
@@ -34,93 +39,219 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->di;
     }
 
-    public function loginWithPassword(string $email, string $password): array
+    public function install(): bool
     {
-        $clientService = $this->di['mod_service']('Client');
-        $email = strtolower(trim($this->di['tools']->validateAndSanitizeEmail($email, true, false)));
-        $client = $clientService->authorizeClient($email, $password);
+        $this->ensureStorage();
 
-        if (!$client instanceof \Model_Client) {
-            throw new \FOSSBilling\InformationException('Please check your login details.', [], 401);
-        }
-
-        $bundle = $this->rotateTokenForClient($client);
-        $this->di['logger']->info('App bridge issued token for client #%s', $client->id);
-
-        return $bundle;
+        return true;
     }
 
-    public function loginWithToken(string $appToken): array
+    public function uninstall(): bool
     {
-        $client = $this->findClientByToken($appToken);
-        if (!$client instanceof \Model_Client || $client->status !== \Model_Client::ACTIVE) {
-            throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
+        $this->di['db']->exec('DROP TABLE IF EXISTS `' . self::ACTIVATION_TOKEN_BEAN . '`');
+        $this->di['db']->exec('DROP TABLE IF EXISTS `' . self::DEVICE_BEAN . '`');
+        $this->storageEnsured = false;
+
+        return true;
+    }
+
+    public function loginWithPassword(string $email, string $password): array
+    {
+        unset($email, $password);
+
+        throw new \FOSSBilling\InformationException(
+            'Create an activation token in the client area and use it in the application.',
+            [],
+            403,
+        );
+    }
+
+    public function loginWithToken(string $appToken, array $deviceData = []): array
+    {
+        $this->ensureStorage();
+        $this->expireActivationTokens();
+        $this->expireDeviceTokens();
+
+        $activationToken = $this->findPendingActivationTokenByToken($appToken);
+        if ($activationToken instanceof OODBBean) {
+            return $this->exchangeActivationToken($activationToken, $deviceData);
         }
 
-        $storedHash = $this->getClientMetaValue((int) $client->id, self::META_TOKEN_HASH);
-        $expiresAt = $this->getClientMetaValue((int) $client->id, self::META_TOKEN_EXPIRES_AT);
-        if ($storedHash === null || $expiresAt === null) {
-            throw new \FOSSBilling\InformationException('Application token is not initialized. Please log in again.', [], 401);
+        $device = $this->findActiveDeviceByToken($appToken);
+        if ($device instanceof OODBBean) {
+            return $this->loginWithDeviceToken($device, $appToken);
         }
 
-        if (!hash_equals($storedHash, $this->hashToken($appToken))) {
-            throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
-        }
-
-        if (strtotime($expiresAt) < time()) {
-            throw new \FOSSBilling\InformationException('Application token has expired. Please log in again.', [], 401);
-        }
-
-        $refreshedExpiresAt = $this->refreshTokenExpiry((int) $client->id);
-
-        return $this->buildAccessBundle($client, null, $refreshedExpiresAt);
+        throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
     }
 
     public function getBundleForClient(\Model_Client $client): array
     {
-        $appCode = $this->ensureAppCode((int) $client->id);
-        $expiresAt = $this->getClientMetaValue((int) $client->id, self::META_TOKEN_EXPIRES_AT);
+        $this->ensureStorage();
+        $this->expireActivationTokens((int) $client->id);
+        $this->expireDeviceTokens((int) $client->id);
 
-        return $this->buildAccessBundle($client, null, $expiresAt, $appCode);
+        return $this->buildAccessBundle($client);
+    }
+
+    public function createActivationTokenBundleForClient(\Model_Client $client): array
+    {
+        $this->ensureStorage();
+        $this->expireActivationTokens((int) $client->id);
+        $this->expireDeviceTokens((int) $client->id);
+
+        if ($client->status !== \Model_Client::ACTIVE) {
+            throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
+        }
+
+        $overview = $this->getDeviceOverview($client);
+        if (!$overview['has_active_access']) {
+            throw new \FOSSBilling\InformationException('No active subscription is ready for application access yet.', [], 409);
+        }
+
+        if ($overview['available'] < 1) {
+            throw new \FOSSBilling\InformationException('No device slots are available for this account.', [], 409);
+        }
+
+        $token = $this->generateToken();
+        $now = $this->now();
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::ACTIVATION_TOKEN_TTL_MINUTES . ' minutes'));
+
+        $row = $this->di['db']->dispense(self::ACTIVATION_TOKEN_BEAN);
+        $row->client_id = $client->id;
+        $row->source_order_id = $overview['primary_order_id'];
+        $row->token_hash = $this->hashToken($token);
+        $row->status = self::STATUS_PENDING;
+        $row->expires_at = $expiresAt;
+        $row->created_at = $now;
+        $row->updated_at = $now;
+        $this->di['db']->store($row);
+
+        $bundle = $this->buildAccessBundle($client);
+        $bundle['activation_token'] = [
+            'token' => $token,
+            'expires_at' => $this->formatDateAtom($expiresAt),
+            'created_at' => $this->formatDateAtom($now),
+            'ttl_minutes' => self::ACTIVATION_TOKEN_TTL_MINUTES,
+        ];
+
+        return $bundle;
     }
 
     public function rotateTokenForClient(\Model_Client $client): array
     {
-        [$appCode, $token, $expiresAt] = $this->issueClientToken((int) $client->id);
+        return $this->createActivationTokenBundleForClient($client);
+    }
 
-        return $this->buildAccessBundle($client, $token, $expiresAt, $appCode);
+    private function exchangeActivationToken(OODBBean $activationToken, array $deviceData): array
+    {
+        $client = $this->getClientById((int) $activationToken->client_id);
+        if (!$client instanceof \Model_Client || $client->status !== \Model_Client::ACTIVE) {
+            throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
+        }
+
+        if (strtotime((string) $activationToken->expires_at) < time()) {
+            $this->markActivationTokenExpired($activationToken);
+            throw new \FOSSBilling\InformationException('Activation token has expired. Create a new token in the client area.', [], 401);
+        }
+
+        $overview = $this->getDeviceOverview($client, (int) $activationToken->id);
+        if (!$overview['has_active_access']) {
+            throw new \FOSSBilling\InformationException('No active subscription is ready for application access yet.', [], 409);
+        }
+
+        if (((int) $overview['active']) + 1 + ((int) $overview['pending_tokens']) > (int) $overview['allowed']) {
+            throw new \FOSSBilling\InformationException('No device slots are available for this account.', [], 409);
+        }
+
+        $deviceToken = $this->generateToken();
+        $now = $this->now();
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::DEVICE_TOKEN_TTL_DAYS . ' days'));
+        $sanitizedDeviceData = $this->sanitizeDeviceData($deviceData);
+
+        $device = $this->di['db']->dispense(self::DEVICE_BEAN);
+        $device->client_id = $client->id;
+        $device->source_order_id = $activationToken->source_order_id ?: $overview['primary_order_id'];
+        $device->activation_token_id = $activationToken->id;
+        $device->device_name = $sanitizedDeviceData['device_name'];
+        $device->platform = $sanitizedDeviceData['platform'];
+        $device->install_id = $sanitizedDeviceData['install_id'];
+        $device->device_token_hash = $this->hashToken($deviceToken);
+        $device->status = self::STATUS_ACTIVE;
+        $device->expires_at = $expiresAt;
+        $device->last_seen_at = $now;
+        $device->created_at = $now;
+        $device->updated_at = $now;
+        $this->di['db']->store($device);
+
+        $activationToken->status = self::STATUS_USED;
+        $activationToken->used_at = $now;
+        $activationToken->updated_at = $now;
+        $this->di['db']->store($activationToken);
+
+        return $this->buildAccessBundle($client, $deviceToken, $expiresAt, $now, $device);
+    }
+
+    private function loginWithDeviceToken(OODBBean $device, string $rawToken): array
+    {
+        $client = $this->getClientById((int) $device->client_id);
+        if (!$client instanceof \Model_Client || $client->status !== \Model_Client::ACTIVE) {
+            throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
+        }
+
+        if (!hash_equals((string) $device->device_token_hash, $this->hashToken($rawToken))) {
+            throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
+        }
+
+        if (strtotime((string) $device->expires_at) < time()) {
+            $this->markDeviceExpired($device);
+            throw new \FOSSBilling\InformationException('Application token has expired. Create a new token in the client area.', [], 401);
+        }
+
+        $now = $this->now();
+        $refreshedExpiresAt = date('Y-m-d H:i:s', strtotime('+' . self::DEVICE_TOKEN_TTL_DAYS . ' days'));
+        $device->last_seen_at = $now;
+        $device->expires_at = $refreshedExpiresAt;
+        $device->updated_at = $now;
+        $this->di['db']->store($device);
+
+        return $this->buildAccessBundle($client, null, $refreshedExpiresAt, (string) $device->created_at, $device);
     }
 
     private function buildAccessBundle(
         \Model_Client $client,
         ?string $appToken = null,
         ?string $tokenExpiresAt = null,
-        ?string $appCode = null,
+        ?string $tokenIssuedAt = null,
+        ?OODBBean $device = null,
     ): array {
-        $appCode = $appCode ?? $this->ensureAppCode((int) $client->id);
         $subscriptions = $this->collectClientSubscriptions($client);
         $activeLinks = [];
 
         foreach ($subscriptions as $subscription) {
             if (
                 ($subscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
-                && ($subscription['provision_status'] ?? null) === 'active'
+                && ($subscription['provision_status'] ?? null) === self::STATUS_ACTIVE
                 && !empty($subscription['subscription_link'])
             ) {
                 $activeLinks[] = $subscription['subscription_link'];
             }
         }
 
+        $overview = $this->getDeviceOverview($client);
+
         $app = [
-            'code' => $appCode,
             'token_expires_at' => $this->formatDateAtom($tokenExpiresAt),
-            'token_issued_at' => $this->formatDateAtom(
-                $this->getClientMetaValue((int) $client->id, self::META_TOKEN_LAST_ISSUED_AT),
-            ),
+            'token_issued_at' => $this->formatDateAtom($tokenIssuedAt),
+            'activation_token_ttl_minutes' => self::ACTIVATION_TOKEN_TTL_MINUTES,
         ];
 
         if ($appToken !== null) {
             $app['token'] = $appToken;
+        }
+
+        if ($device instanceof OODBBean) {
+            $app['device'] = $this->mapDeviceRow($device);
         }
 
         return [
@@ -136,6 +267,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'has_active_access' => !empty($activeLinks),
             'active_subscription_links' => array_values($activeLinks),
             'subscriptions' => $subscriptions,
+            'devices' => $overview,
             'generated_at' => date(DATE_ATOM),
         ];
     }
@@ -166,6 +298,12 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 continue;
             }
 
+            $deviceLimit = $this->resolveOrderDeviceLimit($order, $access);
+            $eligibleForApp =
+                ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
+                && ($access['status'] ?? null) === self::STATUS_ACTIVE
+                && !empty($access['subscription_link']);
+
             $subscriptions[] = [
                 'order_id' => (int) $order->id,
                 'title' => trim((string) ($order->title ?? '')),
@@ -175,196 +313,300 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'error' => $access['error'] ?? null,
                 'last_sync_at' => $this->formatDateAtom($access['last_sync_at'] ?? null),
                 'access_email_sent_at' => $this->formatDateAtom($access['access_email_sent_at'] ?? null),
+                'device_limit' => $deviceLimit,
+                'eligible_for_app' => $eligibleForApp,
             ];
         }
 
         return $subscriptions;
     }
 
-    private function issueClientToken(int $clientId): array
+    private function getDeviceOverview(\Model_Client $client, ?int $ignoreActivationTokenId = null): array
     {
-        $appCode = $this->ensureAppCode($clientId);
-        $token = $this->generateAccessToken();
-        $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::TOKEN_TTL_DAYS . ' days'));
-        $issuedAt = date('Y-m-d H:i:s');
+        $subscriptions = $this->collectClientSubscriptions($client);
+        $eligibleSubscriptions = array_values(array_filter(
+            $subscriptions,
+            static fn(array $subscription): bool => !empty($subscription['eligible_for_app']),
+        ));
 
-        $this->setClientMeta($clientId, self::META_TOKEN_HASH, $this->hashToken($token));
-        $this->setClientMeta($clientId, self::META_TOKEN_EXPIRES_AT, $expiresAt);
-        $this->setClientMeta($clientId, self::META_TOKEN_LAST_ISSUED_AT, $issuedAt);
-
-        return [$appCode, $token, $expiresAt];
-    }
-
-    private function refreshTokenExpiry(int $clientId): string
-    {
-        $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::TOKEN_TTL_DAYS . ' days'));
-        $this->setClientMeta($clientId, self::META_TOKEN_EXPIRES_AT, $expiresAt);
-
-        return $expiresAt;
-    }
-
-    private function ensureAppCode(int $clientId): string
-    {
-        $existing = $this->getClientMetaValue($clientId, self::META_APP_CODE);
-        if ($existing !== null) {
-            return $existing;
+        $allowed = 0;
+        $primaryOrderId = null;
+        foreach ($eligibleSubscriptions as $subscription) {
+            $primaryOrderId ??= (int) $subscription['order_id'];
+            $allowed += max(0, (int) ($subscription['device_limit'] ?? 0));
         }
 
-        for ($attempt = 0; $attempt < 20; $attempt++) {
-            $code = $this->generatePublicCode();
-            if ($this->findClientIdByAppCode($code) === null) {
-                $this->setClientMeta($clientId, self::META_APP_CODE, $code);
-
-                return $code;
-            }
-        }
-
-        throw new \FOSSBilling\Exception('Unable to generate a unique application code');
-    }
-
-    private function findClientByAppCode(string $appCode): ?\Model_Client
-    {
-        $clientId = $this->findClientIdByAppCode($appCode);
-        if ($clientId === null) {
-            return null;
-        }
-
-        $client = $this->di['db']->findOne('Client', 'id = :id', [':id' => $clientId]);
-
-        return $client instanceof \Model_Client ? $client : null;
-    }
-
-    private function findClientByToken(string $appToken): ?\Model_Client
-    {
-        $clientId = $this->findClientIdByToken($appToken);
-        if ($clientId === null) {
-            return null;
-        }
-
-        $client = $this->di['db']->findOne('Client', 'id = :id', [':id' => $clientId]);
-
-        return $client instanceof \Model_Client ? $client : null;
-    }
-
-    private function findClientIdByAppCode(string $appCode): ?int
-    {
-        $normalizedCode = strtoupper(trim($appCode));
-        if ($normalizedCode === '') {
-            return null;
-        }
-
-        $row = $this->di['db']->getRow(
-            'SELECT client_id
-               FROM extension_meta
-              WHERE extension = :extension
-                AND meta_key = :meta_key
-                AND meta_value = :meta_value
-              LIMIT 1',
+        $clientId = (int) $client->id;
+        $activeDevices = (int) $this->di['db']->getCell(
+            'SELECT COUNT(*) FROM `' . self::DEVICE_BEAN . '` WHERE client_id = :client_id AND status = :status',
             [
-                ':extension' => self::EXTENSION_NAME,
-                ':meta_key' => self::META_APP_CODE,
-                ':meta_value' => $normalizedCode,
+                ':client_id' => $clientId,
+                ':status' => self::STATUS_ACTIVE,
             ],
         );
 
-        if (!is_array($row) || empty($row['client_id'])) {
-            return null;
+        $pendingParams = [
+            ':client_id' => $clientId,
+            ':status' => self::STATUS_PENDING,
+        ];
+        $pendingSql = 'SELECT COUNT(*) FROM `' . self::ACTIVATION_TOKEN_BEAN . '` WHERE client_id = :client_id AND status = :status';
+        if ($ignoreActivationTokenId !== null) {
+            $pendingSql .= ' AND id != :ignore_id';
+            $pendingParams[':ignore_id'] = $ignoreActivationTokenId;
+        }
+        $pendingTokens = (int) $this->di['db']->getCell($pendingSql, $pendingParams);
+
+        $deviceRows = $this->di['db']->find(
+            self::DEVICE_BEAN,
+            'client_id = :client_id AND status = :status ORDER BY created_at DESC',
+            [
+                ':client_id' => $clientId,
+                ':status' => self::STATUS_ACTIVE,
+            ],
+        );
+
+        $mappedDevices = [];
+        foreach ($deviceRows as $deviceRow) {
+            if ($deviceRow instanceof OODBBean) {
+                $mappedDevices[] = $this->mapDeviceRow($deviceRow);
+            }
         }
 
-        return (int) $row['client_id'];
+        return [
+            'allowed' => $allowed,
+            'active' => $activeDevices,
+            'pending_tokens' => $pendingTokens,
+            'available' => max(0, $allowed - $activeDevices - $pendingTokens),
+            'primary_order_id' => $primaryOrderId,
+            'has_active_access' => !empty($eligibleSubscriptions),
+            'eligible_order_count' => count($eligibleSubscriptions),
+            'activation_token_ttl_minutes' => self::ACTIVATION_TOKEN_TTL_MINUTES,
+            'list' => $mappedDevices,
+        ];
     }
 
-    private function findClientIdByToken(string $appToken): ?int
+    private function resolveOrderDeviceLimit(\Model_ClientOrder $order, array $access): int
     {
-        $normalizedToken = trim($appToken);
+        $config = json_decode($order->config ?? '', true);
+        if (!is_array($config)) {
+            $config = [];
+        }
+
+        foreach (['appbridge_device_limit', 'device_limit', 'devices_limit'] as $key) {
+            if (isset($config[$key]) && is_numeric($config[$key]) && (int) $config[$key] > 0) {
+                return (int) $config[$key];
+            }
+        }
+
+        if (!empty($order->product_id)) {
+            $product = $this->di['db']->findOne('Product', 'id = :id', [':id' => $order->product_id]);
+            if ($product instanceof OODBBean) {
+                $productConfig = json_decode($product->config ?? '', true);
+                if (!is_array($productConfig)) {
+                    $productConfig = [];
+                }
+
+                foreach (['appbridge_device_limit', 'device_limit', 'devices_limit'] as $key) {
+                    if (isset($productConfig[$key]) && is_numeric($productConfig[$key]) && (int) $productConfig[$key] > 0) {
+                        return (int) $productConfig[$key];
+                    }
+                }
+            }
+        }
+
+        if (
+            ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
+            && ($access['status'] ?? null) === self::STATUS_ACTIVE
+            && !empty($access['subscription_link'])
+        ) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private function sanitizeDeviceData(array $deviceData): array
+    {
+        $clean = [];
+        foreach (['device_name', 'platform', 'install_id'] as $field) {
+            $value = isset($deviceData[$field]) ? trim((string) $deviceData[$field]) : '';
+            $clean[$field] = $value !== '' ? mb_substr($value, 0, 255) : null;
+        }
+
+        return $clean;
+    }
+
+    private function ensureStorage(): void
+    {
+        if ($this->storageEnsured) {
+            return;
+        }
+
+        $this->di['db']->exec(
+            '
+            CREATE TABLE IF NOT EXISTS `' . self::ACTIVATION_TOKEN_BEAN . '` (
+                `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                `client_id` bigint(20) NOT NULL,
+                `source_order_id` bigint(20) DEFAULT NULL,
+                `token_hash` varchar(64) NOT NULL,
+                `status` varchar(32) NOT NULL DEFAULT \'' . self::STATUS_PENDING . '\',
+                `expires_at` datetime NOT NULL,
+                `used_at` datetime DEFAULT NULL,
+                `created_at` datetime DEFAULT NULL,
+                `updated_at` datetime DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_token_hash` (`token_hash`),
+                KEY `idx_client_status` (`client_id`, `status`),
+                KEY `idx_expires_at` (`expires_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ',
+        );
+
+        $this->di['db']->exec(
+            '
+            CREATE TABLE IF NOT EXISTS `' . self::DEVICE_BEAN . '` (
+                `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                `client_id` bigint(20) NOT NULL,
+                `source_order_id` bigint(20) DEFAULT NULL,
+                `activation_token_id` bigint(20) DEFAULT NULL,
+                `device_name` varchar(255) DEFAULT NULL,
+                `platform` varchar(255) DEFAULT NULL,
+                `install_id` varchar(255) DEFAULT NULL,
+                `device_token_hash` varchar(64) NOT NULL,
+                `status` varchar(32) NOT NULL DEFAULT \'' . self::STATUS_ACTIVE . '\',
+                `expires_at` datetime NOT NULL,
+                `last_seen_at` datetime DEFAULT NULL,
+                `created_at` datetime DEFAULT NULL,
+                `updated_at` datetime DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_device_token_hash` (`device_token_hash`),
+                KEY `idx_client_status` (`client_id`, `status`),
+                KEY `idx_expires_at` (`expires_at`),
+                KEY `idx_install_id` (`install_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ',
+        );
+
+        $this->storageEnsured = true;
+    }
+
+    private function expireActivationTokens(?int $clientId = null): void
+    {
+        $params = [
+            ':status_pending' => self::STATUS_PENDING,
+            ':status_expired' => self::STATUS_EXPIRED,
+            ':now' => $this->now(),
+        ];
+
+        $sql = 'UPDATE `' . self::ACTIVATION_TOKEN_BEAN . '`
+                   SET status = :status_expired, updated_at = :now
+                 WHERE status = :status_pending
+                   AND expires_at < :now';
+
+        if ($clientId !== null) {
+            $sql .= ' AND client_id = :client_id';
+            $params[':client_id'] = $clientId;
+        }
+
+        $this->di['db']->exec($sql, $params);
+    }
+
+    private function expireDeviceTokens(?int $clientId = null): void
+    {
+        $params = [
+            ':status_active' => self::STATUS_ACTIVE,
+            ':status_expired' => self::STATUS_EXPIRED,
+            ':now' => $this->now(),
+        ];
+
+        $sql = 'UPDATE `' . self::DEVICE_BEAN . '`
+                   SET status = :status_expired, updated_at = :now
+                 WHERE status = :status_active
+                   AND expires_at < :now';
+
+        if ($clientId !== null) {
+            $sql .= ' AND client_id = :client_id';
+            $params[':client_id'] = $clientId;
+        }
+
+        $this->di['db']->exec($sql, $params);
+    }
+
+    private function findPendingActivationTokenByToken(string $token): ?OODBBean
+    {
+        $normalizedToken = trim($token);
         if ($normalizedToken === '') {
             return null;
         }
 
-        $row = $this->di['db']->getRow(
-            'SELECT client_id
-               FROM extension_meta
-              WHERE extension = :extension
-                AND meta_key = :meta_key
-                AND meta_value = :meta_value
-              LIMIT 1',
+        $row = $this->di['db']->findOne(
+            self::ACTIVATION_TOKEN_BEAN,
+            'token_hash = :token_hash AND status = :status LIMIT 1',
             [
-                ':extension' => self::EXTENSION_NAME,
-                ':meta_key' => self::META_TOKEN_HASH,
-                ':meta_value' => $this->hashToken($normalizedToken),
+                ':token_hash' => $this->hashToken($normalizedToken),
+                ':status' => self::STATUS_PENDING,
             ],
         );
 
-        if (!is_array($row) || empty($row['client_id'])) {
+        return $row instanceof OODBBean ? $row : null;
+    }
+
+    private function findActiveDeviceByToken(string $token): ?OODBBean
+    {
+        $normalizedToken = trim($token);
+        if ($normalizedToken === '') {
             return null;
         }
 
-        return (int) $row['client_id'];
-    }
-
-    private function setClientMeta(int $clientId, string $key, string $value): void
-    {
-        $meta = $this->di['db']->findOne(
-            'ExtensionMeta',
-            'extension = :extension AND client_id = :client_id AND meta_key = :meta_key',
+        $row = $this->di['db']->findOne(
+            self::DEVICE_BEAN,
+            'device_token_hash = :token_hash AND status = :status LIMIT 1',
             [
-                ':extension' => self::EXTENSION_NAME,
-                ':client_id' => $clientId,
-                ':meta_key' => $key,
+                ':token_hash' => $this->hashToken($normalizedToken),
+                ':status' => self::STATUS_ACTIVE,
             ],
         );
 
-        if (!$meta) {
-            $meta = $this->di['db']->dispense('ExtensionMeta');
-            $meta->extension = self::EXTENSION_NAME;
-            $meta->client_id = $clientId;
-            $meta->meta_key = $key;
-            $meta->created_at = date('Y-m-d H:i:s');
-        }
-
-        $meta->meta_value = $value;
-        $meta->updated_at = date('Y-m-d H:i:s');
-        $this->di['db']->store($meta);
+        return $row instanceof OODBBean ? $row : null;
     }
 
-    private function getClientMetaValue(int $clientId, string $key): ?string
+    private function getClientById(int $clientId): ?\Model_Client
     {
-        $meta = $this->di['db']->findOne(
-            'ExtensionMeta',
-            'extension = :extension AND client_id = :client_id AND meta_key = :meta_key',
-            [
-                ':extension' => self::EXTENSION_NAME,
-                ':client_id' => $clientId,
-                ':meta_key' => $key,
-            ],
-        );
+        $client = $this->di['db']->findOne('Client', 'id = :id', [':id' => $clientId]);
 
-        if (!$meta || !isset($meta->meta_value)) {
-            return null;
-        }
-
-        $value = trim((string) $meta->meta_value);
-
-        return $value !== '' ? $value : null;
+        return $client instanceof \Model_Client ? $client : null;
     }
 
-    private function generatePublicCode(): string
+    private function mapDeviceRow(OODBBean $device): array
     {
-        $chars = [];
-        $alphabetLength = strlen(self::CODE_ALPHABET);
-
-        for ($index = 0; $index < 12; $index++) {
-            $chars[] = self::CODE_ALPHABET[random_int(0, $alphabetLength - 1)];
-        }
-
-        return implode('-', [
-            implode('', array_slice($chars, 0, 4)),
-            implode('', array_slice($chars, 4, 4)),
-            implode('', array_slice($chars, 8, 4)),
-        ]);
+        return [
+            'id' => (int) $device->id,
+            'name' => $device->device_name ? (string) $device->device_name : null,
+            'platform' => $device->platform ? (string) $device->platform : null,
+            'install_id' => $device->install_id ? (string) $device->install_id : null,
+            'status' => (string) $device->status,
+            'source_order_id' => $device->source_order_id ? (int) $device->source_order_id : null,
+            'expires_at' => $this->formatDateAtom((string) $device->expires_at),
+            'last_seen_at' => $this->formatDateAtom($device->last_seen_at ? (string) $device->last_seen_at : null),
+            'created_at' => $this->formatDateAtom($device->created_at ? (string) $device->created_at : null),
+        ];
     }
 
-    private function generateAccessToken(): string
+    private function markActivationTokenExpired(OODBBean $activationToken): void
+    {
+        $activationToken->status = self::STATUS_EXPIRED;
+        $activationToken->updated_at = $this->now();
+        $this->di['db']->store($activationToken);
+    }
+
+    private function markDeviceExpired(OODBBean $device): void
+    {
+        $device->status = self::STATUS_EXPIRED;
+        $device->updated_at = $this->now();
+        $this->di['db']->store($device);
+    }
+
+    private function generateToken(): string
     {
         return strtr(base64_encode(random_bytes(24)), '+/', '-_');
     }
@@ -372,6 +614,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     private function hashToken(string $token): string
     {
         return hash('sha256', $token);
+    }
+
+    private function now(): string
+    {
+        return date('Y-m-d H:i:s');
     }
 
     private function formatDateAtom(?string $date): ?string

@@ -1,12 +1,23 @@
 {% extends request.ajax ? "layout_blank.html.twig" : "layout_default.html.twig" %}
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
+{% set appbridge = client.appbridge_bundle %}
 
 {% block meta_title %}{{ is_en ? 'Profile details' : 'Детали профиля' }}{% endblock %}
 {% block meta_description %}{% endblock %}
 {% block shell_title %}{{ is_en ? 'Profile details' : 'Детали профиля' }}{% endblock %}
 {% block shell_description %}{% endblock %}
 {% block page_header %}{{ is_en ? 'Profile' : 'Профиль' }}{% endblock %}
+{% block shell_head_actions %}
+    <button
+        class="znet-btn znet-btn-accent"
+        type="button"
+        data-appbridge-open-trigger
+        {% if not appbridge.has_active_access or appbridge.devices.available < 1 %}disabled{% endif %}
+    >
+        {{ is_en ? 'Add device' : 'Добавить устройство' }}
+    </button>
+{% endblock %}
 {% block breadcrumb %}
     <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Profile' : 'Профиль' }}</li>
 {% endblock %}
@@ -68,4 +79,240 @@
             </div>
         </div>
     </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div>
+                            <h2 class="h5 mb-1">{{ is_en ? 'App access' : 'Доступ для приложения' }}</h2>
+                            <p class="text-secondary mb-0">
+                                {{ is_en
+                                    ? 'Create a one-time token for a new device. The token expires in 15 minutes and is consumed on first activation.'
+                                    : 'Создайте одноразовый токен для нового устройства. Токен действует 15 минут и сгорает после первой активации.' }}
+                            </p>
+                        </div>
+
+                        <button
+                            class="btn btn-primary"
+                            type="button"
+                            data-appbridge-create
+                            {% if not appbridge.has_active_access or appbridge.devices.available < 1 %}disabled{% endif %}
+                        >
+                            {{ is_en ? 'Generate token' : 'Создать токен' }}
+                        </button>
+                    </div>
+
+                    <div class="znet-appbridge-stats mt-4">
+                        <article class="znet-appbridge-stat">
+                            <span>{{ is_en ? 'Available slots' : 'Доступно слотов' }}</span>
+                            <strong data-appbridge-available>{{ appbridge.devices.available }}</strong>
+                        </article>
+                        <article class="znet-appbridge-stat">
+                            <span>{{ is_en ? 'Connected devices' : 'Подключено устройств' }}</span>
+                            <strong data-appbridge-active>{{ appbridge.devices.active }}</strong>
+                        </article>
+                        <article class="znet-appbridge-stat">
+                            <span>{{ is_en ? 'Pending tokens' : 'Ожидают активации' }}</span>
+                            <strong data-appbridge-pending>{{ appbridge.devices.pending_tokens }}</strong>
+                        </article>
+                    </div>
+
+                    {% if not appbridge.has_active_access %}
+                        <p class="text-secondary small mt-3 mb-0">
+                            {{ is_en
+                                ? 'Application access will become available after the service is fully activated and a subscription link is ready.'
+                                : 'Доступ для приложения появится после полной активации услуги и готовой ссылки на подписку.' }}
+                        </p>
+                    {% elseif appbridge.devices.available < 1 %}
+                        <p class="text-secondary small mt-3 mb-0">
+                            {{ is_en
+                                ? 'All device slots are in use. Revoke an old device before creating a new token.'
+                                : 'Все слоты устройств заняты. Освободите старое устройство перед созданием нового токена.' }}
+                        </p>
+                    {% else %}
+                        <p class="text-secondary small mt-3 mb-0">
+                            {{ is_en
+                                ? 'The application exchanges this one-time token for a device token and then requests the access bundle from billing.'
+                                : 'Приложение обменивает этот одноразовый токен на device-token и затем получает bundle доступа из биллинга.' }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="znet-appbridge-modal" hidden data-appbridge-modal>
+        <div class="znet-appbridge-modal-backdrop" data-appbridge-close></div>
+        <div class="znet-appbridge-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="appbridge-modal-title">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1" id="appbridge-modal-title">{{ is_en ? 'Activation token' : 'Токен активации' }}</h2>
+                            <p class="text-secondary mb-0">
+                                {{ is_en
+                                    ? 'Copy the token and paste it into the application. It remains valid for 15 minutes and can only be used once.'
+                                    : 'Скопируйте токен и вставьте его в приложение. Он действует 15 минут и может быть использован только один раз.' }}
+                            </p>
+                        </div>
+
+                        <button class="znet-btn znet-btn-ghost znet-btn-icon-only" type="button" data-appbridge-close aria-label="{{ is_en ? 'Close' : 'Закрыть' }}">
+                            <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 6l12 12"></path>
+                                <path d="M18 6L6 18"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <button class="znet-appbridge-token-field is-masked" type="button" data-appbridge-token-copy>
+                        <span data-appbridge-token>••••••••••••••••••••••••••••••••</span>
+                    </button>
+
+                    <div class="znet-shell-link-row mt-3">
+                        <button class="btn btn-primary" type="button" data-appbridge-copy-btn>{{ is_en ? 'Copy token' : 'Скопировать токен' }}</button>
+                        <button class="btn btn-outline-primary" type="button" data-appbridge-close>{{ is_en ? 'Close' : 'Закрыть' }}</button>
+                    </div>
+
+                    <p class="text-secondary small mt-3 mb-0" data-appbridge-meta>
+                        {{ is_en ? 'A fresh token will appear here after generation.' : 'После создания здесь появится новый токен.' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.querySelector('[data-appbridge-modal]');
+            const tokenValue = modal?.querySelector('[data-appbridge-token]');
+            const meta = modal?.querySelector('[data-appbridge-meta]');
+            const createButtons = document.querySelectorAll('[data-appbridge-create], [data-appbridge-open-trigger]');
+            const closeButtons = modal?.querySelectorAll('[data-appbridge-close]') || [];
+            const copyButton = modal?.querySelector('[data-appbridge-copy-btn]');
+            const tokenButton = modal?.querySelector('[data-appbridge-token-copy]');
+            const availableValue = document.querySelector('[data-appbridge-available]');
+            const activeValue = document.querySelector('[data-appbridge-active]');
+            const pendingValue = document.querySelector('[data-appbridge-pending]');
+
+            if (!modal || !tokenValue || !meta || createButtons.length === 0) {
+                return;
+            }
+
+            let currentToken = '';
+
+            const setMessage = (message, type = 'success') => {
+                if (typeof FOSSBilling !== 'undefined' && typeof FOSSBilling.message === 'function') {
+                    FOSSBilling.message(message, type);
+                } else {
+                    console[type === 'error' ? 'error' : 'log'](message);
+                }
+            };
+
+            const openModal = () => {
+                modal.hidden = false;
+                document.body.classList.add('znet-appbridge-modal-open');
+            };
+
+            const closeModal = () => {
+                modal.hidden = true;
+                document.body.classList.remove('znet-appbridge-modal-open');
+            };
+
+            const updateStats = (payload) => {
+                const devices = payload?.devices || {};
+
+                if (availableValue && typeof devices.available !== 'undefined') {
+                    availableValue.textContent = devices.available;
+                }
+
+                if (activeValue && typeof devices.active !== 'undefined') {
+                    activeValue.textContent = devices.active;
+                }
+
+                if (pendingValue && typeof devices.pending_tokens !== 'undefined') {
+                    pendingValue.textContent = devices.pending_tokens;
+                }
+
+                const disableCreate = !payload?.has_active_access || Number(devices.available || 0) < 1;
+                createButtons.forEach((button) => {
+                    button.disabled = disableCreate;
+                });
+            };
+
+            const setCreateButtonsDisabled = (disabled) => {
+                createButtons.forEach((button) => {
+                    button.disabled = disabled;
+                });
+            };
+
+            const copyCurrentToken = async () => {
+                if (!currentToken) {
+                    return;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(currentToken);
+                    setMessage('{{ is_en ? 'Token copied' : 'Токен скопирован' }}');
+                } catch (error) {
+                    const helper = document.createElement('textarea');
+                    helper.value = currentToken;
+                    document.body.appendChild(helper);
+                    helper.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(helper);
+                    setMessage('{{ is_en ? 'Token copied' : 'Токен скопирован' }}');
+                }
+            };
+
+            createButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    setCreateButtonsDisabled(true);
+
+                    API.client.post('appbridge/activation_token_create', {}, (result) => {
+                        const activation = result.activation_token || {};
+                        currentToken = activation.token || '';
+                        tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
+                        meta.textContent = activation.expires_at
+                            ? `{{ is_en ? 'Valid until' : 'Действует до' }} ${activation.expires_at}`
+                            : '{{ is_en ? 'The token is ready to copy.' : 'Токен готов к копированию.' }}';
+                        updateStats(result);
+                        openModal();
+                    }, (error) => {
+                        updateStats({
+                            has_active_access: {{ appbridge.has_active_access ? 'true' : 'false' }},
+                            devices: {
+                                available: {{ appbridge.devices.available|default(0) }},
+                                active: {{ appbridge.devices.active|default(0) }},
+                                pending_tokens: {{ appbridge.devices.pending_tokens|default(0) }}
+                            }
+                        });
+                        setMessage(`${error.message} (${error.code})`, 'error');
+                    });
+                });
+            });
+
+            closeButtons.forEach((button) => {
+                button.addEventListener('click', closeModal);
+            });
+
+            if (copyButton) {
+                copyButton.addEventListener('click', copyCurrentToken);
+            }
+
+            if (tokenButton) {
+                tokenButton.addEventListener('click', copyCurrentToken);
+            }
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && !modal.hidden) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
 {% endblock %}

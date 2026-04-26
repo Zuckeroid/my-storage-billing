@@ -774,6 +774,98 @@ html {
   flex: 1 1 220px;
 }
 
+.znet-shell-page .znet-appbridge-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.znet-shell-page .znet-appbridge-stat {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.znet-shell-page .znet-appbridge-stat span {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.znet-shell-page .znet-appbridge-stat strong {
+  color: var(--znet-text);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.znet-shell-page .znet-appbridge-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+
+.znet-shell-page .znet-appbridge-modal[hidden] {
+  display: none;
+}
+
+.znet-shell-page .znet-appbridge-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(1, 4, 9, 0.56);
+  backdrop-filter: blur(10px);
+}
+
+.znet-shell-page .znet-appbridge-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(560px, calc(100vw - 32px));
+  margin: min(12vh, 96px) auto 24px;
+}
+
+.znet-shell-page .znet-appbridge-token-field {
+  width: 100%;
+  min-height: 64px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.znet-shell-page .znet-appbridge-token-field:hover {
+  border-color: rgba(134, 239, 172, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.znet-shell-page .znet-appbridge-token-field span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 18px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  word-break: break-all;
+}
+
+.znet-shell-page .znet-appbridge-token-field.is-masked span {
+  filter: blur(8px);
+  user-select: none;
+}
+
+.znet-appbridge-modal-open {
+  overflow: hidden;
+}
+
 .znet-shell-page .content-block,
 .znet-shell-page .row,
 .znet-shell-page .col,
@@ -1138,7 +1230,8 @@ html {
 
   .znet-shell-page .znet-shell-stat-grid,
   .znet-shell-page .znet-shell-card-grid,
-  .znet-shell-page .znet-shell-card-grid-2 {
+  .znet-shell-page .znet-shell-card-grid-2,
+  .znet-shell-page .znet-appbridge-stats {
     grid-template-columns: 1fr;
   }
 

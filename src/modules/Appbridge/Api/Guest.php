@@ -30,6 +30,7 @@ class Guest extends \Api_Abstract
     {
         return $this->getService()->loginWithToken(
             (string) $data['app_token'],
+            $data,
         );
     }
 }
