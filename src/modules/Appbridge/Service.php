@@ -366,7 +366,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
     private function generateAccessToken(): string
     {
-        return rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        return strtr(base64_encode(random_bytes(24)), '+/', '-_');
     }
 
     private function hashToken(string $token): string
