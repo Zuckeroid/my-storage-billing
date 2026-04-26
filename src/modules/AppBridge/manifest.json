@@ -1,0 +1,7 @@
+{
+  "id": "appbridge",
+  "type": "mod",
+  "name": "External App Bridge",
+  "description": "Authenticates external applications against billing and returns orchestrator access bundles",
+  "version": "1.0.0"
+}
