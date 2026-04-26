@@ -766,7 +766,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $productConfig = [];
         if (!empty($order->product_id)) {
             $product = $this->di['db']->findOne('Product', 'id = :id', [':id' => $order->product_id]);
-            if ($product instanceof OODBBean) {
+            if ($product instanceof \Model_Product || $product instanceof OODBBean) {
                 $productConfig = json_decode($product->config ?? '', true);
                 if (!is_array($productConfig)) {
                     $productConfig = [];
