@@ -3,6 +3,8 @@
 {% set is_en = current_locale starts with 'en' %}
 {% set appbridge = client.appbridge_bundle %}
 {% set appbridge_unlimited = appbridge.devices.is_unlimited_test_mode|default(false) %}
+{% set appbridge_groups = appbridge.devices.groups|default([]) %}
+{% set appbridge_single_order_id = appbridge.devices.eligible_order_count|default(0) == 1 ? appbridge.devices.primary_order_id|default(null) : null %}
 
 {% block meta_title %}{{ is_en ? 'Profile details' : 'Детали профиля' }}{% endblock %}
 {% block meta_description %}{% endblock %}
@@ -10,14 +12,17 @@
 {% block shell_description %}{% endblock %}
 {% block page_header %}{{ is_en ? 'Profile' : 'Профиль' }}{% endblock %}
 {% block shell_head_actions %}
-    <button
-        class="znet-btn znet-btn-accent"
-        type="button"
-        data-appbridge-open-trigger
-        {% if not appbridge.has_active_access %}disabled{% endif %}
-    >
-        {{ is_en ? 'Add device' : 'Добавить устройство' }}
-    </button>
+    {% if appbridge_single_order_id %}
+        <button
+            class="znet-btn znet-btn-accent"
+            type="button"
+            data-appbridge-open-trigger
+            data-order-id="{{ appbridge_single_order_id }}"
+            {% if not appbridge.has_active_access %}disabled{% endif %}
+        >
+            {{ is_en ? 'Add device' : 'Добавить устройство' }}
+        </button>
+    {% endif %}
 {% endblock %}
 {% block breadcrumb %}
     <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Profile' : 'Профиль' }}</li>
@@ -95,14 +100,21 @@
                             </p>
                         </div>
 
-                        <button
-                            class="btn btn-primary"
-                            type="button"
-                            data-appbridge-create
-                            {% if not appbridge.has_active_access %}disabled{% endif %}
-                        >
-                            {{ is_en ? 'Generate token' : 'Создать токен' }}
-                        </button>
+                        {% if appbridge_single_order_id %}
+                            <button
+                                class="btn btn-primary"
+                                type="button"
+                                data-appbridge-create
+                                data-order-id="{{ appbridge_single_order_id }}"
+                                {% if not appbridge.has_active_access %}disabled{% endif %}
+                            >
+                                {{ is_en ? 'Generate token' : 'Создать токен' }}
+                            </button>
+                        {% elseif appbridge.devices.eligible_order_count|default(0) > 1 %}
+                            <p class="text-secondary small mb-0">
+                                {{ is_en ? 'Choose a service below to add a device.' : 'Выберите услугу ниже, чтобы добавить устройство.' }}
+                            </p>
+                        {% endif %}
                     </div>
 
                     <div class="znet-appbridge-stats mt-4">
@@ -138,8 +150,107 @@
                         </p>
                     {% endif %}
 
-                    <div class="znet-appbridge-device-list mt-4" data-appbridge-device-list>
-                        {% if appbridge.devices.list is empty %}
+                    <div class="znet-appbridge-device-list mt-4">
+                        {% if appbridge_groups is empty %}
+                            <article class="znet-appbridge-device znet-appbridge-device-empty">
+                                <div>
+                                    <strong>{{ is_en ? 'No services are linked to application access yet' : 'Пока нет услуг, связанных с доступом приложения' }}</strong>
+                                    <p class="mb-0 text-secondary small">
+                                        {{ is_en
+                                            ? 'After the orchestrator prepares a subscription link, the service will appear here with its own device pool.'
+                                            : 'Когда оркестратор подготовит ссылку на подписку, услуга появится здесь со своим отдельным пулом устройств.' }}
+                                    </p>
+                                </div>
+                            </article>
+                        {% else %}
+                            {% for group in appbridge_groups %}
+                                <section class="mt-4" data-appbridge-order="{{ group.order_id }}">
+                                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                                        <div>
+                                            <strong>{{ group.title ?: ((is_en ? 'Service' : 'Услуга') ~ ' #' ~ group.order_id) }}</strong>
+                                            <p class="mb-0 text-secondary small">
+                                                {% if group.eligible_for_app %}
+                                                    {{ is_en ? 'Ready for device activation' : 'Готово к подключению устройств' }}
+                                                {% else %}
+                                                    {{ is_en ? 'Will become available after the service is fully activated' : 'Станет доступно после полной активации услуги' }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            class="btn btn-outline-primary"
+                                            type="button"
+                                            data-appbridge-create
+                                            data-order-id="{{ group.order_id }}"
+                                            {% if not group.eligible_for_app or (not appbridge_unlimited and group.available < 1) %}disabled{% endif %}
+                                        >
+                                            {{ is_en ? 'Add device' : 'Добавить устройство' }}
+                                        </button>
+                                    </div>
+
+                                    <div class="znet-appbridge-stats mt-3">
+                                        <article class="znet-appbridge-stat">
+                                            <span>{{ is_en ? 'Device limit' : 'Лимит устройств' }}</span>
+                                            <strong data-appbridge-order-allowed>{{ appbridge_unlimited and group.eligible_for_app ? '∞' : group.device_limit }}</strong>
+                                        </article>
+                                        <article class="znet-appbridge-stat">
+                                            <span>{{ is_en ? 'Free slots' : 'Свободно слотов' }}</span>
+                                            <strong data-appbridge-order-available>{{ appbridge_unlimited and group.eligible_for_app ? '∞' : group.available }}</strong>
+                                        </article>
+                                        <article class="znet-appbridge-stat">
+                                            <span>{{ is_en ? 'Connected devices' : 'Подключено устройств' }}</span>
+                                            <strong data-appbridge-order-active>{{ group.active }}</strong>
+                                        </article>
+                                        <article class="znet-appbridge-stat">
+                                            <span>{{ is_en ? 'Pending tokens' : 'Ожидают активации' }}</span>
+                                            <strong data-appbridge-order-pending>{{ group.pending_tokens }}</strong>
+                                        </article>
+                                    </div>
+
+                                    <div class="znet-appbridge-device-list mt-3">
+                                        {% if group.devices is empty %}
+                                            <article class="znet-appbridge-device znet-appbridge-device-empty">
+                                                <div>
+                                                    <strong>{{ is_en ? 'No devices in this service yet' : 'В этой услуге пока нет устройств' }}</strong>
+                                                    <p class="mb-0 text-secondary small">
+                                                        {{ is_en
+                                                            ? 'Create a token for this service, paste it into the app, and the device will appear here after activation.'
+                                                            : 'Создайте токен для этой услуги, вставьте его в приложение, и после активации устройство появится здесь.' }}
+                                                    </p>
+                                                </div>
+                                            </article>
+                                        {% else %}
+                                            {% for device in group.devices %}
+                                                {% set device_meta = [] %}
+                                                {% if device.platform %}{% set device_meta = device_meta|merge([device.platform]) %}{% endif %}
+                                                {% if device.install_id %}{% set device_meta = device_meta|merge([device.install_id]) %}{% endif %}
+                                                {% if device.last_seen_at %}{% set device_meta = device_meta|merge([(is_en ? 'Last seen' : 'Последний запрос') ~ ': ' ~ device.last_seen_at]) %}{% endif %}
+                                                <article class="znet-appbridge-device" data-appbridge-device-row data-device-id="{{ device.id }}">
+                                                    <div class="znet-appbridge-device-copy">
+                                                        <strong>{{ device.name ?: ((is_en ? 'Device' : 'Устройство') ~ ' #' ~ device.id) }}</strong>
+                                                        <p class="mb-0 text-secondary small">{{ device_meta|join(' • ') }}</p>
+                                                    </div>
+                                                    <div class="znet-appbridge-device-actions">
+                                                        <button
+                                                            class="btn btn-outline-primary"
+                                                            type="button"
+                                                            data-appbridge-revoke
+                                                            data-device-id="{{ device.id }}"
+                                                        >
+                                                            {{ is_en ? 'Disconnect' : 'Отключить' }}
+                                                        </button>
+                                                    </div>
+                                                </article>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </section>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="znet-appbridge-device-list mt-4" data-appbridge-legacy-device-list hidden>
+                        {% if false %}
                             <article class="znet-appbridge-device znet-appbridge-device-empty">
                                 <div>
                                     <strong>{{ is_en ? 'No devices connected yet' : 'Подключенных устройств пока нет' }}</strong>
@@ -250,7 +361,9 @@
                     available: {{ appbridge.devices.available|default(0) }},
                     active: {{ appbridge.devices.active|default(0) }},
                     pending_tokens: {{ appbridge.devices.pending_tokens|default(0) }},
-                    is_unlimited_test_mode: {{ appbridge_unlimited ? 'true' : 'false' }}
+                    eligible_order_count: {{ appbridge.devices.eligible_order_count|default(0) }},
+                    is_unlimited_test_mode: {{ appbridge_unlimited ? 'true' : 'false' }},
+                    groups: {{ appbridge_groups|json_encode|raw }}
                 }
             };
 
@@ -275,6 +388,8 @@
             const updateStats = (payload) => {
                 const devices = payload?.devices || {};
                 const isUnlimited = Boolean(devices.is_unlimited_test_mode);
+                const groups = Array.isArray(devices.groups) ? devices.groups : [];
+                const groupMap = new Map(groups.map((group) => [Number(group.order_id || 0), group]));
 
                 if (allowedValue && typeof devices.allowed !== 'undefined') {
                     allowedValue.textContent = isUnlimited ? '∞' : devices.allowed;
@@ -292,9 +407,48 @@
                     pendingValue.textContent = devices.pending_tokens;
                 }
 
-                const disableCreate = !payload?.has_active_access || (!isUnlimited && Number(devices.available || 0) < 1);
                 createButtons.forEach((button) => {
+                    const orderId = Number(button.getAttribute('data-order-id') || 0);
+                    if (orderId > 0) {
+                        const group = groupMap.get(orderId);
+                        const disableForGroup = !group || !group.eligible_for_app || (!isUnlimited && Number(group.available || 0) < 1);
+                        button.disabled = disableForGroup;
+                        return;
+                    }
+
+                    const disableCreate =
+                        !payload?.has_active_access
+                        || Number(devices.eligible_order_count || 0) !== 1
+                        || (!isUnlimited && Number(devices.available || 0) < 1);
                     button.disabled = disableCreate;
+                });
+
+                groups.forEach((group) => {
+                    const root = document.querySelector(`[data-appbridge-order="${group.order_id}"]`);
+                    if (!root) {
+                        return;
+                    }
+
+                    const allowed = root.querySelector('[data-appbridge-order-allowed]');
+                    const available = root.querySelector('[data-appbridge-order-available]');
+                    const active = root.querySelector('[data-appbridge-order-active]');
+                    const pending = root.querySelector('[data-appbridge-order-pending]');
+
+                    if (allowed) {
+                        allowed.textContent = isUnlimited && group.eligible_for_app ? '∞' : group.device_limit;
+                    }
+
+                    if (available) {
+                        available.textContent = isUnlimited && group.eligible_for_app ? '∞' : group.available;
+                    }
+
+                    if (active) {
+                        active.textContent = group.active;
+                    }
+
+                    if (pending) {
+                        pending.textContent = group.pending_tokens;
+                    }
                 });
             };
 
@@ -326,12 +480,18 @@
             createButtons.forEach((button) => {
                 button.addEventListener('click', () => {
                     setCreateButtonsDisabled(true);
+                    const orderId = Number(button.getAttribute('data-order-id') || 0);
+                    const payload = orderId > 0 ? { order_id: orderId } : {};
 
-                    API.client.post('appbridge/activation_token_create', {}, (result) => {
+                    API.client.post('appbridge/activation_token_create', payload, (result) => {
                         const activation = result.activation_token || {};
                         currentToken = activation.token || '';
                         tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
                         meta.textContent = '{{ is_en ? 'Single-use token ready to copy.' : 'Одноразовый токен готов к копированию.' }}';
+                        const sourceTitle = activation.source_title || result?.service?.title || '';
+                        if (sourceTitle) {
+                            meta.textContent = `{{ is_en ? 'Single-use token ready for service:' : 'Одноразовый токен готов для услуги:' }} ${sourceTitle}`;
+                        }
                         updateStats(result);
                         openModal();
                     }, (error) => {

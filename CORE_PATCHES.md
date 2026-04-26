@@ -74,6 +74,7 @@ These files are not separate extensions; they are upstream modules we already ch
 - `src/modules/Client/templates/client/mod_client_profile.html.twig`
   - profile simplification
   - Appbridge token/device UI
+  - per-service device pools and order-scoped token creation
 - `src/modules/Index/templates/client/mod_index_dashboard.html.twig`
   - dashboard cleanup and product-card changes
 - `src/modules/Page/templates/client/*`

@@ -95,7 +95,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->buildAccessBundle($client);
     }
 
-    public function createActivationTokenBundleForClient(\Model_Client $client): array
+    public function createActivationTokenBundleForClient(\Model_Client $client, ?int $orderId = null): array
     {
         $this->ensureStorage();
         $this->expireActivationTokens((int) $client->id);
@@ -105,15 +105,27 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
         }
 
-        $this->revokePendingActivationTokens((int) $client->id);
-
         $overview = $this->getDeviceOverview($client);
         if (!$overview['has_active_access']) {
             throw new \FOSSBilling\InformationException('No active subscription is ready for application access yet.', [], 409);
         }
 
-        if (!self::UNLIMITED_DEVICE_TEST_MODE && $overview['available'] < 1) {
-            throw new \FOSSBilling\InformationException('No device slots are available for this account.', [], 409);
+        $selectedGroup = $this->resolveActivationTargetGroup($overview, $orderId);
+        if ($selectedGroup === null) {
+            throw new \FOSSBilling\InformationException('Selected service is not ready for device activation.', [], 409);
+        }
+
+        $selectedOrderId = (int) $selectedGroup['order_id'];
+        $this->revokePendingActivationTokens((int) $client->id, $selectedOrderId);
+
+        $overview = $this->getDeviceOverview($client);
+        $selectedGroup = $this->resolveActivationTargetGroup($overview, $selectedOrderId);
+        if ($selectedGroup === null) {
+            throw new \FOSSBilling\InformationException('Selected service is not ready for device activation.', [], 409);
+        }
+
+        if (!self::UNLIMITED_DEVICE_TEST_MODE && (int) ($selectedGroup['available'] ?? 0) < 1) {
+            throw new \FOSSBilling\InformationException('No device slots are available for this service.', [], 409);
         }
 
         $token = $this->generateToken();
@@ -121,7 +133,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
         $row = $this->di['db']->dispense(self::ACTIVATION_TOKEN_BEAN);
         $row->client_id = $client->id;
-        $row->source_order_id = $overview['primary_order_id'];
+        $row->source_order_id = $selectedOrderId;
         $row->token_hash = $this->hashToken($token);
         $row->status = self::STATUS_PENDING;
         $row->expires_at = '2999-12-31 23:59:59';
@@ -134,14 +146,16 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'token' => $token,
             'created_at' => $this->formatDateAtom($now),
             'single_use' => true,
+            'source_order_id' => $selectedOrderId,
+            'source_title' => $selectedGroup['title'] ?? null,
         ];
 
         return $bundle;
     }
 
-    public function rotateTokenForClient(\Model_Client $client): array
+    public function rotateTokenForClient(\Model_Client $client, ?int $orderId = null): array
     {
-        return $this->createActivationTokenBundleForClient($client);
+        return $this->createActivationTokenBundleForClient($client, $orderId);
     }
 
     public function revokeDeviceForClient(\Model_Client $client, int $deviceId): array
@@ -194,11 +208,19 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             throw new \FOSSBilling\InformationException('No active subscription is ready for application access yet.', [], 409);
         }
 
+        $selectedGroup = $this->resolveActivationTargetGroup(
+            $overview,
+            !empty($activationToken->source_order_id) ? (int) $activationToken->source_order_id : null,
+        );
+        if ($selectedGroup === null) {
+            throw new \FOSSBilling\InformationException('Selected service is not ready for device activation.', [], 409);
+        }
+
         if (
             !self::UNLIMITED_DEVICE_TEST_MODE
-            && (((int) $overview['active']) + 1 + ((int) $overview['pending_tokens']) > (int) $overview['allowed'])
+            && (((int) ($selectedGroup['active'] ?? 0)) + 1 + ((int) ($selectedGroup['pending_tokens'] ?? 0)) > (int) ($selectedGroup['device_limit'] ?? 0))
         ) {
-            throw new \FOSSBilling\InformationException('No device slots are available for this account.', [], 409);
+            throw new \FOSSBilling\InformationException('No device slots are available for this service.', [], 409);
         }
 
         $deviceToken = $this->generateToken();
@@ -257,6 +279,10 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         ?OODBBean $device = null,
     ): array {
         $subscriptions = $this->collectClientSubscriptions($client);
+        $preferredOrderId = $device instanceof OODBBean && !empty($device->source_order_id)
+            ? (int) $device->source_order_id
+            : null;
+        $subscriptions = $this->prioritizeSubscriptionsByOrder($subscriptions, $preferredOrderId);
         $activeLinks = [];
 
         foreach ($subscriptions as $subscription) {
@@ -329,6 +355,32 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         return $subscriptions[0] ?? null;
+    }
+
+    private function prioritizeSubscriptionsByOrder(array $subscriptions, ?int $preferredOrderId): array
+    {
+        if ($preferredOrderId === null || $preferredOrderId < 1 || count($subscriptions) < 2) {
+            return $subscriptions;
+        }
+
+        $preferred = [];
+        $rest = [];
+
+        foreach ($subscriptions as $subscription) {
+            $subscriptionOrderId = (int) ($subscription['order_id'] ?? 0);
+            if ($subscriptionOrderId === $preferredOrderId) {
+                $preferred[] = $subscription;
+                continue;
+            }
+
+            $rest[] = $subscription;
+        }
+
+        if (empty($preferred)) {
+            return $subscriptions;
+        }
+
+        return array_merge($preferred, $rest);
     }
 
     private function buildConnectionPayload(array $subscriptions, array $activeLinks, ?array $primarySubscription): array
@@ -448,21 +500,44 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     private function getDeviceOverview(\Model_Client $client, ?int $ignoreActivationTokenId = null): array
     {
         $subscriptions = $this->collectClientSubscriptions($client);
-        $eligibleSubscriptions = array_values(array_filter(
-            $subscriptions,
-            static fn(array $subscription): bool => !empty($subscription['eligible_for_app']),
-        ));
-
-        $allowed = 0;
+        $clientId = (int) $client->id;
+        $groupMap = [];
+        $eligibleOrderCount = 0;
         $primaryOrderId = null;
-        foreach ($eligibleSubscriptions as $subscription) {
-            $primaryOrderId ??= (int) $subscription['order_id'];
-            $allowed += max(0, (int) ($subscription['device_limit'] ?? 0));
+
+        foreach ($subscriptions as $subscription) {
+            $orderId = (int) ($subscription['order_id'] ?? 0);
+            if ($orderId < 1) {
+                continue;
+            }
+
+            if (!empty($subscription['eligible_for_app'])) {
+                ++$eligibleOrderCount;
+                $primaryOrderId ??= $orderId;
+            }
+
+            $groupMap[$orderId] = [
+                'order_id' => $orderId,
+                'title' => $subscription['title'] ?? null,
+                'order_status' => $subscription['order_status'] ?? null,
+                'provision_status' => $subscription['provision_status'] ?? null,
+                'device_limit' => max(0, (int) ($subscription['device_limit'] ?? 0)),
+                'eligible_for_app' => !empty($subscription['eligible_for_app']),
+                'active' => 0,
+                'pending_tokens' => 0,
+                'available' => 0,
+                'is_primary' => false,
+                'devices' => [],
+            ];
         }
 
-        $clientId = (int) $client->id;
-        $activeDevices = (int) $this->di['db']->getCell(
-            'SELECT COUNT(*) FROM `' . self::DEVICE_BEAN . '` WHERE client_id = :client_id AND status = :status',
+        if ($primaryOrderId === null && !empty($groupMap)) {
+            $primaryOrderId = (int) array_key_first($groupMap);
+        }
+
+        $activeDeviceRows = $this->di['db']->find(
+            self::DEVICE_BEAN,
+            'client_id = :client_id AND status = :status ORDER BY created_at DESC',
             [
                 ':client_id' => $clientId,
                 ':status' => self::STATUS_ACTIVE,
@@ -473,36 +548,87 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             ':client_id' => $clientId,
             ':status' => self::STATUS_PENDING,
         ];
-        $pendingSql = 'SELECT COUNT(*) FROM `' . self::ACTIVATION_TOKEN_BEAN . '` WHERE client_id = :client_id AND status = :status';
+        $pendingSql = 'client_id = :client_id AND status = :status';
         if ($ignoreActivationTokenId !== null) {
             $pendingSql .= ' AND id != :ignore_id';
             $pendingParams[':ignore_id'] = $ignoreActivationTokenId;
         }
-        $pendingTokens = (int) $this->di['db']->getCell($pendingSql, $pendingParams);
-
-        $deviceRows = $this->di['db']->find(
-            self::DEVICE_BEAN,
-            'client_id = :client_id AND status = :status ORDER BY created_at DESC',
-            [
-                ':client_id' => $clientId,
-                ':status' => self::STATUS_ACTIVE,
-            ],
+        $pendingTokenRows = $this->di['db']->find(
+            self::ACTIVATION_TOKEN_BEAN,
+            $pendingSql . ' ORDER BY created_at DESC',
+            $pendingParams,
         );
 
+        $groupOrderIds = array_map('intval', array_keys($groupMap));
         $mappedDevices = [];
-        foreach ($deviceRows as $deviceRow) {
-            if ($deviceRow instanceof OODBBean) {
-                $mappedDevices[] = $this->mapDeviceRow($deviceRow);
+        $activeDevices = 0;
+        foreach ($activeDeviceRows as $deviceRow) {
+            if (!$deviceRow instanceof OODBBean) {
+                continue;
+            }
+
+            ++$activeDevices;
+            $mappedDevices[] = $this->mapDeviceRow($deviceRow);
+            $resolvedOrderId = $this->resolveOverviewOrderId(
+                isset($deviceRow->source_order_id) ? (int) $deviceRow->source_order_id : 0,
+                $primaryOrderId,
+                $groupOrderIds,
+            );
+
+            if ($resolvedOrderId !== null && isset($groupMap[$resolvedOrderId])) {
+                ++$groupMap[$resolvedOrderId]['active'];
+                $groupMap[$resolvedOrderId]['devices'][] = $this->mapDeviceRow($deviceRow);
             }
         }
 
-        if (self::UNLIMITED_DEVICE_TEST_MODE && !empty($eligibleSubscriptions)) {
-            $allowed = max($allowed, self::UNLIMITED_DEVICE_SENTINEL);
+        $pendingTokens = 0;
+        foreach ($pendingTokenRows as $pendingTokenRow) {
+            if (!$pendingTokenRow instanceof OODBBean) {
+                continue;
+            }
+
+            ++$pendingTokens;
+            $resolvedOrderId = $this->resolveOverviewOrderId(
+                isset($pendingTokenRow->source_order_id) ? (int) $pendingTokenRow->source_order_id : 0,
+                $primaryOrderId,
+                $groupOrderIds,
+            );
+
+            if ($resolvedOrderId !== null && isset($groupMap[$resolvedOrderId])) {
+                ++$groupMap[$resolvedOrderId]['pending_tokens'];
+            }
         }
 
-        $available = self::UNLIMITED_DEVICE_TEST_MODE && !empty($eligibleSubscriptions)
-            ? self::UNLIMITED_DEVICE_SENTINEL
-            : max(0, $allowed - $activeDevices - $pendingTokens);
+        $allowed = 0;
+        $available = 0;
+        foreach ($groupMap as $orderId => &$group) {
+            $group['is_primary'] = $primaryOrderId !== null && $orderId === $primaryOrderId;
+            $groupAllowed = $group['eligible_for_app'] ? max(0, (int) $group['device_limit']) : 0;
+
+            if (self::UNLIMITED_DEVICE_TEST_MODE && $group['eligible_for_app']) {
+                $groupAllowed = max($groupAllowed, self::UNLIMITED_DEVICE_SENTINEL);
+            }
+
+            if ($group['eligible_for_app']) {
+                $allowed += $groupAllowed;
+            }
+
+            $group['available'] = self::UNLIMITED_DEVICE_TEST_MODE && $group['eligible_for_app']
+                ? self::UNLIMITED_DEVICE_SENTINEL
+                : max(0, $groupAllowed - (int) $group['active'] - (int) $group['pending_tokens']);
+
+            if ($group['eligible_for_app']) {
+                $available += (int) $group['available'];
+            }
+        }
+        unset($group);
+
+        if (self::UNLIMITED_DEVICE_TEST_MODE && $eligibleOrderCount > 0) {
+            $allowed = max($allowed, self::UNLIMITED_DEVICE_SENTINEL);
+            $available = self::UNLIMITED_DEVICE_SENTINEL;
+        }
+
+        $hasActiveAccess = $eligibleOrderCount > 0;
 
         return [
             'allowed' => $allowed,
@@ -510,11 +636,57 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'pending_tokens' => $pendingTokens,
             'available' => $available,
             'primary_order_id' => $primaryOrderId,
-            'has_active_access' => !empty($eligibleSubscriptions),
-            'eligible_order_count' => count($eligibleSubscriptions),
+            'has_active_access' => $hasActiveAccess,
+            'eligible_order_count' => $eligibleOrderCount,
             'is_unlimited_test_mode' => self::UNLIMITED_DEVICE_TEST_MODE,
             'list' => $mappedDevices,
+            'groups' => array_values($groupMap),
         ];
+    }
+
+    private function resolveActivationTargetGroup(array $overview, ?int $orderId): ?array
+    {
+        $groups = [];
+        foreach ($overview['groups'] ?? [] as $group) {
+            $groupId = (int) ($group['order_id'] ?? 0);
+            if ($groupId < 1 || empty($group['eligible_for_app'])) {
+                continue;
+            }
+
+            $groups[$groupId] = $group;
+        }
+
+        if (empty($groups)) {
+            return null;
+        }
+
+        if ($orderId !== null) {
+            return $groups[$orderId] ?? null;
+        }
+
+        $primaryOrderId = isset($overview['primary_order_id']) ? (int) $overview['primary_order_id'] : 0;
+        if ($primaryOrderId > 0 && isset($groups[$primaryOrderId])) {
+            return $groups[$primaryOrderId];
+        }
+
+        return reset($groups) ?: null;
+    }
+
+    private function resolveOverviewOrderId(int $sourceOrderId, ?int $primaryOrderId, array $knownOrderIds): ?int
+    {
+        if ($sourceOrderId > 0 && in_array($sourceOrderId, $knownOrderIds, true)) {
+            return $sourceOrderId;
+        }
+
+        if ($primaryOrderId !== null && in_array($primaryOrderId, $knownOrderIds, true)) {
+            return $primaryOrderId;
+        }
+
+        if (!empty($knownOrderIds)) {
+            return (int) $knownOrderIds[0];
+        }
+
+        return null;
     }
 
     private function resolveOrderDeviceLimit(\Model_ClientOrder $order, array $access): int
@@ -664,19 +836,26 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $this->di['db']->exec($sql, $params);
     }
 
-    private function revokePendingActivationTokens(int $clientId): void
+    private function revokePendingActivationTokens(int $clientId, ?int $sourceOrderId = null): void
     {
-        $this->di['db']->exec(
-            'UPDATE `' . self::ACTIVATION_TOKEN_BEAN . '`
+        $sql = 'UPDATE `' . self::ACTIVATION_TOKEN_BEAN . '`
                 SET status = :status_revoked, updated_at = :now
               WHERE client_id = :client_id
-                AND status = :status_pending',
-            [
-                ':status_revoked' => self::STATUS_REVOKED,
-                ':status_pending' => self::STATUS_PENDING,
-                ':client_id' => $clientId,
-                ':now' => $this->now(),
-            ],
+                AND status = :status_pending';
+        $params = [
+            ':status_revoked' => self::STATUS_REVOKED,
+            ':status_pending' => self::STATUS_PENDING,
+            ':client_id' => $clientId,
+            ':now' => $this->now(),
+        ];
+        if ($sourceOrderId !== null) {
+            $sql .= ' AND source_order_id = :source_order_id';
+            $params[':source_order_id'] = $sourceOrderId;
+        }
+
+        $this->di['db']->exec(
+            $sql,
+            $params,
         );
     }
 

@@ -23,12 +23,18 @@ class Client extends \Api_Abstract
 
     public function token_rotate(array $data): array
     {
-        return $this->getService()->createActivationTokenBundleForClient($this->getIdentity());
+        return $this->getService()->createActivationTokenBundleForClient(
+            $this->getIdentity(),
+            isset($data['order_id']) ? (int) $data['order_id'] : null,
+        );
     }
 
     public function activation_token_create(array $data): array
     {
-        return $this->getService()->createActivationTokenBundleForClient($this->getIdentity());
+        return $this->getService()->createActivationTokenBundleForClient(
+            $this->getIdentity(),
+            isset($data['order_id']) ? (int) $data['order_id'] : null,
+        );
     }
 
     #[RequiredParams(['id' => 'Device id required'])]
