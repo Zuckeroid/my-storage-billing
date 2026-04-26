@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache-2.0
  */
 
-namespace Box\Mod\AppBridge\Api;
+namespace Box\Mod\Appbridge\Api;
 
 use FOSSBilling\Validation\Api\RequiredParams;
 
@@ -25,11 +25,10 @@ class Guest extends \Api_Abstract
         );
     }
 
-    #[RequiredParams(['app_code' => 'App code required', 'app_token' => 'App token required'])]
+    #[RequiredParams(['app_token' => 'App token required'])]
     public function token_login(array $data): array
     {
         return $this->getService()->loginWithToken(
-            (string) $data['app_code'],
             (string) $data['app_token'],
         );
     }

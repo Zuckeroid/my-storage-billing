@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache-2.0
  */
 
-namespace Box\Mod\AppBridge;
+namespace Box\Mod\Appbridge;
 
 class Service implements \FOSSBilling\InjectionAwareInterface
 {
@@ -50,9 +50,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $bundle;
     }
 
-    public function loginWithToken(string $appCode, string $appToken): array
+    public function loginWithToken(string $appToken): array
     {
-        $client = $this->findClientByAppCode($appCode);
+        $client = $this->findClientByToken($appToken);
         if (!$client instanceof \Model_Client || $client->status !== \Model_Client::ACTIVE) {
             throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
         }
@@ -234,6 +234,18 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $client instanceof \Model_Client ? $client : null;
     }
 
+    private function findClientByToken(string $appToken): ?\Model_Client
+    {
+        $clientId = $this->findClientIdByToken($appToken);
+        if ($clientId === null) {
+            return null;
+        }
+
+        $client = $this->di['db']->findOne('Client', 'id = :id', [':id' => $clientId]);
+
+        return $client instanceof \Model_Client ? $client : null;
+    }
+
     private function findClientIdByAppCode(string $appCode): ?int
     {
         $normalizedCode = strtoupper(trim($appCode));
@@ -252,6 +264,34 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 ':extension' => self::EXTENSION_NAME,
                 ':meta_key' => self::META_APP_CODE,
                 ':meta_value' => $normalizedCode,
+            ],
+        );
+
+        if (!is_array($row) || empty($row['client_id'])) {
+            return null;
+        }
+
+        return (int) $row['client_id'];
+    }
+
+    private function findClientIdByToken(string $appToken): ?int
+    {
+        $normalizedToken = trim($appToken);
+        if ($normalizedToken === '') {
+            return null;
+        }
+
+        $row = $this->di['db']->getRow(
+            'SELECT client_id
+               FROM extension_meta
+              WHERE extension = :extension
+                AND meta_key = :meta_key
+                AND meta_value = :meta_value
+              LIMIT 1',
+            [
+                ':extension' => self::EXTENSION_NAME,
+                ':meta_key' => self::META_TOKEN_HASH,
+                ':meta_value' => $this->hashToken($normalizedToken),
             ],
         );
 
