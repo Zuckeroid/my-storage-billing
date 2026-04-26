@@ -16,6 +16,7 @@ use RedBeanPHP\OODBBean;
 
 class Service implements \FOSSBilling\InjectionAwareInterface
 {
+    public const string CONTRACT_VERSION = 'appbridge-v1';
     private const string ACTIVATION_TOKEN_BEAN = 'mod_appbridge_activation_token';
     private const string DEVICE_BEAN = 'mod_appbridge_device';
     private const int DEVICE_TOKEN_TTL_DAYS = 30;
@@ -265,6 +266,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         $overview = $this->getDeviceOverview($client);
+        $primarySubscription = $this->resolvePrimarySubscription($subscriptions);
+        $connection = $this->buildConnectionPayload($subscriptions, $activeLinks, $primarySubscription);
+        $service = $this->buildPrimaryServicePayload($primarySubscription);
 
         $app = [
             'token_expires_at' => $this->formatDateAtom($tokenExpiresAt),
@@ -280,6 +284,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         return [
+            'contract_version' => self::CONTRACT_VERSION,
             'client' => [
                 'id' => (int) $client->id,
                 'email' => (string) $client->email,
@@ -289,12 +294,102 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'status' => (string) $client->status,
             ],
             'app' => $app,
+            'access' => [
+                'has_active_access' => !empty($activeLinks),
+                'device_binding' => 'per-device-token',
+                'connection_mode' => 'shared-subscription-link',
+                'revoke_scope' => 'application-token',
+            ],
+            'connection' => $connection,
+            'service' => $service,
             'has_active_access' => !empty($activeLinks),
             'active_subscription_links' => array_values($activeLinks),
             'subscriptions' => $subscriptions,
             'devices' => $overview,
             'generated_at' => date(DATE_ATOM),
         ];
+    }
+
+    private function resolvePrimarySubscription(array $subscriptions): ?array
+    {
+        $activeReady = array_values(array_filter(
+            $subscriptions,
+            static fn(array $subscription): bool =>
+                ($subscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
+                && ($subscription['provision_status'] ?? null) === self::STATUS_ACTIVE
+                && !empty($subscription['subscription_link']),
+        ));
+
+        if (!empty($activeReady)) {
+            return $activeReady[0];
+        }
+
+        return $subscriptions[0] ?? null;
+    }
+
+    private function buildConnectionPayload(array $subscriptions, array $activeLinks, ?array $primarySubscription): array
+    {
+        $primaryLink = null;
+        if ($primarySubscription !== null) {
+            $primaryLink = isset($primarySubscription['subscription_link'])
+                ? trim((string) $primarySubscription['subscription_link'])
+                : null;
+
+            if ($primaryLink === '') {
+                $primaryLink = null;
+            }
+        }
+
+        $primaryLink ??= $activeLinks[0] ?? null;
+        $type = $this->detectConnectionType($primaryLink);
+        $ready = $primaryLink !== null;
+
+        return [
+            'ready' => $ready,
+            'type' => $type,
+            'link' => $primaryLink,
+            'links' => array_values($activeLinks),
+            'xray_config' => null,
+            'source_order_id' => $primarySubscription['order_id'] ?? null,
+            'source_title' => $primarySubscription['title'] ?? null,
+            'revision' => $ready ? hash('sha256', (string) $primaryLink) : null,
+            'available_connection_count' => count($activeLinks),
+            'service_count' => count($subscriptions),
+        ];
+    }
+
+    private function buildPrimaryServicePayload(?array $primarySubscription): ?array
+    {
+        if ($primarySubscription === null) {
+            return null;
+        }
+
+        return [
+            'order_id' => $primarySubscription['order_id'] ?? null,
+            'title' => $primarySubscription['title'] ?? null,
+            'order_status' => $primarySubscription['order_status'] ?? null,
+            'provision_status' => $primarySubscription['provision_status'] ?? null,
+            'device_limit' => $primarySubscription['device_limit'] ?? 0,
+            'eligible_for_app' => !empty($primarySubscription['eligible_for_app']),
+            'last_sync_at' => $primarySubscription['last_sync_at'] ?? null,
+            'access_email_sent_at' => $primarySubscription['access_email_sent_at'] ?? null,
+        ];
+    }
+
+    private function detectConnectionType(?string $link): ?string
+    {
+        if ($link === null || trim($link) === '') {
+            return null;
+        }
+
+        $normalized = strtolower(trim($link));
+        foreach (['vless://', 'vmess://', 'trojan://', 'ss://', 'ssr://'] as $prefix) {
+            if (str_starts_with($normalized, $prefix)) {
+                return rtrim($prefix, ':/');
+            }
+        }
+
+        return 'link';
     }
 
     private function collectClientSubscriptions(\Model_Client $client): array
