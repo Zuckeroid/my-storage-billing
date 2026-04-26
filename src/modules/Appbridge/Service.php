@@ -41,6 +41,19 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->di;
     }
 
+    public static function onAfterAdminOrderDelete(\Box_Event $event): void
+    {
+        $params = $event->getParameters();
+        $orderId = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($orderId <= 0) {
+            return;
+        }
+
+        $service = new self();
+        $service->setDi($event->getDi());
+        $service->cleanupArtifactsForOrder($orderId);
+    }
+
     public function install(): bool
     {
         $this->ensureStorage();
@@ -567,8 +580,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 continue;
             }
 
-            ++$activeDevices;
-            $mappedDevices[] = $this->mapDeviceRow($deviceRow);
             $resolvedOrderId = $this->resolveOverviewOrderId(
                 isset($deviceRow->source_order_id) ? (int) $deviceRow->source_order_id : 0,
                 $primaryOrderId,
@@ -576,8 +587,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             );
 
             if ($resolvedOrderId !== null && isset($groupMap[$resolvedOrderId])) {
+                ++$activeDevices;
+                $mappedDevice = $this->mapDeviceRow($deviceRow);
+                $mappedDevices[] = $mappedDevice;
                 ++$groupMap[$resolvedOrderId]['active'];
-                $groupMap[$resolvedOrderId]['devices'][] = $this->mapDeviceRow($deviceRow);
+                $groupMap[$resolvedOrderId]['devices'][] = $mappedDevice;
             }
         }
 
@@ -587,7 +601,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 continue;
             }
 
-            ++$pendingTokens;
             $resolvedOrderId = $this->resolveOverviewOrderId(
                 isset($pendingTokenRow->source_order_id) ? (int) $pendingTokenRow->source_order_id : 0,
                 $primaryOrderId,
@@ -595,6 +608,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             );
 
             if ($resolvedOrderId !== null && isset($groupMap[$resolvedOrderId])) {
+                ++$pendingTokens;
                 ++$groupMap[$resolvedOrderId]['pending_tokens'];
             }
         }
@@ -856,6 +870,40 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $this->di['db']->exec(
             $sql,
             $params,
+        );
+    }
+
+    private function cleanupArtifactsForOrder(int $orderId): void
+    {
+        if ($orderId < 1) {
+            return;
+        }
+
+        $now = $this->now();
+        $this->di['db']->exec(
+            'UPDATE `' . self::ACTIVATION_TOKEN_BEAN . '`
+                SET status = :status_revoked, updated_at = :now
+              WHERE source_order_id = :source_order_id
+                AND status = :status_pending',
+            [
+                ':status_revoked' => self::STATUS_REVOKED,
+                ':status_pending' => self::STATUS_PENDING,
+                ':source_order_id' => $orderId,
+                ':now' => $now,
+            ],
+        );
+
+        $this->di['db']->exec(
+            'UPDATE `' . self::DEVICE_BEAN . '`
+                SET status = :status_revoked, expires_at = :now, updated_at = :now
+              WHERE source_order_id = :source_order_id
+                AND status = :status_active',
+            [
+                ':status_revoked' => self::STATUS_REVOKED,
+                ':status_active' => self::STATUS_ACTIVE,
+                ':source_order_id' => $orderId,
+                ':now' => $now,
+            ],
         );
     }
 
