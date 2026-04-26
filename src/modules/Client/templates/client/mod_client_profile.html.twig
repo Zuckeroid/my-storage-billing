@@ -107,7 +107,11 @@
 
                     <div class="znet-appbridge-stats mt-4">
                         <article class="znet-appbridge-stat">
-                            <span>{{ is_en ? 'Available slots' : 'Доступно слотов' }}</span>
+                            <span>{{ is_en ? 'Device limit' : 'Лимит устройств' }}</span>
+                            <strong data-appbridge-allowed>{{ appbridge_unlimited ? '∞' : appbridge.devices.allowed }}</strong>
+                        </article>
+                        <article class="znet-appbridge-stat">
+                            <span>{{ is_en ? 'Free slots' : 'Свободно слотов' }}</span>
                             <strong data-appbridge-available>{{ appbridge_unlimited ? '∞' : appbridge.devices.available }}</strong>
                         </article>
                         <article class="znet-appbridge-stat">
@@ -228,6 +232,7 @@
             const closeButtons = modal?.querySelectorAll('[data-appbridge-close]') || [];
             const copyButton = modal?.querySelector('[data-appbridge-copy-btn]');
             const tokenButton = modal?.querySelector('[data-appbridge-token-copy]');
+            const allowedValue = document.querySelector('[data-appbridge-allowed]');
             const availableValue = document.querySelector('[data-appbridge-available]');
             const activeValue = document.querySelector('[data-appbridge-active]');
             const pendingValue = document.querySelector('[data-appbridge-pending]');
@@ -241,6 +246,7 @@
             const initialState = {
                 has_active_access: {{ appbridge.has_active_access ? 'true' : 'false' }},
                 devices: {
+                    allowed: {{ appbridge.devices.allowed|default(0) }},
                     available: {{ appbridge.devices.available|default(0) }},
                     active: {{ appbridge.devices.active|default(0) }},
                     pending_tokens: {{ appbridge.devices.pending_tokens|default(0) }},
@@ -269,6 +275,10 @@
             const updateStats = (payload) => {
                 const devices = payload?.devices || {};
                 const isUnlimited = Boolean(devices.is_unlimited_test_mode);
+
+                if (allowedValue && typeof devices.allowed !== 'undefined') {
+                    allowedValue.textContent = isUnlimited ? '∞' : devices.allowed;
+                }
 
                 if (availableValue && typeof devices.available !== 'undefined') {
                     availableValue.textContent = isUnlimited ? '∞' : devices.available;

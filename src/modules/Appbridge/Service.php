@@ -89,6 +89,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     public function getBundleForClient(\Model_Client $client): array
     {
         $this->ensureStorage();
+        $this->expireActivationTokens((int) $client->id);
         $this->expireDeviceTokens((int) $client->id);
 
         return $this->buildAccessBundle($client);
@@ -97,11 +98,14 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     public function createActivationTokenBundleForClient(\Model_Client $client): array
     {
         $this->ensureStorage();
+        $this->expireActivationTokens((int) $client->id);
         $this->expireDeviceTokens((int) $client->id);
 
         if ($client->status !== \Model_Client::ACTIVE) {
             throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
         }
+
+        $this->revokePendingActivationTokens((int) $client->id);
 
         $overview = $this->getDeviceOverview($client);
         if (!$overview['has_active_access']) {
@@ -658,6 +662,22 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         $this->di['db']->exec($sql, $params);
+    }
+
+    private function revokePendingActivationTokens(int $clientId): void
+    {
+        $this->di['db']->exec(
+            'UPDATE `' . self::ACTIVATION_TOKEN_BEAN . '`
+                SET status = :status_revoked, updated_at = :now
+              WHERE client_id = :client_id
+                AND status = :status_pending',
+            [
+                ':status_revoked' => self::STATUS_REVOKED,
+                ':status_pending' => self::STATUS_PENDING,
+                ':client_id' => $clientId,
+                ':now' => $this->now(),
+            ],
+        );
     }
 
     private function findPendingActivationTokenByToken(string $token): ?OODBBean
