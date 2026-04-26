@@ -102,6 +102,9 @@ These files are not separate extensions; they are upstream modules we already ch
 - `src/modules/Product/Service.php`
   - product pricing flag normalization
   - used by our current config-driven tariff metadata model
+- `src/modules/Servicecustom/templates/admin/mod_servicecustom_config.html.twig`
+  - adds explicit Appbridge device-limit field for custom tariffs
+  - writes into `product.config[appbridge_device_limit]`
 
 Important for upcoming device-limit work:
 - device count is currently read by `Appbridge` from product/order `config`
