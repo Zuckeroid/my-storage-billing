@@ -19,6 +19,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     public const string CONTRACT_VERSION = 'appbridge-v1';
     private const string ACTIVATION_TOKEN_BEAN = 'mod_appbridge_activation_token';
     private const string DEVICE_BEAN = 'mod_appbridge_device';
+    private const string PRIMARY_DEVICE_LIMIT_KEY = 'appbridge_device_limit';
     private const array DEVICE_LIMIT_KEYS = [
         'appbridge_device_limit',
         'device_limit',
@@ -182,7 +183,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
     public function resolveProvisioningDeviceLimitForOrder(\Model_ClientOrder $order): int
     {
-        return $this->resolveConfiguredPositiveOrderDeviceLimit($order) ?? 1;
+        return $this->resolveConfiguredPositiveOrderDeviceLimitMeta($order)['value'] ?? 1;
     }
 
     public function revokeDeviceForClient(\Model_Client $client, int $deviceId): array
@@ -453,6 +454,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'order_status' => $primarySubscription['order_status'] ?? null,
             'provision_status' => $primarySubscription['provision_status'] ?? null,
             'device_limit' => $primarySubscription['device_limit'] ?? 0,
+            'device_limit_source' => $primarySubscription['device_limit_source'] ?? null,
             'eligible_for_app' => !empty($primarySubscription['eligible_for_app']),
             'last_sync_at' => $primarySubscription['last_sync_at'] ?? null,
             'access_email_sent_at' => $primarySubscription['access_email_sent_at'] ?? null,
@@ -501,7 +503,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 continue;
             }
 
-            $deviceLimit = $this->resolveOrderDeviceLimit($order, $access);
+            $deviceLimitMeta = $this->resolveOrderDeviceLimitMeta($order, $access);
             $eligibleForApp =
                 ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
                 && ($access['status'] ?? null) === self::STATUS_ACTIVE
@@ -516,7 +518,8 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'error' => $access['error'] ?? null,
                 'last_sync_at' => $this->formatDateAtom($access['last_sync_at'] ?? null),
                 'access_email_sent_at' => $this->formatDateAtom($access['access_email_sent_at'] ?? null),
-                'device_limit' => $deviceLimit,
+                'device_limit' => $deviceLimitMeta['value'],
+                'device_limit_source' => $deviceLimitMeta['source'],
                 'eligible_for_app' => $eligibleForApp,
             ];
         }
@@ -549,9 +552,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'order_status' => $subscription['order_status'] ?? null,
                 'provision_status' => $subscription['provision_status'] ?? null,
                 'device_limit' => max(0, (int) ($subscription['device_limit'] ?? 0)),
+                'device_limit_source' => $subscription['device_limit_source'] ?? null,
                 'eligible_for_app' => !empty($subscription['eligible_for_app']),
                 'active' => 0,
                 'pending_tokens' => 0,
+                'latest_pending_created_at' => null,
                 'available' => 0,
                 'is_primary' => false,
                 'devices' => [],
@@ -624,6 +629,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             if ($resolvedOrderId !== null && isset($groupMap[$resolvedOrderId])) {
                 ++$pendingTokens;
                 ++$groupMap[$resolvedOrderId]['pending_tokens'];
+                if ($groupMap[$resolvedOrderId]['latest_pending_created_at'] === null) {
+                    $groupMap[$resolvedOrderId]['latest_pending_created_at'] = $this->formatDateAtom($pendingTokenRow->created_at ?? null);
+                }
             }
         }
 
@@ -717,11 +725,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return null;
     }
 
-    private function resolveOrderDeviceLimit(\Model_ClientOrder $order, array $access): int
+    private function resolveOrderDeviceLimitMeta(\Model_ClientOrder $order, array $access): array
     {
-        $configuredLimit = $this->resolveConfiguredPositiveOrderDeviceLimit($order);
-        if ($configuredLimit !== null) {
-            return $configuredLimit;
+        $configuredLimitMeta = $this->resolveConfiguredPositiveOrderDeviceLimitMeta($order);
+        if ($configuredLimitMeta['value'] !== null) {
+            return $configuredLimitMeta;
         }
 
         if (
@@ -729,46 +737,86 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             && ($access['status'] ?? null) === self::STATUS_ACTIVE
             && !empty($access['subscription_link'])
         ) {
-            return 1;
+            return [
+                'value' => 1,
+                'source' => 'fallback.active_access',
+            ];
         }
 
-        return 0;
+        return [
+            'value' => 0,
+            'source' => 'fallback.inactive',
+        ];
     }
 
     private function resolveConfiguredPositiveOrderDeviceLimit(\Model_ClientOrder $order): ?int
     {
-        $config = json_decode($order->config ?? '', true);
-        if (!is_array($config)) {
-            $config = [];
+        return $this->resolveConfiguredPositiveOrderDeviceLimitMeta($order)['value'];
+    }
+
+    private function resolveConfiguredPositiveOrderDeviceLimitMeta(\Model_ClientOrder $order): array
+    {
+        $orderConfig = json_decode($order->config ?? '', true);
+        if (!is_array($orderConfig)) {
+            $orderConfig = [];
         }
 
-        foreach (self::DEVICE_LIMIT_KEYS as $key) {
-            if (isset($config[$key]) && is_numeric($config[$key]) && (int) $config[$key] > 0) {
-                return (int) $config[$key];
+        $productConfig = [];
+        if (!empty($order->product_id)) {
+            $product = $this->di['db']->findOne('Product', 'id = :id', [':id' => $order->product_id]);
+            if ($product instanceof OODBBean) {
+                $productConfig = json_decode($product->config ?? '', true);
+                if (!is_array($productConfig)) {
+                    $productConfig = [];
+                }
             }
         }
 
-        if (empty($order->product_id)) {
-            return null;
+        $primaryKey = self::PRIMARY_DEVICE_LIMIT_KEY;
+        if (isset($orderConfig[$primaryKey]) && is_numeric($orderConfig[$primaryKey]) && (int) $orderConfig[$primaryKey] > 0) {
+            return [
+                'value' => (int) $orderConfig[$primaryKey],
+                'source' => 'order.' . $primaryKey,
+            ];
         }
 
-        $product = $this->di['db']->findOne('Product', 'id = :id', [':id' => $order->product_id]);
-        if (!$product instanceof OODBBean) {
-            return null;
-        }
-
-        $productConfig = json_decode($product->config ?? '', true);
-        if (!is_array($productConfig)) {
-            $productConfig = [];
+        if (isset($productConfig[$primaryKey]) && is_numeric($productConfig[$primaryKey]) && (int) $productConfig[$primaryKey] > 0) {
+            return [
+                'value' => (int) $productConfig[$primaryKey],
+                'source' => 'product.' . $primaryKey,
+            ];
         }
 
         foreach (self::DEVICE_LIMIT_KEYS as $key) {
+            if ($key === $primaryKey) {
+                continue;
+            }
+
             if (isset($productConfig[$key]) && is_numeric($productConfig[$key]) && (int) $productConfig[$key] > 0) {
-                return (int) $productConfig[$key];
+                return [
+                    'value' => (int) $productConfig[$key],
+                    'source' => 'product.' . $key,
+                ];
             }
         }
 
-        return null;
+        foreach (self::DEVICE_LIMIT_KEYS as $key) {
+            if ($key === $primaryKey) {
+                continue;
+            }
+
+            if (isset($orderConfig[$key]) && is_numeric($orderConfig[$key]) && (int) $orderConfig[$key] > 0) {
+                return [
+                    'value' => (int) $orderConfig[$key],
+                    'source' => 'order.' . $key,
+                ];
+            }
+        }
+
+        return [
+            'value' => null,
+            'source' => null,
+        ];
     }
 
     private function sanitizeDeviceData(array $deviceData): array

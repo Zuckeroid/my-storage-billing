@@ -164,6 +164,16 @@
                             </article>
                         {% else %}
                             {% for group in appbridge_groups %}
+                                {% set limit_source = group.device_limit_source|default('') %}
+                                {% if limit_source starts with 'product.' %}
+                                    {% set limit_source_label = is_en ? 'Billing tariff' : 'Тариф в биллинге' %}
+                                {% elseif limit_source starts with 'order.' %}
+                                    {% set limit_source_label = is_en ? 'Order snapshot' : 'Снимок заказа' %}
+                                {% elseif limit_source == 'fallback.active_access' %}
+                                    {% set limit_source_label = is_en ? 'Automatic fallback' : 'Автоматический fallback' %}
+                                {% else %}
+                                    {% set limit_source_label = '' %}
+                                {% endif %}
                                 <section class="mt-4" data-appbridge-order="{{ group.order_id }}">
                                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                                         <div>
@@ -175,6 +185,19 @@
                                                     {{ is_en ? 'Will become available after the service is fully activated' : 'Станет доступно после полной активации услуги' }}
                                                 {% endif %}
                                             </p>
+                                            {% if limit_source_label %}
+                                                <p class="mb-0 text-secondary small">
+                                                    {{ is_en ? 'Device limit source:' : 'Источник лимита устройств:' }} {{ limit_source_label }}
+                                                </p>
+                                            {% endif %}
+                                            {% if group.pending_tokens|default(0) > 0 %}
+                                                <p class="mb-0 text-secondary small">
+                                                    {{ is_en ? 'A single-use token is waiting for activation.' : 'Есть одноразовый токен, ожидающий активации.' }}
+                                                    {% if group.latest_pending_created_at %}
+                                                        {{ is_en ? 'Created:' : 'Создан:' }} {{ group.latest_pending_created_at }}
+                                                    {% endif %}
+                                                </p>
+                                            {% endif %}
                                         </div>
 
                                         <button
