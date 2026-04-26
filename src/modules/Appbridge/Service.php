@@ -710,8 +710,10 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
     private function resolveOverviewOrderId(int $sourceOrderId, ?int $primaryOrderId, array $knownOrderIds): ?int
     {
-        if ($sourceOrderId > 0 && in_array($sourceOrderId, $knownOrderIds, true)) {
-            return $sourceOrderId;
+        if ($sourceOrderId > 0) {
+            return in_array($sourceOrderId, $knownOrderIds, true)
+                ? $sourceOrderId
+                : null;
         }
 
         if ($primaryOrderId !== null && in_array($primaryOrderId, $knownOrderIds, true)) {
