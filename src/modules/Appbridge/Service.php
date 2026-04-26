@@ -20,7 +20,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     private const string ACTIVATION_TOKEN_BEAN = 'mod_appbridge_activation_token';
     private const string DEVICE_BEAN = 'mod_appbridge_device';
     private const int DEVICE_TOKEN_TTL_DAYS = 30;
-    private const bool UNLIMITED_DEVICE_TEST_MODE = true;
+    private const bool UNLIMITED_DEVICE_TEST_MODE = false;
     private const int UNLIMITED_DEVICE_SENTINEL = 9999;
     private const string STATUS_PENDING = 'pending';
     private const string STATUS_USED = 'used';
