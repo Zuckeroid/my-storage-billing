@@ -343,6 +343,7 @@
 
                     <div class="znet-shell-link-row mt-3">
                         <button class="btn btn-primary" type="button" data-appbridge-copy-btn>{{ is_en ? 'Copy token' : 'Скопировать токен' }}</button>
+                        <button class="btn btn-outline-primary" type="button" data-appbridge-rotate-btn>{{ is_en ? 'Create new token' : 'Создать новый токен' }}</button>
                         <button class="btn btn-outline-primary" type="button" data-appbridge-close>{{ is_en ? 'Close' : 'Закрыть' }}</button>
                     </div>
 
@@ -365,6 +366,7 @@
             const createButtons = document.querySelectorAll('[data-appbridge-create], [data-appbridge-open-trigger]');
             const closeButtons = modal?.querySelectorAll('[data-appbridge-close]') || [];
             const copyButton = modal?.querySelector('[data-appbridge-copy-btn]');
+            const rotateButton = modal?.querySelector('[data-appbridge-rotate-btn]');
             const tokenButton = modal?.querySelector('[data-appbridge-token-copy]');
             const allowedValue = document.querySelector('[data-appbridge-allowed]');
             const availableValue = document.querySelector('[data-appbridge-available]');
@@ -376,6 +378,7 @@
             }
 
             let currentToken = '';
+            let currentOrderId = null;
 
             const initialState = {
                 has_active_access: {{ appbridge.has_active_access ? 'true' : 'false' }},
@@ -504,6 +507,7 @@
                 button.addEventListener('click', () => {
                     setCreateButtonsDisabled(true);
                     const orderId = Number(button.getAttribute('data-order-id') || 0);
+                    currentOrderId = orderId > 0 ? orderId : null;
                     const payload = orderId > 0 ? { order_id: orderId } : {};
 
                     API.client.post('appbridge/activation_token_create', payload, (result) => {
@@ -511,14 +515,21 @@
                         currentToken = activation.token || '';
                         tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
                         meta.textContent = '{{ is_en ? 'Single-use token ready to copy.' : 'Одноразовый токен готов к копированию.' }}';
+                        if (activation.reused) {
+                            meta.textContent = '{{ is_en ? 'Existing pending token reopened.' : 'Открыт уже созданный ожидающий токен.' }}';
+                        }
                         const sourceTitle = activation.source_title || result?.service?.title || '';
                         if (sourceTitle) {
-                            meta.textContent = `{{ is_en ? 'Single-use token ready for service:' : 'Одноразовый токен готов для услуги:' }} ${sourceTitle}`;
+                            meta.textContent = activation.reused
+                                ? `{{ is_en ? 'Existing pending token for service:' : 'Открыт ожидающий токен для услуги:' }} ${sourceTitle}`
+                                : `{{ is_en ? 'Single-use token ready for service:' : 'Одноразовый токен готов для услуги:' }} ${sourceTitle}`;
                         }
                         updateStats(result);
                         openModal();
+                        setCreateButtonsDisabled(false);
                     }, (error) => {
                         updateStats(initialState);
+                        setCreateButtonsDisabled(false);
                         setMessage(`${error.message} (${error.code})`, 'error');
                     });
                 });
@@ -530,6 +541,32 @@
 
             if (copyButton) {
                 copyButton.addEventListener('click', copyCurrentToken);
+            }
+
+            if (rotateButton) {
+                rotateButton.addEventListener('click', () => {
+                    if (!currentOrderId) {
+                        setMessage('{{ is_en ? 'Service is not selected for token rotation.' : 'Для перевыпуска токена не выбрана услуга.' }}', 'error');
+                        return;
+                    }
+
+                    rotateButton.disabled = true;
+                    API.client.post('appbridge/token_rotate', { order_id: currentOrderId }, (result) => {
+                        const activation = result.activation_token || {};
+                        currentToken = activation.token || '';
+                        tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
+                        meta.textContent = '{{ is_en ? 'New single-use token created.' : 'Создан новый одноразовый токен.' }}';
+                        const sourceTitle = activation.source_title || result?.service?.title || '';
+                        if (sourceTitle) {
+                            meta.textContent = `{{ is_en ? 'New single-use token created for service:' : 'Создан новый одноразовый токен для услуги:' }} ${sourceTitle}`;
+                        }
+                        updateStats(result);
+                        rotateButton.disabled = false;
+                    }, (error) => {
+                        rotateButton.disabled = false;
+                        setMessage(`${error.message} (${error.code})`, 'error');
+                    });
+                });
             }
 
             if (tokenButton) {

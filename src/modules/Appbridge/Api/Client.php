@@ -23,7 +23,7 @@ class Client extends \Api_Abstract
 
     public function token_rotate(array $data): array
     {
-        return $this->getService()->createActivationTokenBundleForClient(
+        return $this->getService()->rotateTokenForClient(
             $this->getIdentity(),
             isset($data['order_id']) ? (int) $data['order_id'] : null,
         );

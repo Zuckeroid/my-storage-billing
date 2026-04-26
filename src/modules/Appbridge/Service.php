@@ -118,7 +118,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->buildAccessBundle($client);
     }
 
-    public function createActivationTokenBundleForClient(\Model_Client $client, ?int $orderId = null): array
+    public function createActivationTokenBundleForClient(\Model_Client $client, ?int $orderId = null, bool $forceRotate = false): array
     {
         $this->ensureStorage();
         $this->expireActivationTokens((int) $client->id);
@@ -139,6 +139,20 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         $selectedOrderId = (int) $selectedGroup['order_id'];
+        $existingPendingToken = $this->findPendingActivationTokenForOrder((int) $client->id, $selectedOrderId);
+        if (!$forceRotate && $existingPendingToken instanceof OODBBean) {
+            $existingTokenValue = trim((string) ($existingPendingToken->token_value ?? ''));
+            if ($existingTokenValue !== '') {
+                return $this->buildActivationTokenBundle(
+                    $client,
+                    $selectedGroup,
+                    $existingTokenValue,
+                    (string) ($existingPendingToken->created_at ?? $this->now()),
+                    false,
+                );
+            }
+        }
+
         $this->revokePendingActivationTokens((int) $client->id, $selectedOrderId);
 
         $overview = $this->getDeviceOverview($client);
@@ -158,27 +172,19 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $row->client_id = $client->id;
         $row->source_order_id = $selectedOrderId;
         $row->token_hash = $this->hashToken($token);
+        $row->token_value = $token;
         $row->status = self::STATUS_PENDING;
         $row->expires_at = '2999-12-31 23:59:59';
         $row->created_at = $now;
         $row->updated_at = $now;
         $this->di['db']->store($row);
 
-        $bundle = $this->buildAccessBundle($client);
-        $bundle['activation_token'] = [
-            'token' => $token,
-            'created_at' => $this->formatDateAtom($now),
-            'single_use' => true,
-            'source_order_id' => $selectedOrderId,
-            'source_title' => $selectedGroup['title'] ?? null,
-        ];
-
-        return $bundle;
+        return $this->buildActivationTokenBundle($client, $selectedGroup, $token, $now, true);
     }
 
     public function rotateTokenForClient(\Model_Client $client, ?int $orderId = null): array
     {
-        return $this->createActivationTokenBundleForClient($client, $orderId);
+        return $this->createActivationTokenBundleForClient($client, $orderId, true);
     }
 
     public function resolveProvisioningDeviceLimitForOrder(\Model_ClientOrder $order): int
@@ -227,6 +233,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
         $now = $this->now();
         $activationToken->status = self::STATUS_USED;
+        $activationToken->token_value = null;
         $activationToken->used_at = $now;
         $activationToken->updated_at = $now;
         $this->di['db']->store($activationToken);
@@ -366,6 +373,27 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'devices' => $overview,
             'generated_at' => date(DATE_ATOM),
         ];
+    }
+
+    private function buildActivationTokenBundle(
+        \Model_Client $client,
+        array $selectedGroup,
+        string $token,
+        string $createdAt,
+        bool $createdNew,
+    ): array {
+        $bundle = $this->buildAccessBundle($client);
+        $bundle['activation_token'] = [
+            'token' => $token,
+            'created_at' => $this->formatDateAtom($createdAt),
+            'single_use' => true,
+            'source_order_id' => (int) ($selectedGroup['order_id'] ?? 0),
+            'source_title' => $selectedGroup['title'] ?? null,
+            'created_new' => $createdNew,
+            'reused' => !$createdNew,
+        ];
+
+        return $bundle;
     }
 
     private function resolvePrimarySubscription(array $subscriptions): ?array
@@ -845,6 +873,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 `client_id` bigint(20) NOT NULL,
                 `source_order_id` bigint(20) DEFAULT NULL,
                 `token_hash` varchar(64) NOT NULL,
+                `token_value` varchar(255) DEFAULT NULL,
                 `status` varchar(32) NOT NULL DEFAULT \'' . self::STATUS_PENDING . '\',
                 `expires_at` datetime NOT NULL,
                 `used_at` datetime DEFAULT NULL,
@@ -856,6 +885,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 KEY `idx_expires_at` (`expires_at`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             ',
+        );
+
+        $this->di['db']->exec(
+            'ALTER TABLE `' . self::ACTIVATION_TOKEN_BEAN . '`
+                ADD COLUMN IF NOT EXISTS `token_value` varchar(255) DEFAULT NULL AFTER `token_hash`',
         );
 
         $this->di['db']->exec(
@@ -895,7 +929,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         ];
 
         $sql = 'UPDATE `' . self::ACTIVATION_TOKEN_BEAN . '`
-                   SET status = :status_expired, updated_at = :now
+                   SET status = :status_expired, token_value = NULL, updated_at = :now
                  WHERE status = :status_pending
                    AND expires_at < :now';
 
@@ -931,7 +965,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     private function revokePendingActivationTokens(int $clientId, ?int $sourceOrderId = null): void
     {
         $sql = 'UPDATE `' . self::ACTIVATION_TOKEN_BEAN . '`
-                SET status = :status_revoked, updated_at = :now
+                SET status = :status_revoked, token_value = NULL, updated_at = :now
               WHERE client_id = :client_id
                 AND status = :status_pending';
         $params = [
@@ -960,7 +994,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $now = $this->now();
         $this->di['db']->exec(
             'UPDATE `' . self::ACTIVATION_TOKEN_BEAN . '`
-                SET status = :status_revoked, updated_at = :now
+                SET status = :status_revoked, token_value = NULL, updated_at = :now
               WHERE source_order_id = :source_order_id
                 AND status = :status_pending',
             [
@@ -983,6 +1017,25 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 ':now' => $now,
             ],
         );
+    }
+
+    private function findPendingActivationTokenForOrder(int $clientId, int $sourceOrderId): ?OODBBean
+    {
+        if ($clientId < 1 || $sourceOrderId < 1) {
+            return null;
+        }
+
+        $row = $this->di['db']->findOne(
+            self::ACTIVATION_TOKEN_BEAN,
+            'client_id = :client_id AND source_order_id = :source_order_id AND status = :status ORDER BY created_at DESC LIMIT 1',
+            [
+                ':client_id' => $clientId,
+                ':source_order_id' => $sourceOrderId,
+                ':status' => self::STATUS_PENDING,
+            ],
+        );
+
+        return $row instanceof OODBBean ? $row : null;
     }
 
     private function findPendingActivationTokenByToken(string $token): ?OODBBean
