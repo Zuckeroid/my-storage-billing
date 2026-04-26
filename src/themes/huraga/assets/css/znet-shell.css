@@ -804,6 +804,44 @@ html {
   font-weight: 700;
 }
 
+.znet-shell-page .znet-appbridge-device-list {
+  display: grid;
+  gap: 12px;
+}
+
+.znet-shell-page .znet-appbridge-device {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page .znet-appbridge-device-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.znet-shell-page .znet-appbridge-device-copy strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.znet-shell-page .znet-appbridge-device-copy p {
+  word-break: break-word;
+}
+
+.znet-shell-page .znet-appbridge-device-actions {
+  flex: 0 0 auto;
+}
+
+.znet-shell-page .znet-appbridge-device-empty {
+  justify-content: flex-start;
+}
+
 .znet-shell-page .znet-appbridge-modal {
   position: fixed;
   inset: 0;
@@ -1233,6 +1271,15 @@ html {
   .znet-shell-page .znet-shell-card-grid-2,
   .znet-shell-page .znet-appbridge-stats {
     grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-appbridge-device {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .znet-shell-page .znet-appbridge-device-actions .btn {
+    width: 100%;
   }
 
   .znet-shell-page .znet-shell-footer-shell {

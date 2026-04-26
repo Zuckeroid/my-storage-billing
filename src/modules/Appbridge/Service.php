@@ -18,8 +18,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 {
     private const string ACTIVATION_TOKEN_BEAN = 'mod_appbridge_activation_token';
     private const string DEVICE_BEAN = 'mod_appbridge_device';
-    private const int ACTIVATION_TOKEN_TTL_MINUTES = 15;
     private const int DEVICE_TOKEN_TTL_DAYS = 30;
+    private const bool UNLIMITED_DEVICE_TEST_MODE = true;
+    private const int UNLIMITED_DEVICE_SENTINEL = 9999;
     private const string STATUS_PENDING = 'pending';
     private const string STATUS_USED = 'used';
     private const string STATUS_ACTIVE = 'active';
@@ -69,7 +70,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     public function loginWithToken(string $appToken, array $deviceData = []): array
     {
         $this->ensureStorage();
-        $this->expireActivationTokens();
         $this->expireDeviceTokens();
 
         $activationToken = $this->findPendingActivationTokenByToken($appToken);
@@ -88,7 +88,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     public function getBundleForClient(\Model_Client $client): array
     {
         $this->ensureStorage();
-        $this->expireActivationTokens((int) $client->id);
         $this->expireDeviceTokens((int) $client->id);
 
         return $this->buildAccessBundle($client);
@@ -97,7 +96,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     public function createActivationTokenBundleForClient(\Model_Client $client): array
     {
         $this->ensureStorage();
-        $this->expireActivationTokens((int) $client->id);
         $this->expireDeviceTokens((int) $client->id);
 
         if ($client->status !== \Model_Client::ACTIVE) {
@@ -109,20 +107,19 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             throw new \FOSSBilling\InformationException('No active subscription is ready for application access yet.', [], 409);
         }
 
-        if ($overview['available'] < 1) {
+        if (!self::UNLIMITED_DEVICE_TEST_MODE && $overview['available'] < 1) {
             throw new \FOSSBilling\InformationException('No device slots are available for this account.', [], 409);
         }
 
         $token = $this->generateToken();
         $now = $this->now();
-        $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::ACTIVATION_TOKEN_TTL_MINUTES . ' minutes'));
 
         $row = $this->di['db']->dispense(self::ACTIVATION_TOKEN_BEAN);
         $row->client_id = $client->id;
         $row->source_order_id = $overview['primary_order_id'];
         $row->token_hash = $this->hashToken($token);
         $row->status = self::STATUS_PENDING;
-        $row->expires_at = $expiresAt;
+        $row->expires_at = '2999-12-31 23:59:59';
         $row->created_at = $now;
         $row->updated_at = $now;
         $this->di['db']->store($row);
@@ -130,9 +127,8 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $bundle = $this->buildAccessBundle($client);
         $bundle['activation_token'] = [
             'token' => $token,
-            'expires_at' => $this->formatDateAtom($expiresAt),
             'created_at' => $this->formatDateAtom($now),
-            'ttl_minutes' => self::ACTIVATION_TOKEN_TTL_MINUTES,
+            'single_use' => true,
         ];
 
         return $bundle;
@@ -143,6 +139,38 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->createActivationTokenBundleForClient($client);
     }
 
+    public function revokeDeviceForClient(\Model_Client $client, int $deviceId): array
+    {
+        $this->ensureStorage();
+        $this->expireDeviceTokens((int) $client->id);
+
+        if ($deviceId < 1) {
+            throw new \FOSSBilling\InformationException('Device not found.', [], 404);
+        }
+
+        $device = $this->di['db']->findOne(
+            self::DEVICE_BEAN,
+            'id = :id AND client_id = :client_id AND status = :status LIMIT 1',
+            [
+                ':id' => $deviceId,
+                ':client_id' => $client->id,
+                ':status' => self::STATUS_ACTIVE,
+            ],
+        );
+
+        if (!$device instanceof OODBBean) {
+            throw new \FOSSBilling\InformationException('Device not found.', [], 404);
+        }
+
+        $now = $this->now();
+        $device->status = self::STATUS_REVOKED;
+        $device->expires_at = $now;
+        $device->updated_at = $now;
+        $this->di['db']->store($device);
+
+        return $this->buildAccessBundle($client);
+    }
+
     private function exchangeActivationToken(OODBBean $activationToken, array $deviceData): array
     {
         $client = $this->getClientById((int) $activationToken->client_id);
@@ -150,22 +178,25 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
         }
 
-        if (strtotime((string) $activationToken->expires_at) < time()) {
-            $this->markActivationTokenExpired($activationToken);
-            throw new \FOSSBilling\InformationException('Activation token has expired. Create a new token in the client area.', [], 401);
-        }
+        $now = $this->now();
+        $activationToken->status = self::STATUS_USED;
+        $activationToken->used_at = $now;
+        $activationToken->updated_at = $now;
+        $this->di['db']->store($activationToken);
 
-        $overview = $this->getDeviceOverview($client, (int) $activationToken->id);
+        $overview = $this->getDeviceOverview($client);
         if (!$overview['has_active_access']) {
             throw new \FOSSBilling\InformationException('No active subscription is ready for application access yet.', [], 409);
         }
 
-        if (((int) $overview['active']) + 1 + ((int) $overview['pending_tokens']) > (int) $overview['allowed']) {
+        if (
+            !self::UNLIMITED_DEVICE_TEST_MODE
+            && (((int) $overview['active']) + 1 + ((int) $overview['pending_tokens']) > (int) $overview['allowed'])
+        ) {
             throw new \FOSSBilling\InformationException('No device slots are available for this account.', [], 409);
         }
 
         $deviceToken = $this->generateToken();
-        $now = $this->now();
         $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::DEVICE_TOKEN_TTL_DAYS . ' days'));
         $sanitizedDeviceData = $this->sanitizeDeviceData($deviceData);
 
@@ -183,11 +214,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $device->created_at = $now;
         $device->updated_at = $now;
         $this->di['db']->store($device);
-
-        $activationToken->status = self::STATUS_USED;
-        $activationToken->used_at = $now;
-        $activationToken->updated_at = $now;
-        $this->di['db']->store($activationToken);
 
         return $this->buildAccessBundle($client, $deviceToken, $expiresAt, $now, $device);
     }
@@ -243,7 +269,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $app = [
             'token_expires_at' => $this->formatDateAtom($tokenExpiresAt),
             'token_issued_at' => $this->formatDateAtom($tokenIssuedAt),
-            'activation_token_ttl_minutes' => self::ACTIVATION_TOKEN_TTL_MINUTES,
         ];
 
         if ($appToken !== null) {
@@ -372,15 +397,23 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             }
         }
 
+        if (self::UNLIMITED_DEVICE_TEST_MODE && !empty($eligibleSubscriptions)) {
+            $allowed = max($allowed, self::UNLIMITED_DEVICE_SENTINEL);
+        }
+
+        $available = self::UNLIMITED_DEVICE_TEST_MODE && !empty($eligibleSubscriptions)
+            ? self::UNLIMITED_DEVICE_SENTINEL
+            : max(0, $allowed - $activeDevices - $pendingTokens);
+
         return [
             'allowed' => $allowed,
             'active' => $activeDevices,
             'pending_tokens' => $pendingTokens,
-            'available' => max(0, $allowed - $activeDevices - $pendingTokens),
+            'available' => $available,
             'primary_order_id' => $primaryOrderId,
             'has_active_access' => !empty($eligibleSubscriptions),
             'eligible_order_count' => count($eligibleSubscriptions),
-            'activation_token_ttl_minutes' => self::ACTIVATION_TOKEN_TTL_MINUTES,
+            'is_unlimited_test_mode' => self::UNLIMITED_DEVICE_TEST_MODE,
             'list' => $mappedDevices,
         ];
     }

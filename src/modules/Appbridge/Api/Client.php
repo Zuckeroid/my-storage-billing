@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Box\Mod\Appbridge\Api;
 
+use FOSSBilling\Validation\Api\RequiredParams;
+
 class Client extends \Api_Abstract
 {
     public function bundle(array $data): array
@@ -27,5 +29,14 @@ class Client extends \Api_Abstract
     public function activation_token_create(array $data): array
     {
         return $this->getService()->createActivationTokenBundleForClient($this->getIdentity());
+    }
+
+    #[RequiredParams(['id' => 'Device id required'])]
+    public function device_revoke(array $data): array
+    {
+        return $this->getService()->revokeDeviceForClient(
+            $this->getIdentity(),
+            (int) $data['id'],
+        );
     }
 }

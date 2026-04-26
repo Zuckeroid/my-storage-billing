@@ -2,6 +2,7 @@
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
 {% set appbridge = client.appbridge_bundle %}
+{% set appbridge_unlimited = appbridge.devices.is_unlimited_test_mode|default(false) %}
 
 {% block meta_title %}{{ is_en ? 'Profile details' : 'Детали профиля' }}{% endblock %}
 {% block meta_description %}{% endblock %}
@@ -13,7 +14,7 @@
         class="znet-btn znet-btn-accent"
         type="button"
         data-appbridge-open-trigger
-        {% if not appbridge.has_active_access or appbridge.devices.available < 1 %}disabled{% endif %}
+        {% if not appbridge.has_active_access %}disabled{% endif %}
     >
         {{ is_en ? 'Add device' : 'Добавить устройство' }}
     </button>
@@ -89,8 +90,8 @@
                             <h2 class="h5 mb-1">{{ is_en ? 'App access' : 'Доступ для приложения' }}</h2>
                             <p class="text-secondary mb-0">
                                 {{ is_en
-                                    ? 'Create a one-time token for a new device. The token expires in 15 minutes and is consumed on first activation.'
-                                    : 'Создайте одноразовый токен для нового устройства. Токен действует 15 минут и сгорает после первой активации.' }}
+                                    ? 'Create a single-use token for a new device. The token is consumed as soon as the application sends the activation request.'
+                                    : 'Создайте одноразовый токен для нового устройства. Он сгорает сразу после запроса из приложения.' }}
                             </p>
                         </div>
 
@@ -98,7 +99,7 @@
                             class="btn btn-primary"
                             type="button"
                             data-appbridge-create
-                            {% if not appbridge.has_active_access or appbridge.devices.available < 1 %}disabled{% endif %}
+                            {% if not appbridge.has_active_access %}disabled{% endif %}
                         >
                             {{ is_en ? 'Generate token' : 'Создать токен' }}
                         </button>
@@ -107,7 +108,7 @@
                     <div class="znet-appbridge-stats mt-4">
                         <article class="znet-appbridge-stat">
                             <span>{{ is_en ? 'Available slots' : 'Доступно слотов' }}</span>
-                            <strong data-appbridge-available>{{ appbridge.devices.available }}</strong>
+                            <strong data-appbridge-available>{{ appbridge_unlimited ? '∞' : appbridge.devices.available }}</strong>
                         </article>
                         <article class="znet-appbridge-stat">
                             <span>{{ is_en ? 'Connected devices' : 'Подключено устройств' }}</span>
@@ -125,19 +126,51 @@
                                 ? 'Application access will become available after the service is fully activated and a subscription link is ready.'
                                 : 'Доступ для приложения появится после полной активации услуги и готовой ссылки на подписку.' }}
                         </p>
-                    {% elseif appbridge.devices.available < 1 %}
-                        <p class="text-secondary small mt-3 mb-0">
-                            {{ is_en
-                                ? 'All device slots are in use. Revoke an old device before creating a new token.'
-                                : 'Все слоты устройств заняты. Освободите старое устройство перед созданием нового токена.' }}
-                        </p>
                     {% else %}
                         <p class="text-secondary small mt-3 mb-0">
                             {{ is_en
-                                ? 'The application exchanges this one-time token for a device token and then requests the access bundle from billing.'
+                                ? 'The application exchanges this single-use token for a device token and then requests the access bundle from billing.'
                                 : 'Приложение обменивает этот одноразовый токен на device-token и затем получает bundle доступа из биллинга.' }}
                         </p>
                     {% endif %}
+
+                    <div class="znet-appbridge-device-list mt-4" data-appbridge-device-list>
+                        {% if appbridge.devices.list is empty %}
+                            <article class="znet-appbridge-device znet-appbridge-device-empty">
+                                <div>
+                                    <strong>{{ is_en ? 'No devices connected yet' : 'Подключенных устройств пока нет' }}</strong>
+                                    <p class="mb-0 text-secondary small">
+                                        {{ is_en
+                                            ? 'Create a token, paste it into the app, and the device will appear here after activation.'
+                                            : 'Создайте токен, вставьте его в приложение, и после активации устройство появится здесь.' }}
+                                    </p>
+                                </div>
+                            </article>
+                        {% else %}
+                            {% for device in appbridge.devices.list %}
+                                {% set device_meta = [] %}
+                                {% if device.platform %}{% set device_meta = device_meta|merge([device.platform]) %}{% endif %}
+                                {% if device.install_id %}{% set device_meta = device_meta|merge([device.install_id]) %}{% endif %}
+                                {% if device.last_seen_at %}{% set device_meta = device_meta|merge([(is_en ? 'Last seen' : 'Последний запрос') ~ ': ' ~ device.last_seen_at]) %}{% endif %}
+                                <article class="znet-appbridge-device" data-appbridge-device-row data-device-id="{{ device.id }}">
+                                    <div class="znet-appbridge-device-copy">
+                                        <strong>{{ device.name ?: ((is_en ? 'Device' : 'Устройство') ~ ' #' ~ device.id) }}</strong>
+                                        <p class="mb-0 text-secondary small">{{ device_meta|join(' • ') }}</p>
+                                    </div>
+                                    <div class="znet-appbridge-device-actions">
+                                        <button
+                                            class="btn btn-outline-primary"
+                                            type="button"
+                                            data-appbridge-revoke
+                                            data-device-id="{{ device.id }}"
+                                        >
+                                            {{ is_en ? 'Disconnect' : 'Отключить' }}
+                                        </button>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -153,8 +186,8 @@
                             <h2 class="h5 mb-1" id="appbridge-modal-title">{{ is_en ? 'Activation token' : 'Токен активации' }}</h2>
                             <p class="text-secondary mb-0">
                                 {{ is_en
-                                    ? 'Copy the token and paste it into the application. It remains valid for 15 minutes and can only be used once.'
-                                    : 'Скопируйте токен и вставьте его в приложение. Он действует 15 минут и может быть использован только один раз.' }}
+                                    ? 'Copy the token and paste it into the application. It can only be used once and is consumed on the first activation request.'
+                                    : 'Скопируйте токен и вставьте его в приложение. Он одноразовый и сгорает после первого запроса на активацию.' }}
                             </p>
                         </div>
 
@@ -205,6 +238,16 @@
 
             let currentToken = '';
 
+            const initialState = {
+                has_active_access: {{ appbridge.has_active_access ? 'true' : 'false' }},
+                devices: {
+                    available: {{ appbridge.devices.available|default(0) }},
+                    active: {{ appbridge.devices.active|default(0) }},
+                    pending_tokens: {{ appbridge.devices.pending_tokens|default(0) }},
+                    is_unlimited_test_mode: {{ appbridge_unlimited ? 'true' : 'false' }}
+                }
+            };
+
             const setMessage = (message, type = 'success') => {
                 if (typeof FOSSBilling !== 'undefined' && typeof FOSSBilling.message === 'function') {
                     FOSSBilling.message(message, type);
@@ -225,9 +268,10 @@
 
             const updateStats = (payload) => {
                 const devices = payload?.devices || {};
+                const isUnlimited = Boolean(devices.is_unlimited_test_mode);
 
                 if (availableValue && typeof devices.available !== 'undefined') {
-                    availableValue.textContent = devices.available;
+                    availableValue.textContent = isUnlimited ? '∞' : devices.available;
                 }
 
                 if (activeValue && typeof devices.active !== 'undefined') {
@@ -238,7 +282,7 @@
                     pendingValue.textContent = devices.pending_tokens;
                 }
 
-                const disableCreate = !payload?.has_active_access || Number(devices.available || 0) < 1;
+                const disableCreate = !payload?.has_active_access || (!isUnlimited && Number(devices.available || 0) < 1);
                 createButtons.forEach((button) => {
                     button.disabled = disableCreate;
                 });
@@ -277,20 +321,11 @@
                         const activation = result.activation_token || {};
                         currentToken = activation.token || '';
                         tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
-                        meta.textContent = activation.expires_at
-                            ? `{{ is_en ? 'Valid until' : 'Действует до' }} ${activation.expires_at}`
-                            : '{{ is_en ? 'The token is ready to copy.' : 'Токен готов к копированию.' }}';
+                        meta.textContent = '{{ is_en ? 'Single-use token ready to copy.' : 'Одноразовый токен готов к копированию.' }}';
                         updateStats(result);
                         openModal();
                     }, (error) => {
-                        updateStats({
-                            has_active_access: {{ appbridge.has_active_access ? 'true' : 'false' }},
-                            devices: {
-                                available: {{ appbridge.devices.available|default(0) }},
-                                active: {{ appbridge.devices.active|default(0) }},
-                                pending_tokens: {{ appbridge.devices.pending_tokens|default(0) }}
-                            }
-                        });
+                        updateStats(initialState);
                         setMessage(`${error.message} (${error.code})`, 'error');
                     });
                 });
@@ -307,6 +342,31 @@
             if (tokenButton) {
                 tokenButton.addEventListener('click', copyCurrentToken);
             }
+
+            document.addEventListener('click', (event) => {
+                const revokeButton = event.target.closest('[data-appbridge-revoke]');
+                if (!revokeButton) {
+                    return;
+                }
+
+                const deviceId = revokeButton.getAttribute('data-device-id');
+                if (!deviceId) {
+                    return;
+                }
+
+                const confirmed = window.confirm('{{ is_en ? 'Disconnect this device?' : 'Отключить это устройство?' }}');
+                if (!confirmed) {
+                    return;
+                }
+
+                revokeButton.disabled = true;
+                API.client.post('appbridge/device_revoke', { id: deviceId }, () => {
+                    window.location.reload();
+                }, (error) => {
+                    revokeButton.disabled = false;
+                    setMessage(`${error.message} (${error.code})`, 'error');
+                });
+            });
 
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && !modal.hidden) {
