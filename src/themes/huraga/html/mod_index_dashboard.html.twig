@@ -6,6 +6,11 @@
 {% set is_en = current_locale starts with 'en' %}
 {% set company = guest.system_company %}
 {% set storage_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false, 'type': 'custom' }).list|default([]) %}
+{% if client %}
+    {% set appbridge = client.appbridge_bundle %}
+    {% set appbridge_unlimited = appbridge.devices.is_unlimited_test_mode|default(false) %}
+    {% set appbridge_groups = appbridge.devices.groups|default([]) %}
+{% endif %}
 
 {% block meta_title %}
     {% if client %}
@@ -110,6 +115,8 @@
             </div>
         </section>
 
+        {% include 'partial_appbridge_client_area.html.twig' %}
+
         {% if dashboard.recent_orders %}
             <section class="znet-shell-section">
                 <div class="znet-shell-section-head">
@@ -141,5 +148,12 @@
         {{ parent() }}
     {% else %}
         {% include 'znet_homepage.html.twig' %}
+    {% endif %}
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    {% if client %}
+        {% include 'partial_appbridge_client_area_js.html.twig' %}
     {% endif %}
 {% endblock %}

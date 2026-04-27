@@ -1,0 +1,309 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.querySelector('[data-appbridge-modal]');
+        const tokenValue = modal?.querySelector('[data-appbridge-token]');
+        const meta = modal?.querySelector('[data-appbridge-meta]');
+        const addButtons = document.querySelectorAll('[data-appbridge-add-device]');
+        const openTokenButtons = document.querySelectorAll('[data-appbridge-open-token]');
+        const closeButtons = modal?.querySelectorAll('[data-appbridge-close]') || [];
+        const copyButton = modal?.querySelector('[data-appbridge-copy-btn]');
+        const rotateButton = modal?.querySelector('[data-appbridge-rotate-btn]');
+        const tokenButton = modal?.querySelector('[data-appbridge-token-copy]');
+
+        if (!modal || !tokenValue || !meta || addButtons.length === 0) {
+            return;
+        }
+
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+
+        let currentToken = '';
+        let currentOrderId = null;
+
+        const initialState = {
+            has_active_access: {{ appbridge.has_active_access ? 'true' : 'false' }},
+            devices: {
+                allowed: {{ appbridge.devices.allowed|default(0) }},
+                available: {{ appbridge.devices.available|default(0) }},
+                active: {{ appbridge.devices.active|default(0) }},
+                pending_tokens: {{ appbridge.devices.pending_tokens|default(0) }},
+                eligible_order_count: {{ appbridge.devices.eligible_order_count|default(0) }},
+                is_unlimited_test_mode: {{ appbridge_unlimited ? 'true' : 'false' }},
+                groups: {{ appbridge_groups|json_encode|raw }}
+            }
+        };
+
+        const setMessage = (message, type = 'success') => {
+            if (typeof FOSSBilling !== 'undefined' && typeof FOSSBilling.message === 'function') {
+                FOSSBilling.message(message, type);
+            } else {
+                console[type === 'error' ? 'error' : 'log'](message);
+            }
+        };
+
+        const openModal = () => {
+            modal.hidden = false;
+            document.body.classList.add('znet-appbridge-modal-open');
+            modal.scrollTop = 0;
+        };
+
+        const closeModal = () => {
+            modal.hidden = true;
+            document.body.classList.remove('znet-appbridge-modal-open');
+        };
+
+        const setResultState = (result) => {
+            initialState.has_active_access = typeof result?.has_active_access !== 'undefined'
+                ? Boolean(result.has_active_access)
+                : initialState.has_active_access;
+            initialState.devices = result?.devices || initialState.devices;
+        };
+
+        const findGroupState = (orderId, payload = initialState) => {
+            const groups = Array.isArray(payload?.devices?.groups) ? payload.devices.groups : [];
+            return groups.find((group) => Number(group.order_id || 0) === Number(orderId || 0)) || null;
+        };
+
+        const updateStats = (payload) => {
+            const devices = payload?.devices || {};
+            const isUnlimited = Boolean(devices.is_unlimited_test_mode);
+            const groups = Array.isArray(devices.groups) ? devices.groups : [];
+            const groupMap = new Map(groups.map((group) => [Number(group.order_id || 0), group]));
+
+            addButtons.forEach((button) => {
+                const orderId = Number(button.getAttribute('data-order-id') || 0);
+                if (orderId > 0) {
+                    const group = groupMap.get(orderId);
+                    const hasPending = Number(group?.pending_tokens || 0) > 0;
+                    const disableForGroup = !group || !group.eligible_for_app || (!isUnlimited && Number(group.available || 0) < 1 && !hasPending);
+                    button.disabled = disableForGroup;
+                    return;
+                }
+
+                const disableCreate = !payload?.has_active_access || Number(devices.eligible_order_count || 0) !== 1 || (!isUnlimited && Number(devices.available || 0) < 1);
+                button.disabled = disableCreate;
+            });
+
+            groups.forEach((group) => {
+                const root = document.querySelector(`[data-appbridge-order="${group.order_id}"]`);
+                if (!root) {
+                    return;
+                }
+
+                const deviceRatio = root.querySelector('[data-appbridge-order-device-ratio]');
+                const pending = root.querySelector('[data-appbridge-order-pending]');
+                const addDeviceButton = root.querySelector('[data-appbridge-add-device]');
+                const openTokenButton = root.querySelector('[data-appbridge-open-token]');
+
+                if (deviceRatio) {
+                    const deviceLimit = isUnlimited && group.eligible_for_app ? '∞' : group.device_limit;
+                    deviceRatio.textContent = `${group.active}/${deviceLimit}`;
+                }
+
+                if (pending) {
+                    pending.textContent = group.pending_tokens;
+                }
+
+                if (addDeviceButton) {
+                    const hasPending = Number(group.pending_tokens || 0) > 0;
+                    addDeviceButton.disabled = !group.eligible_for_app || (!isUnlimited && Number(group.available || 0) < 1 && !hasPending);
+                }
+
+                if (openTokenButton) {
+                    const hasPending = Number(group.pending_tokens || 0) > 0;
+                    openTokenButton.hidden = !hasPending;
+                    openTokenButton.disabled = !group.eligible_for_app || !hasPending;
+                }
+            });
+        };
+
+        const setAddButtonsDisabled = (disabled) => {
+            addButtons.forEach((button) => {
+                button.disabled = disabled;
+            });
+        };
+
+        const copyCurrentToken = async () => {
+            if (!currentToken) {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(currentToken);
+                setMessage('{{ is_en ? 'Token copied' : 'Токен скопирован' }}');
+            } catch (error) {
+                const helper = document.createElement('textarea');
+                helper.value = currentToken;
+                document.body.appendChild(helper);
+                helper.select();
+                document.execCommand('copy');
+                document.body.removeChild(helper);
+                setMessage('{{ is_en ? 'Token copied' : 'Токен скопирован' }}');
+            }
+        };
+
+        addButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                setAddButtonsDisabled(true);
+                const orderId = Number(button.getAttribute('data-order-id') || 0);
+                currentOrderId = orderId > 0 ? orderId : null;
+                const payload = currentOrderId ? { order_id: currentOrderId } : {};
+                const groupState = currentOrderId ? findGroupState(currentOrderId) : null;
+                const hasPending = Number(groupState?.pending_tokens || 0) > 0;
+                const action = hasPending ? 'appbridge/token_rotate' : 'appbridge/activation_token_create';
+
+                API.client.post(action, payload, (result) => {
+                    const activation = result.activation_token || {};
+                    const sourceTitle = activation.source_title || result?.service?.title || '';
+
+                    currentToken = activation.token || '';
+                    tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
+                    meta.textContent = '{{ is_en ? 'New token is ready to copy.' : 'Новый токен готов к копированию.' }}';
+
+                    if (sourceTitle) {
+                        meta.textContent = `{{ is_en ? 'Token ready for service:' : 'Токен готов для услуги:' }} ${sourceTitle}`;
+                    }
+
+                    setResultState(result);
+                    updateStats(result);
+                    openModal();
+                    setAddButtonsDisabled(false);
+                }, (error) => {
+                    updateStats(initialState);
+                    setAddButtonsDisabled(false);
+                    setMessage(`${error.message} (${error.code})`, 'error');
+                });
+            });
+        });
+
+        openTokenButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const orderId = Number(button.getAttribute('data-order-id') || 0);
+                currentOrderId = orderId > 0 ? orderId : null;
+                if (!currentOrderId) {
+                    setMessage('{{ is_en ? 'Service is not selected for token display.' : 'Для показа токена не выбрана услуга.' }}', 'error');
+                    return;
+                }
+
+                button.disabled = true;
+                API.client.post('appbridge/activation_token_create', { order_id: currentOrderId }, (result) => {
+                    const activation = result.activation_token || {};
+                    const sourceTitle = activation.source_title || result?.service?.title || '';
+
+                    currentToken = activation.token || '';
+                    tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
+                    meta.textContent = '{{ is_en ? 'Pending token opened again.' : 'Открыт уже созданный ожидающий токен.' }}';
+
+                    if (sourceTitle) {
+                        meta.textContent = `{{ is_en ? 'Pending token for service:' : 'Ожидающий токен для услуги:' }} ${sourceTitle}`;
+                    }
+
+                    setResultState(result);
+                    updateStats(result);
+                    openModal();
+                    button.disabled = false;
+                }, (error) => {
+                    button.disabled = false;
+                    setMessage(`${error.message} (${error.code})`, 'error');
+                });
+            });
+        });
+
+        closeButtons.forEach((button) => {
+            button.addEventListener('click', closeModal);
+        });
+
+        if (copyButton) {
+            copyButton.addEventListener('click', copyCurrentToken);
+        }
+
+        if (rotateButton) {
+            rotateButton.addEventListener('click', () => {
+                if (!currentOrderId) {
+                    setMessage('{{ is_en ? 'Service is not selected for token rotation.' : 'Для перевыпуска токена не выбрана услуга.' }}', 'error');
+                    return;
+                }
+
+                rotateButton.disabled = true;
+                API.client.post('appbridge/token_rotate', { order_id: currentOrderId }, (result) => {
+                    const activation = result.activation_token || {};
+                    const sourceTitle = activation.source_title || result?.service?.title || '';
+
+                    currentToken = activation.token || '';
+                    tokenValue.textContent = currentToken || '••••••••••••••••••••••••••••••••';
+                    meta.textContent = '{{ is_en ? 'New token created.' : 'Создан новый токен.' }}';
+
+                    if (sourceTitle) {
+                        meta.textContent = `{{ is_en ? 'New token created for service:' : 'Создан новый токен для услуги:' }} ${sourceTitle}`;
+                    }
+
+                    setResultState(result);
+                    updateStats(result);
+                    rotateButton.disabled = false;
+                }, (error) => {
+                    rotateButton.disabled = false;
+                    setMessage(`${error.message} (${error.code})`, 'error');
+                });
+            });
+        }
+
+        if (tokenButton) {
+            tokenButton.addEventListener('click', copyCurrentToken);
+        }
+
+        document.addEventListener('click', (event) => {
+            const renewButton = event.target.closest('[data-appbridge-renew]');
+            if (renewButton) {
+                const orderId = Number(renewButton.getAttribute('data-order-id') || 0);
+                if (!orderId) {
+                    return;
+                }
+
+                const confirmed = window.confirm('{{ is_en ? 'This will create a renewal invoice. Continue?' : 'Будет создан счет на продление. Продолжить?' }}');
+                if (!confirmed) {
+                    return;
+                }
+
+                renewButton.disabled = true;
+                API.client.post('invoice/renewal_invoice', { order_id: orderId }, (result) => {
+                    window.location = "{{ 'invoice'|link }}/" + result;
+                }, (error) => {
+                    renewButton.disabled = false;
+                    setMessage(`${error.message} (${error.code})`, 'error');
+                });
+
+                return;
+            }
+
+            const revokeButton = event.target.closest('[data-appbridge-revoke]');
+            if (!revokeButton) {
+                return;
+            }
+
+            const deviceId = revokeButton.getAttribute('data-device-id');
+            if (!deviceId) {
+                return;
+            }
+
+            const confirmed = window.confirm('{{ is_en ? 'Disconnect this device?' : 'Отключить это устройство?' }}');
+            if (!confirmed) {
+                return;
+            }
+
+            revokeButton.disabled = true;
+            API.client.post('appbridge/device_revoke', { id: deviceId }, () => {
+                window.location.reload();
+            }, (error) => {
+                revokeButton.disabled = false;
+                setMessage(`${error.message} (${error.code})`, 'error');
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !modal.hidden) {
+                closeModal();
+            }
+        });
+    });
+</script>

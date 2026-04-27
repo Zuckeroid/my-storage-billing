@@ -1,0 +1,190 @@
+<section class="znet-shell-section">
+    <div class="znet-shell-section-head">
+        <div>
+            <h2>{{ is_en ? 'Devices and access' : 'Устройства и доступ' }}</h2>
+            <p>
+                {{ is_en
+                    ? 'Copy a token from the right service and paste it into the app to add a device.'
+                    : 'Скопируйте токен из нужного тарифа и вставьте его в приложение, чтобы добавить устройство.' }}
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if not appbridge.has_active_access %}
+                <p class="text-secondary small mb-0">
+                    {{ is_en
+                        ? 'Application access will appear here after the service is fully activated.'
+                        : 'Доступ для приложения появится здесь после полной активации услуги.' }}
+                </p>
+            {% endif %}
+
+            <div class="znet-appbridge-device-list {% if appbridge.has_active_access %}mt-0{% else %}mt-3{% endif %}">
+                {% if appbridge_groups is empty %}
+                    <article class="znet-appbridge-device znet-appbridge-device-empty">
+                        <div>
+                            <strong>{{ is_en ? 'No services are linked to application access yet' : 'Пока нет услуг, связанных с доступом приложения' }}</strong>
+                            <p class="mb-0 text-secondary small">
+                                {{ is_en
+                                    ? 'After the subscription link is prepared, the service will appear here with its own device list.'
+                                    : 'Когда ссылка на подписку будет готова, услуга появится здесь со своим списком устройств.' }}
+                            </p>
+                        </div>
+                    </article>
+                {% else %}
+                    {% for group in appbridge_groups %}
+                        <section class="mt-4" data-appbridge-order="{{ group.order_id }}">
+                            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                                <div>
+                                    <strong>{{ group.title ?: ((is_en ? 'Service' : 'Услуга') ~ ' #' ~ group.order_id) }}</strong>
+                                    <p class="mb-0 text-secondary small">
+                                        {% if group.eligible_for_app %}
+                                            {{ is_en ? 'Ready for device activation' : 'Готово к подключению устройств' }}
+                                        {% else %}
+                                            {{ is_en ? 'Will become available after the service is fully activated' : 'Станет доступно после полной активации услуги' }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="text-md-end">
+                                    {% if group.days_remaining is not null %}
+                                        <strong class="d-block">
+                                            {{ is_en ? group.days_remaining ~ ' days left' : 'Осталось ' ~ group.days_remaining ~ ' дн.' }}
+                                        </strong>
+                                    {% endif %}
+                                    {% if group.expires_at %}
+                                        <p class="mb-0 text-secondary small">
+                                            {{ is_en ? 'Paid through' : 'Оплачен до' }} {{ group.expires_at|format_date }}
+                                        </p>
+                                    {% endif %}
+                                    {% if group.can_renew %}
+                                        <button
+                                            class="btn btn-outline-primary btn-sm mt-2"
+                                            type="button"
+                                            data-appbridge-renew
+                                            data-order-id="{{ group.order_id }}"
+                                        >
+                                            {{ is_en ? 'Renew' : 'Продлить' }}
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="znet-shell-link-row mt-3">
+                                <button
+                                    class="btn btn-outline-primary"
+                                    type="button"
+                                    data-appbridge-add-device
+                                    data-order-id="{{ group.order_id }}"
+                                    {% if not group.eligible_for_app or (group.pending_tokens|default(0) < 1 and not appbridge_unlimited and group.available < 1) %}disabled{% endif %}
+                                >
+                                    {{ is_en ? 'Add device' : 'Добавить устройство' }}
+                                </button>
+                            </div>
+
+                            <div class="znet-appbridge-stats mt-3">
+                                <article class="znet-appbridge-stat">
+                                    <span>{{ is_en ? 'Devices' : 'Устройства' }}</span>
+                                    <strong data-appbridge-order-device-ratio>{{ group.active }}/{{ appbridge_unlimited and group.eligible_for_app ? '∞' : group.device_limit }}</strong>
+                                </article>
+                                <article class="znet-appbridge-stat">
+                                    <span>{{ is_en ? 'Pending tokens' : 'Ожидают активации' }}</span>
+                                    <strong data-appbridge-order-pending>{{ group.pending_tokens }}</strong>
+                                    <button
+                                        class="btn btn-outline-primary btn-sm mt-2"
+                                        type="button"
+                                        data-appbridge-open-token
+                                        data-order-id="{{ group.order_id }}"
+                                        {% if group.pending_tokens|default(0) < 1 %}hidden{% endif %}
+                                        {% if not group.eligible_for_app or group.pending_tokens|default(0) < 1 %}disabled{% endif %}
+                                    >
+                                        {{ is_en ? 'Show token' : 'Показать токен' }}
+                                    </button>
+                                </article>
+                            </div>
+
+                            <div class="znet-appbridge-device-list mt-3">
+                                {% if group.devices is empty %}
+                                    <article class="znet-appbridge-device znet-appbridge-device-empty">
+                                        <div>
+                                            <strong>{{ is_en ? 'No devices in this service yet' : 'В этой услуге пока нет устройств' }}</strong>
+                                            <p class="mb-0 text-secondary small">
+                                                {{ is_en
+                                                    ? 'Create a token for this service, paste it into the app, and the device will appear here after activation.'
+                                                    : 'Создайте токен для этой услуги, вставьте его в приложение, и после активации устройство появится здесь.' }}
+                                            </p>
+                                        </div>
+                                    </article>
+                                {% else %}
+                                    {% for device in group.devices %}
+                                        {% set device_meta = [] %}
+                                        {% if device.platform %}{% set device_meta = device_meta|merge([device.platform]) %}{% endif %}
+                                        {% if device.install_id %}{% set device_meta = device_meta|merge([device.install_id]) %}{% endif %}
+                                        {% if device.last_seen_at %}{% set device_meta = device_meta|merge([(is_en ? 'Last seen' : 'Последний запрос') ~ ': ' ~ device.last_seen_at]) %}{% endif %}
+                                        <article class="znet-appbridge-device" data-appbridge-device-row data-device-id="{{ device.id }}">
+                                            <div class="znet-appbridge-device-copy">
+                                                <strong>{{ device.name ?: ((is_en ? 'Device' : 'Устройство') ~ ' #' ~ device.id) }}</strong>
+                                                <p class="mb-0 text-secondary small">{{ device_meta|join(' • ') }}</p>
+                                            </div>
+                                            <div class="znet-appbridge-device-actions">
+                                                <button
+                                                    class="btn btn-outline-primary"
+                                                    type="button"
+                                                    data-appbridge-revoke
+                                                    data-device-id="{{ device.id }}"
+                                                >
+                                                    {{ is_en ? 'Disconnect' : 'Отключить' }}
+                                                </button>
+                                            </div>
+                                        </article>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </section>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="znet-appbridge-modal" hidden data-appbridge-modal>
+        <div class="znet-appbridge-modal-backdrop" data-appbridge-close></div>
+        <div class="znet-appbridge-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="appbridge-modal-title">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1" id="appbridge-modal-title">{{ is_en ? 'Device token' : 'Токен для устройства' }}</h2>
+                            <p class="text-secondary mb-0">
+                                {{ is_en
+                                    ? 'Copy and paste this token into the app to add your device.'
+                                    : 'Скопируйте и вставьте этот токен в приложение, чтобы добавить ваше устройство.' }}
+                            </p>
+                        </div>
+
+                        <button class="znet-btn znet-btn-ghost znet-btn-icon-only" type="button" data-appbridge-close aria-label="{{ is_en ? 'Close' : 'Закрыть' }}">
+                            <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 6l12 12"></path>
+                                <path d="M18 6L6 18"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <button class="znet-appbridge-token-field" type="button" data-appbridge-token-copy>
+                        <span data-appbridge-token>••••••••••••••••••••••••••••••••</span>
+                    </button>
+
+                    <div class="znet-shell-link-row mt-3">
+                        <button class="btn btn-primary" type="button" data-appbridge-copy-btn>{{ is_en ? 'Copy token' : 'Скопировать токен' }}</button>
+                        <button class="btn btn-outline-primary" type="button" data-appbridge-rotate-btn>{{ is_en ? 'Create new token' : 'Создать новый токен' }}</button>
+                        <button class="btn btn-outline-primary" type="button" data-appbridge-close>{{ is_en ? 'Close' : 'Закрыть' }}</button>
+                    </div>
+
+                    <p class="text-secondary small mt-3 mb-0" data-appbridge-meta>
+                        {{ is_en ? 'A new token will appear here after generation.' : 'После создания новый токен появится здесь.' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
