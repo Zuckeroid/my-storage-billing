@@ -765,8 +765,27 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'node_label' => isset($snapshot['node_label']) ? trim((string) $snapshot['node_label']) : null,
             'node_country' => isset($snapshot['node_country']) ? trim((string) $snapshot['node_country']) : null,
             'node_host' => isset($snapshot['node_host']) ? trim((string) $snapshot['node_host']) : null,
+            'routing_policy' => $this->normalizeSnapshotArrayField($snapshot['routing_policy'] ?? null),
+            'automation_policy' => $this->normalizeSnapshotArrayField($snapshot['automation_policy'] ?? null),
+            'telemetry_profile' => $this->normalizeSnapshotArrayField($snapshot['telemetry_profile'] ?? null),
             'generated_at' => isset($snapshot['generated_at']) ? trim((string) $snapshot['generated_at']) : null,
         ];
+    }
+
+    private function normalizeSnapshotArrayField(mixed $value): ?array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && trim($value) !== '') {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
     }
 
     private function syncOrderStatusFromProvisioning(
