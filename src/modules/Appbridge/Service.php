@@ -103,7 +103,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
         $device = $this->findActiveDeviceByToken($appToken);
         if ($device instanceof OODBBean) {
-            return $this->loginWithDeviceToken($device, $appToken);
+            return $this->loginWithDeviceToken($device, $appToken, $deviceData);
         }
 
         throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
@@ -314,7 +314,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->buildAccessBundle($client, $deviceToken, $expiresAt, $now, $device);
     }
 
-    private function loginWithDeviceToken(OODBBean $device, string $rawToken): array
+    private function loginWithDeviceToken(OODBBean $device, string $rawToken, array $deviceData = []): array
     {
         $client = $this->getClientById((int) $device->client_id);
         if (!$client instanceof \Model_Client || $client->status !== \Model_Client::ACTIVE) {
@@ -330,8 +330,24 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             throw new \FOSSBilling\InformationException('Application token has expired. Create a new token in the client area.', [], 401);
         }
 
+        $sanitizedDeviceData = $this->sanitizeDeviceData($deviceData);
+        if ($sanitizedDeviceData['install_id'] !== null) {
+            $storedInstallId = $device->install_id ? trim((string) $device->install_id) : '';
+            if ($storedInstallId === '' || !hash_equals($storedInstallId, $sanitizedDeviceData['install_id'])) {
+                $this->markDeviceRevoked($device);
+                throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
+            }
+        }
+
+        if ($this->resolveActiveDeviceSubscription($client, $device) === null) {
+            $this->markDeviceRevoked($device);
+            throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
+        }
+
         $now = $this->now();
         $refreshedExpiresAt = date('Y-m-d H:i:s', strtotime('+' . self::DEVICE_TOKEN_TTL_DAYS . ' days'));
+        $device->device_name = $sanitizedDeviceData['device_name'] ?? $device->device_name;
+        $device->platform = $sanitizedDeviceData['platform'] ?? $device->platform;
         $device->last_seen_at = $now;
         $device->expires_at = $refreshedExpiresAt;
         $device->updated_at = $now;
@@ -352,10 +368,20 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             ? (int) $device->source_order_id
             : null;
         $subscriptions = $this->prioritizeSubscriptionsByOrder($subscriptions, $preferredOrderId);
+        $deviceSubscription = $preferredOrderId !== null
+            ? $this->findSubscriptionByOrderId($subscriptions, $preferredOrderId)
+            : null;
         $activeLinks = [];
         $activeConnections = [];
 
         foreach ($subscriptions as $subscription) {
+            if (
+                $preferredOrderId !== null
+                && (int) ($subscription['order_id'] ?? 0) !== $preferredOrderId
+            ) {
+                continue;
+            }
+
             if (
                 ($subscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
                 && ($subscription['provision_status'] ?? null) === self::STATUS_ACTIVE
@@ -369,10 +395,18 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         $overview = $this->getDeviceOverview($client);
-        $primarySubscription = $this->resolvePrimarySubscription($subscriptions);
+        $primarySubscription = $preferredOrderId !== null
+            ? $deviceSubscription
+            : $this->resolvePrimarySubscription($subscriptions);
         $connection = $this->buildConnectionPayload($subscriptions, $activeLinks, $primarySubscription);
         $service = $this->buildPrimaryServicePayload($primarySubscription);
-        $hasActiveAccess = !empty($activeConnections);
+        $hasActiveAccess = $preferredOrderId !== null
+            ? (
+                $deviceSubscription !== null
+                && ($deviceSubscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
+                && ($deviceSubscription['provision_status'] ?? null) === self::STATUS_ACTIVE
+            )
+            : !empty($activeConnections);
 
         $app = [
             'token_expires_at' => $this->formatDateAtom($tokenExpiresAt),
@@ -476,6 +510,50 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         return array_merge($preferred, $rest);
+    }
+
+    private function findSubscriptionByOrderId(array $subscriptions, int $orderId): ?array
+    {
+        if ($orderId < 1) {
+            return null;
+        }
+
+        foreach ($subscriptions as $subscription) {
+            if ((int) ($subscription['order_id'] ?? 0) === $orderId) {
+                return $subscription;
+            }
+        }
+
+        return null;
+    }
+
+    private function resolveActiveDeviceSubscription(\Model_Client $client, OODBBean $device): ?array
+    {
+        $sourceOrderId = !empty($device->source_order_id)
+            ? (int) $device->source_order_id
+            : 0;
+        if ($sourceOrderId < 1) {
+            return null;
+        }
+
+        $subscription = $this->findSubscriptionByOrderId(
+            $this->collectClientSubscriptions($client),
+            $sourceOrderId,
+        );
+
+        if ($subscription === null) {
+            return null;
+        }
+
+        if (($subscription['order_status'] ?? null) !== \Model_ClientOrder::STATUS_ACTIVE) {
+            return null;
+        }
+
+        if (($subscription['provision_status'] ?? null) !== self::STATUS_ACTIVE) {
+            return null;
+        }
+
+        return $subscription;
     }
 
     private function buildConnectionPayload(array $subscriptions, array $activeLinks, ?array $primarySubscription): array
@@ -1384,6 +1462,15 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     {
         $device->status = self::STATUS_EXPIRED;
         $device->updated_at = $this->now();
+        $this->di['db']->store($device);
+    }
+
+    private function markDeviceRevoked(OODBBean $device): void
+    {
+        $now = $this->now();
+        $device->status = self::STATUS_REVOKED;
+        $device->expires_at = $now;
+        $device->updated_at = $now;
         $this->di['db']->store($device);
     }
 
