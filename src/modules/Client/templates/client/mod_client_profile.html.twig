@@ -4,26 +4,13 @@
 {% set appbridge = client.appbridge_bundle %}
 {% set appbridge_unlimited = appbridge.devices.is_unlimited_test_mode|default(false) %}
 {% set appbridge_groups = appbridge.devices.groups|default([]) %}
-{% set appbridge_single_order_id = appbridge.devices.eligible_order_count|default(0) == 1 ? appbridge.devices.primary_order_id|default(null) : null %}
 
 {% block meta_title %}{{ is_en ? 'Profile details' : 'Детали профиля' }}{% endblock %}
 {% block meta_description %}{% endblock %}
 {% block shell_title %}{{ is_en ? 'Profile details' : 'Детали профиля' }}{% endblock %}
 {% block shell_description %}{% endblock %}
 {% block page_header %}{{ is_en ? 'Profile' : 'Профиль' }}{% endblock %}
-{% block shell_head_actions %}
-    {% if appbridge_single_order_id %}
-        <button
-            class="znet-btn znet-btn-accent"
-            type="button"
-            data-appbridge-add-device
-            data-order-id="{{ appbridge_single_order_id }}"
-            {% if not appbridge.has_active_access %}disabled{% endif %}
-        >
-            {{ is_en ? 'Add device' : 'Добавить устройство' }}
-        </button>
-    {% endif %}
-{% endblock %}
+{% block shell_head_actions %}{% endblock %}
 {% block breadcrumb %}
     <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Profile' : 'Профиль' }}</li>
 {% endblock %}
@@ -90,50 +77,13 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-                        <div>
-                            <h2 class="h5 mb-1">{{ is_en ? 'App access' : 'Доступ для приложения' }}</h2>
-                            <p class="text-secondary mb-0">
-                                {{ is_en
-                                    ? 'Create a single-use token for a new device. The token is consumed as soon as the application sends the activation request.'
-                                    : 'Создайте одноразовый токен для нового устройства. Он сгорает сразу после запроса из приложения.' }}
-                            </p>
-                        </div>
-
-                        {% if appbridge_single_order_id %}
-                            <button
-                                class="btn btn-primary"
-                                type="button"
-                                data-appbridge-add-device
-                                data-order-id="{{ appbridge_single_order_id }}"
-                                {% if not appbridge.has_active_access %}disabled{% endif %}
-                            >
-                                {{ is_en ? 'Add device' : 'Добавить устройство' }}
-                            </button>
-                        {% elseif appbridge.devices.eligible_order_count|default(0) > 1 %}
-                            <p class="text-secondary small mb-0">
-                                {{ is_en ? 'Choose a service below to add a device.' : 'Выберите услугу ниже, чтобы добавить устройство.' }}
-                            </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="znet-appbridge-stats mt-4">
-                        <article class="znet-appbridge-stat">
-                            <span>{{ is_en ? 'Device limit' : 'Лимит устройств' }}</span>
-                            <strong data-appbridge-allowed>{{ appbridge_unlimited ? '∞' : appbridge.devices.allowed }}</strong>
-                        </article>
-                        <article class="znet-appbridge-stat">
-                            <span>{{ is_en ? 'Free slots' : 'Свободно слотов' }}</span>
-                            <strong data-appbridge-available>{{ appbridge_unlimited ? '∞' : appbridge.devices.available }}</strong>
-                        </article>
-                        <article class="znet-appbridge-stat">
-                            <span>{{ is_en ? 'Connected devices' : 'Подключено устройств' }}</span>
-                            <strong data-appbridge-active>{{ appbridge.devices.active }}</strong>
-                        </article>
-                        <article class="znet-appbridge-stat">
-                            <span>{{ is_en ? 'Pending tokens' : 'Ожидают активации' }}</span>
-                            <strong data-appbridge-pending>{{ appbridge.devices.pending_tokens }}</strong>
-                        </article>
+                    <div>
+                        <h2 class="h5 mb-1">{{ is_en ? 'App access' : 'Доступ для приложения' }}</h2>
+                        <p class="text-secondary mb-0">
+                            {{ is_en
+                                ? 'Create a single-use token inside the service card below. The token is consumed as soon as the application sends the activation request.'
+                                : 'Создайте одноразовый токен внутри карточки услуги ниже. Он сгорает сразу после запроса из приложения.' }}
+                        </p>
                     </div>
 
                     {% if not appbridge.has_active_access %}
@@ -381,13 +331,13 @@
             const copyButton = modal?.querySelector('[data-appbridge-copy-btn]');
             const rotateButton = modal?.querySelector('[data-appbridge-rotate-btn]');
             const tokenButton = modal?.querySelector('[data-appbridge-token-copy]');
-            const allowedValue = document.querySelector('[data-appbridge-allowed]');
-            const availableValue = document.querySelector('[data-appbridge-available]');
-            const activeValue = document.querySelector('[data-appbridge-active]');
-            const pendingValue = document.querySelector('[data-appbridge-pending]');
 
             if (!modal || !tokenValue || !meta || addButtons.length === 0) {
                 return;
+            }
+
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
             }
 
             let currentToken = '';
@@ -442,22 +392,6 @@
                 const isUnlimited = Boolean(devices.is_unlimited_test_mode);
                 const groups = Array.isArray(devices.groups) ? devices.groups : [];
                 const groupMap = new Map(groups.map((group) => [Number(group.order_id || 0), group]));
-
-                if (allowedValue && typeof devices.allowed !== 'undefined') {
-                    allowedValue.textContent = isUnlimited ? '∞' : devices.allowed;
-                }
-
-                if (availableValue && typeof devices.available !== 'undefined') {
-                    availableValue.textContent = isUnlimited ? '∞' : devices.available;
-                }
-
-                if (activeValue && typeof devices.active !== 'undefined') {
-                    activeValue.textContent = devices.active;
-                }
-
-                if (pendingValue && typeof devices.pending_tokens !== 'undefined') {
-                    pendingValue.textContent = devices.pending_tokens;
-                }
 
                 addButtons.forEach((button) => {
                     const orderId = Number(button.getAttribute('data-order-id') || 0);
