@@ -216,10 +216,22 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         $now = $this->now();
-        $device->status = self::STATUS_REVOKED;
-        $device->expires_at = $now;
-        $device->updated_at = $now;
-        $this->di['db']->store($device);
+        $installId = $device->install_id ? trim((string) $device->install_id) : '';
+        $sourceOrderId = !empty($device->source_order_id) ? (int) $device->source_order_id : null;
+
+        if ($installId !== '') {
+            $this->revokeActiveDevicesForInstall(
+                (int) $client->id,
+                $sourceOrderId,
+                $installId,
+                $now,
+            );
+        } else {
+            $device->status = self::STATUS_REVOKED;
+            $device->expires_at = $now;
+            $device->updated_at = $now;
+            $this->di['db']->store($device);
+        }
 
         return $this->buildAccessBundle($client);
     }
@@ -258,13 +270,33 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             throw new \FOSSBilling\InformationException('No device slots are available for this service.', [], 409);
         }
 
+        $sanitizedDeviceData = $this->sanitizeDeviceData($deviceData);
+        $targetOrderId = $activationToken->source_order_id ?: $overview['primary_order_id'];
+        $reusableDevice = $this->findMostRecentDeviceForInstall(
+            (int) $client->id,
+            $targetOrderId ? (int) $targetOrderId : null,
+            $sanitizedDeviceData['install_id'],
+        );
+
+        if ($sanitizedDeviceData['install_id'] !== null) {
+            $this->revokeActiveDevicesForInstall(
+                (int) $client->id,
+                $targetOrderId ? (int) $targetOrderId : null,
+                $sanitizedDeviceData['install_id'],
+                $now,
+                $reusableDevice instanceof OODBBean && !empty($reusableDevice->id)
+                    ? (int) $reusableDevice->id
+                    : null,
+            );
+        }
+
         $deviceToken = $this->generateToken();
         $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::DEVICE_TOKEN_TTL_DAYS . ' days'));
-        $sanitizedDeviceData = $this->sanitizeDeviceData($deviceData);
-
-        $device = $this->di['db']->dispense(self::DEVICE_BEAN);
+        $device = $reusableDevice instanceof OODBBean
+            ? $reusableDevice
+            : $this->di['db']->dispense(self::DEVICE_BEAN);
         $device->client_id = $client->id;
-        $device->source_order_id = $activationToken->source_order_id ?: $overview['primary_order_id'];
+        $device->source_order_id = $targetOrderId;
         $device->activation_token_id = $activationToken->id;
         $device->device_name = $sanitizedDeviceData['device_name'];
         $device->platform = $sanitizedDeviceData['platform'];
@@ -273,7 +305,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $device->status = self::STATUS_ACTIVE;
         $device->expires_at = $expiresAt;
         $device->last_seen_at = $now;
-        $device->created_at = $now;
+        if (empty($device->created_at)) {
+            $device->created_at = $now;
+        }
         $device->updated_at = $now;
         $this->di['db']->store($device);
 
@@ -1160,6 +1194,44 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         );
     }
 
+    private function revokeActiveDevicesForInstall(
+        int $clientId,
+        ?int $sourceOrderId,
+        string $installId,
+        string $now,
+        ?int $exceptDeviceId = null,
+    ): void {
+        $normalizedInstallId = trim($installId);
+        if ($clientId < 1 || $normalizedInstallId === '') {
+            return;
+        }
+
+        $sql = 'UPDATE `' . self::DEVICE_BEAN . '`
+                SET status = :status_revoked, expires_at = :now, updated_at = :now
+              WHERE client_id = :client_id
+                AND install_id = :install_id
+                AND status = :status_active';
+        $params = [
+            ':status_revoked' => self::STATUS_REVOKED,
+            ':status_active' => self::STATUS_ACTIVE,
+            ':client_id' => $clientId,
+            ':install_id' => $normalizedInstallId,
+            ':now' => $now,
+        ];
+
+        if ($sourceOrderId !== null) {
+            $sql .= ' AND source_order_id = :source_order_id';
+            $params[':source_order_id'] = $sourceOrderId;
+        }
+
+        if ($exceptDeviceId !== null && $exceptDeviceId > 0) {
+            $sql .= ' AND id != :except_device_id';
+            $params[':except_device_id'] = $exceptDeviceId;
+        }
+
+        $this->di['db']->exec($sql, $params);
+    }
+
     private function cleanupArtifactsForOrder(int $orderId): void
     {
         if ($orderId < 1) {
@@ -1192,6 +1264,34 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 ':now' => $now,
             ],
         );
+    }
+
+    private function findMostRecentDeviceForInstall(
+        int $clientId,
+        ?int $sourceOrderId,
+        ?string $installId,
+    ): ?OODBBean {
+        $normalizedInstallId = $installId !== null ? trim($installId) : '';
+        if ($clientId < 1 || $normalizedInstallId === '') {
+            return null;
+        }
+
+        $sql = 'client_id = :client_id AND install_id = :install_id';
+        $params = [
+            ':client_id' => $clientId,
+            ':install_id' => $normalizedInstallId,
+        ];
+
+        if ($sourceOrderId !== null) {
+            $sql .= ' AND source_order_id = :source_order_id';
+            $params[':source_order_id'] = $sourceOrderId;
+        }
+
+        $sql .= ' ORDER BY updated_at DESC, id DESC LIMIT 1';
+
+        $row = $this->di['db']->findOne(self::DEVICE_BEAN, $sql, $params);
+
+        return $row instanceof OODBBean ? $row : null;
     }
 
     private function findPendingActivationTokenForOrder(int $clientId, int $sourceOrderId): ?OODBBean
