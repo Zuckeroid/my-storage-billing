@@ -319,14 +319,18 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             : null;
         $subscriptions = $this->prioritizeSubscriptionsByOrder($subscriptions, $preferredOrderId);
         $activeLinks = [];
+        $activeConnections = [];
 
         foreach ($subscriptions as $subscription) {
             if (
                 ($subscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
                 && ($subscription['provision_status'] ?? null) === self::STATUS_ACTIVE
-                && !empty($subscription['subscription_link'])
+                && !empty($subscription['connection_ready'])
             ) {
-                $activeLinks[] = $subscription['subscription_link'];
+                $activeConnections[] = $subscription;
+                if (!empty($subscription['subscription_link'])) {
+                    $activeLinks[] = $subscription['subscription_link'];
+                }
             }
         }
 
@@ -334,6 +338,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $primarySubscription = $this->resolvePrimarySubscription($subscriptions);
         $connection = $this->buildConnectionPayload($subscriptions, $activeLinks, $primarySubscription);
         $service = $this->buildPrimaryServicePayload($primarySubscription);
+        $hasActiveAccess = !empty($activeConnections);
 
         $app = [
             'token_expires_at' => $this->formatDateAtom($tokenExpiresAt),
@@ -360,14 +365,14 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             ],
             'app' => $app,
             'access' => [
-                'has_active_access' => !empty($activeLinks),
+                'has_active_access' => $hasActiveAccess,
                 'device_binding' => 'per-device-token',
-                'connection_mode' => 'shared-subscription-link',
+                'connection_mode' => 'runtime-config-snapshot',
                 'revoke_scope' => 'application-token',
             ],
             'connection' => $connection,
             'service' => $service,
-            'has_active_access' => !empty($activeLinks),
+            'has_active_access' => $hasActiveAccess,
             'active_subscription_links' => array_values($activeLinks),
             'subscriptions' => $subscriptions,
             'devices' => $overview,
@@ -403,7 +408,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             static fn(array $subscription): bool =>
                 ($subscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
                 && ($subscription['provision_status'] ?? null) === self::STATUS_ACTIVE
-                && !empty($subscription['subscription_link']),
+                && !empty($subscription['connection_ready']),
         ));
 
         if (!empty($activeReady)) {
@@ -442,30 +447,99 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     private function buildConnectionPayload(array $subscriptions, array $activeLinks, ?array $primarySubscription): array
     {
         $primaryLink = null;
+        $runtimeType = null;
+        $protocol = null;
+        $xrayConfig = null;
+        $configRevision = null;
+        $nodeId = null;
+        $nodeLabel = null;
+        $nodeCountry = null;
+        $nodeHost = null;
         if ($primarySubscription !== null) {
             $primaryLink = isset($primarySubscription['subscription_link'])
                 ? trim((string) $primarySubscription['subscription_link'])
+                : null;
+            $runtimeType = isset($primarySubscription['runtime_type'])
+                ? trim((string) $primarySubscription['runtime_type'])
+                : null;
+            $protocol = isset($primarySubscription['protocol'])
+                ? trim((string) $primarySubscription['protocol'])
+                : null;
+            $xrayConfig = isset($primarySubscription['xray_config'])
+                ? trim((string) $primarySubscription['xray_config'])
+                : null;
+            $configRevision = isset($primarySubscription['config_revision'])
+                ? trim((string) $primarySubscription['config_revision'])
+                : null;
+            $nodeId = isset($primarySubscription['node_id'])
+                ? trim((string) $primarySubscription['node_id'])
+                : null;
+            $nodeLabel = isset($primarySubscription['node_label'])
+                ? trim((string) $primarySubscription['node_label'])
+                : null;
+            $nodeCountry = isset($primarySubscription['node_country'])
+                ? trim((string) $primarySubscription['node_country'])
+                : null;
+            $nodeHost = isset($primarySubscription['node_host'])
+                ? trim((string) $primarySubscription['node_host'])
                 : null;
 
             if ($primaryLink === '') {
                 $primaryLink = null;
             }
+            if ($runtimeType === '') {
+                $runtimeType = null;
+            }
+            if ($protocol === '') {
+                $protocol = null;
+            }
+            if ($xrayConfig === '') {
+                $xrayConfig = null;
+            }
+            if ($configRevision === '') {
+                $configRevision = null;
+            }
+            if ($nodeId === '') {
+                $nodeId = null;
+            }
+            if ($nodeLabel === '') {
+                $nodeLabel = null;
+            }
+            if ($nodeCountry === '') {
+                $nodeCountry = null;
+            }
+            if ($nodeHost === '') {
+                $nodeHost = null;
+            }
         }
 
         $primaryLink ??= $activeLinks[0] ?? null;
-        $type = $this->detectConnectionType($primaryLink);
-        $ready = $primaryLink !== null;
+        $type = $runtimeType ?? $protocol ?? $this->detectConnectionType($primaryLink);
+        $ready = $xrayConfig !== null
+            || $primaryLink !== null
+            || ($primarySubscription !== null && !empty($primarySubscription['connection_ready']));
+        $readyConnectionCount = count(array_filter(
+            $subscriptions,
+            static fn(array $subscription): bool => !empty($subscription['connection_ready']),
+        ));
 
         return [
             'ready' => $ready,
             'type' => $type,
+            'runtime_type' => $runtimeType,
+            'protocol' => $protocol,
             'link' => $primaryLink,
             'links' => array_values($activeLinks),
-            'xray_config' => null,
+            'xray_config' => $xrayConfig,
+            'payload' => $xrayConfig,
+            'node_id' => $nodeId,
+            'node_label' => $nodeLabel,
+            'node_country' => $nodeCountry,
+            'node_host' => $nodeHost,
             'source_order_id' => $primarySubscription['order_id'] ?? null,
             'source_title' => $primarySubscription['title'] ?? null,
-            'revision' => $ready ? hash('sha256', (string) $primaryLink) : null,
-            'available_connection_count' => count($activeLinks),
+            'revision' => $configRevision ?? ($ready ? hash('sha256', (string) ($xrayConfig ?? $primaryLink)) : null),
+            'available_connection_count' => $readyConnectionCount,
             'service_count' => count($subscriptions),
         ];
     }
@@ -524,9 +598,26 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             }
 
             $access = $orchestratorService->getClientOrderAccess($client, (int) $order->id);
+            $configSnapshot = isset($access['config_snapshot']) && is_array($access['config_snapshot'])
+                ? $access['config_snapshot']
+                : null;
+            $runtimePayload = $this->extractConfigSnapshotPayload($configSnapshot);
+            $runtimeType = $this->extractConfigSnapshotString($configSnapshot, 'runtime_type');
+            $protocol = $this->extractConfigSnapshotString($configSnapshot, 'protocol');
+            $configRevision = $this->extractConfigSnapshotString($configSnapshot, 'config_revision');
+            $nodeId = $this->extractConfigSnapshotString($configSnapshot, 'node_id');
+            $nodeLabel = $this->extractConfigSnapshotString($configSnapshot, 'node_label');
+            $nodeCountry = $this->extractConfigSnapshotString($configSnapshot, 'node_country');
+            $nodeHost = $this->extractConfigSnapshotString($configSnapshot, 'node_host');
+            $sourceSubscriptionLink = $this->extractConfigSnapshotString($configSnapshot, 'source_subscription_link');
+            $subscriptionLink = isset($access['subscription_link']) && trim((string) $access['subscription_link']) !== ''
+                ? trim((string) $access['subscription_link'])
+                : $sourceSubscriptionLink;
+            $connectionReady = $this->isConnectionSnapshotReady($configSnapshot, $runtimePayload, $subscriptionLink);
             $hasBridgeData =
                 !empty($access['status'])
-                || !empty($access['subscription_link'])
+                || !empty($subscriptionLink)
+                || $configSnapshot !== null
                 || !empty($access['error'])
                 || !empty($access['last_sync_at']);
 
@@ -538,7 +629,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             $eligibleForApp =
                 ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
                 && ($access['status'] ?? null) === self::STATUS_ACTIVE
-                && !empty($access['subscription_link']);
+                && $connectionReady;
 
             $subscriptions[] = [
                 'order_id' => (int) $order->id,
@@ -548,7 +639,16 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'expires_at' => !empty($order->expires_at) ? (string) $order->expires_at : null,
                 'days_remaining' => $this->calculateDaysRemaining(!empty($order->expires_at) ? (string) $order->expires_at : null),
                 'can_renew' => $this->canRenewOrder($order),
-                'subscription_link' => $access['subscription_link'] ?? null,
+                'subscription_link' => $subscriptionLink,
+                'connection_ready' => $connectionReady,
+                'runtime_type' => $runtimeType,
+                'protocol' => $protocol,
+                'config_revision' => $configRevision,
+                'xray_config' => $runtimePayload,
+                'node_id' => $nodeId,
+                'node_label' => $nodeLabel,
+                'node_country' => $nodeCountry,
+                'node_host' => $nodeHost,
                 'error' => $access['error'] ?? null,
                 'last_sync_at' => $this->formatDateAtom($access['last_sync_at'] ?? null),
                 'access_email_sent_at' => $this->formatDateAtom($access['access_email_sent_at'] ?? null),
@@ -559,6 +659,40 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         return $subscriptions;
+    }
+
+    private function extractConfigSnapshotString(?array $snapshot, string $key): ?string
+    {
+        if (!is_array($snapshot) || !isset($snapshot[$key])) {
+            return null;
+        }
+
+        $value = trim((string) $snapshot[$key]);
+
+        return $value === '' ? null : $value;
+    }
+
+    private function extractConfigSnapshotPayload(?array $snapshot): ?string
+    {
+        $payload = $this->extractConfigSnapshotString($snapshot, 'runtime_payload');
+        if ($payload !== null) {
+            return $payload;
+        }
+
+        return $this->extractConfigSnapshotString($snapshot, 'xray_config');
+    }
+
+    private function isConnectionSnapshotReady(?array $snapshot, ?string $runtimePayload, ?string $subscriptionLink): bool
+    {
+        if (is_array($snapshot) && !empty($snapshot['ready'])) {
+            return true;
+        }
+
+        if ($runtimePayload !== null) {
+            return true;
+        }
+
+        return $subscriptionLink !== null && $subscriptionLink !== '';
     }
 
     private function getDeviceOverview(\Model_Client $client, ?int $ignoreActivationTokenId = null): array
@@ -774,7 +908,12 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         if (
             ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
             && ($access['status'] ?? null) === self::STATUS_ACTIVE
-            && !empty($access['subscription_link'])
+            && (
+                !empty($access['subscription_link'])
+                || !empty($access['config_snapshot']['ready'])
+                || !empty($access['config_snapshot']['runtime_payload'])
+                || !empty($access['config_snapshot']['xray_config'])
+            )
         ) {
             return [
                 'value' => 1,

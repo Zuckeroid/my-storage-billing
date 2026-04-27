@@ -56,4 +56,22 @@ class Guest extends \Api_Abstract
             (string) $data['subscription_link'],
         );
     }
+
+    #[RequiredParams([
+        'external_subscription_id' => 'External subscription ID is required',
+        'config_snapshot' => 'Config snapshot is required',
+    ])]
+    public function update_device_config(array $data): bool
+    {
+        $this->getService()->assertApiKey();
+
+        if (!is_array($data['config_snapshot'])) {
+            throw new \FOSSBilling\InformationException('Config snapshot must be an object', null, 400);
+        }
+
+        return $this->getService()->updateDeviceConfig(
+            (string) $data['external_subscription_id'],
+            $data['config_snapshot'],
+        );
+    }
 }

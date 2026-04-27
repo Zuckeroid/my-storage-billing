@@ -96,6 +96,28 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return true;
     }
 
+    public function updateDeviceConfig(string $externalSubscriptionId, array $configSnapshot): bool
+    {
+        $order = $this->findOrderByExternalSubscriptionId($externalSubscriptionId);
+        $normalized = $this->normalizeConfigSnapshot($configSnapshot);
+
+        $encoded = json_encode($normalized, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($encoded === false) {
+            throw new \FOSSBilling\Exception('Could not encode device config snapshot');
+        }
+
+        $legacyLink = isset($normalized['source_subscription_link'])
+            ? trim((string) $normalized['source_subscription_link'])
+            : '';
+
+        $this->setOrderMeta($order->id, 'orchestrator_config_snapshot', $encoded);
+        $this->setOrderMeta($order->id, 'orchestrator_subscription_link', $legacyLink);
+        $this->setOrderMeta($order->id, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
+        $this->sendAccessReadyEmailIfNeeded($order);
+
+        return true;
+    }
+
     public function getConfig(): array
     {
         return $this->di['mod_service']('extension')->getConfig('mod_orchestrator');
@@ -147,6 +169,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'status' => $this->getOrderMetaValue($orderId, 'orchestrator_status'),
             'error' => $this->getOrderMetaValue($orderId, 'orchestrator_error'),
             'subscription_link' => $this->getOrderMetaValue($orderId, 'orchestrator_subscription_link'),
+            'config_snapshot' => $this->getOrderConfigSnapshot($orderId),
             'last_sync_at' => $this->getOrderMetaValue($orderId, 'orchestrator_last_sync_at'),
             'access_email_sent_at' => $this->getOrderMetaValue($orderId, 'orchestrator_access_email_sent_at'),
         ];
@@ -620,6 +643,46 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $value = trim((string) $meta->value);
 
         return $value === '' ? null : $value;
+    }
+
+    private function getOrderConfigSnapshot(int $orderId): ?array
+    {
+        $raw = $this->getOrderMetaValue($orderId, 'orchestrator_config_snapshot');
+        if ($raw === null) {
+            return null;
+        }
+
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) {
+            return null;
+        }
+
+        return $decoded;
+    }
+
+    private function normalizeConfigSnapshot(array $snapshot): array
+    {
+        $runtimePayload = isset($snapshot['runtime_payload'])
+            ? trim((string) $snapshot['runtime_payload'])
+            : '';
+        if ($runtimePayload === '' && isset($snapshot['xray_config'])) {
+            $runtimePayload = trim((string) $snapshot['xray_config']);
+        }
+
+        return [
+            'ready' => !empty($snapshot['ready']),
+            'runtime_type' => isset($snapshot['runtime_type']) ? trim((string) $snapshot['runtime_type']) : null,
+            'protocol' => isset($snapshot['protocol']) ? trim((string) $snapshot['protocol']) : null,
+            'config_revision' => isset($snapshot['config_revision']) ? trim((string) $snapshot['config_revision']) : null,
+            'runtime_payload' => $runtimePayload !== '' ? $runtimePayload : null,
+            'xray_config' => $runtimePayload !== '' ? $runtimePayload : null,
+            'node_id' => isset($snapshot['node_id']) ? trim((string) $snapshot['node_id']) : null,
+            'node_label' => isset($snapshot['node_label']) ? trim((string) $snapshot['node_label']) : null,
+            'node_country' => isset($snapshot['node_country']) ? trim((string) $snapshot['node_country']) : null,
+            'node_host' => isset($snapshot['node_host']) ? trim((string) $snapshot['node_host']) : null,
+            'source_subscription_link' => isset($snapshot['source_subscription_link']) ? trim((string) $snapshot['source_subscription_link']) : null,
+            'generated_at' => isset($snapshot['generated_at']) ? trim((string) $snapshot['generated_at']) : null,
+        ];
     }
 
     private function syncOrderStatusFromProvisioning(
