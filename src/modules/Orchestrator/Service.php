@@ -106,16 +106,97 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             throw new \FOSSBilling\Exception('Could not encode device config snapshot');
         }
 
-        $legacyLink = isset($normalized['source_subscription_link'])
-            ? trim((string) $normalized['source_subscription_link'])
-            : '';
-
         $this->setOrderMeta($order->id, 'orchestrator_config_snapshot', $encoded);
-        $this->setOrderMeta($order->id, 'orchestrator_subscription_link', $legacyLink);
+        $this->setOrderMeta($order->id, 'orchestrator_subscription_link', '');
         $this->setOrderMeta($order->id, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
-        $this->sendAccessReadyEmailIfNeeded($order);
+        $this->di['mod_service']('Appbridge')->updateDeviceConfigSnapshotFromOrchestrator(
+            $externalSubscriptionId,
+            $normalized,
+        );
 
         return true;
+    }
+
+    public function sendDeviceEvent(\Model_Client $client, \RedBeanPHP\OODBBean $device, string $eventName): void
+    {
+        if (!in_array($eventName, ['device_activated', 'device_revoked'], true)) {
+            throw new \FOSSBilling\Exception('Unsupported device event');
+        }
+
+        $config = $this->getConfig();
+        $enabled = !empty($config['enabled']);
+        if (!$enabled) {
+            return;
+        }
+
+        $webhookUrl = trim((string) ($config['orchestrator_webhook_url'] ?? ''));
+        $apiKey = trim((string) ($config['orchestrator_webhook_api_key'] ?? ''));
+        $signingSecret = trim((string) ($config['orchestrator_webhook_signing_secret'] ?? ''));
+        if ($webhookUrl === '' || $apiKey === '' || $signingSecret === '') {
+            throw new \FOSSBilling\Exception('Orchestrator webhook settings are incomplete');
+        }
+
+        $orderId = !empty($device->source_order_id) ? (int) $device->source_order_id : 0;
+        if ($orderId < 1) {
+            throw new \FOSSBilling\Exception('Device has no source order');
+        }
+
+        $order = $this->di['db']->getExistingModelById('ClientOrder', $orderId, 'Order not found');
+        $deviceId = isset($device->id) ? (int) $device->id : 0;
+        $updatedAt = !empty($device->updated_at) ? (string) $device->updated_at : date('Y-m-d H:i:s');
+        $payload = [
+            'event' => $eventName,
+            'eventId' => sprintf(
+                'fossbilling_%s_%d_device_%d_%s',
+                $eventName,
+                $orderId,
+                $deviceId,
+                gmdate('YmdHis', strtotime($updatedAt) ?: time()),
+            ),
+            'externalUserId' => sprintf('client_%d', $client->id),
+            'externalSubscriptionId' => $this->formatExternalSubscriptionId($orderId),
+            'externalOrderId' => sprintf('order_%d', $orderId),
+            'email' => (string) $client->email,
+            'deviceId' => (string) $deviceId,
+            'deviceName' => $device->device_name ? (string) $device->device_name : null,
+            'platform' => $device->platform ? (string) $device->platform : null,
+            'installId' => $device->install_id ? (string) $device->install_id : null,
+        ];
+
+        if ($order->expires_at) {
+            $payload['expiresAt'] = date(DATE_ATOM, strtotime($order->expires_at));
+        }
+
+        $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($body === false) {
+            throw new \FOSSBilling\Exception('Could not encode Orchestrator device event payload');
+        }
+
+        $timestamp = (string) time();
+        $signature = hash_hmac('sha256', $body, $signingSecret);
+
+        $clientHttp = HttpClient::create(['bindto' => BIND_TO]);
+        $response = $clientHttp->request('POST', $webhookUrl, [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'X-Api-Key' => $apiKey,
+                'X-Timestamp' => $timestamp,
+                'X-Signature' => $signature,
+            ],
+            'body' => $body,
+        ]);
+
+        $statusCode = $response->getStatusCode();
+        if ($statusCode < 200 || $statusCode >= 300) {
+            throw new \FOSSBilling\Exception(
+                'Orchestrator webhook returned HTTP :status',
+                [':status' => $statusCode],
+            );
+        }
+
+        $this->setOrderMeta($orderId, 'orchestrator_last_device_event', $eventName);
+        $this->setOrderMeta($orderId, 'orchestrator_last_device_event_id', (string) $payload['eventId']);
+        $this->setOrderMeta($orderId, 'orchestrator_last_device_webhook_at', date('Y-m-d H:i:s'));
     }
 
     public function getConfig(): array
@@ -676,11 +757,14 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'config_revision' => isset($snapshot['config_revision']) ? trim((string) $snapshot['config_revision']) : null,
             'runtime_payload' => $runtimePayload !== '' ? $runtimePayload : null,
             'xray_config' => $runtimePayload !== '' ? $runtimePayload : null,
+            'device_id' => isset($snapshot['device_id']) ? trim((string) $snapshot['device_id']) : null,
+            'device_name' => isset($snapshot['device_name']) ? trim((string) $snapshot['device_name']) : null,
+            'platform' => isset($snapshot['platform']) ? trim((string) $snapshot['platform']) : null,
+            'install_id' => isset($snapshot['install_id']) ? trim((string) $snapshot['install_id']) : null,
             'node_id' => isset($snapshot['node_id']) ? trim((string) $snapshot['node_id']) : null,
             'node_label' => isset($snapshot['node_label']) ? trim((string) $snapshot['node_label']) : null,
             'node_country' => isset($snapshot['node_country']) ? trim((string) $snapshot['node_country']) : null,
             'node_host' => isset($snapshot['node_host']) ? trim((string) $snapshot['node_host']) : null,
-            'source_subscription_link' => isset($snapshot['source_subscription_link']) ? trim((string) $snapshot['source_subscription_link']) : null,
             'generated_at' => isset($snapshot['generated_at']) ? trim((string) $snapshot['generated_at']) : null,
         ];
     }
@@ -742,13 +826,16 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     private function sendAccessReadyEmailIfNeeded(\Model_ClientOrder $order): void
     {
         $status = $this->getOrderMetaValue($order->id, 'orchestrator_status');
-        $subscriptionLink = $this->getOrderMetaValue($order->id, 'orchestrator_subscription_link');
-        if ($status !== 'active' || $subscriptionLink === null) {
+        $configSnapshot = $this->getOrderConfigSnapshot((int) $order->id);
+        if ($status !== 'active' || !$this->isConfigSnapshotReady($configSnapshot)) {
             return;
         }
 
-        $lastEmailedLink = $this->getOrderMetaValue($order->id, 'orchestrator_last_emailed_subscription_link');
-        if ($lastEmailedLink === $subscriptionLink) {
+        $revision = isset($configSnapshot['config_revision']) && trim((string) $configSnapshot['config_revision']) !== ''
+            ? trim((string) $configSnapshot['config_revision'])
+            : hash('sha256', (string) json_encode($configSnapshot));
+        $lastEmailedRevision = $this->getOrderMetaValue($order->id, 'orchestrator_last_emailed_config_revision');
+        if ($lastEmailedRevision === $revision) {
             return;
         }
 
@@ -777,14 +864,34 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             ],
             'orchestrator' => [
                 'status' => $status,
-                'subscription_link' => $subscriptionLink,
+                'subscription_link' => '',
+                'config_revision' => $revision,
                 'updated_at' => date(DATE_ATOM),
             ],
         ];
 
         $this->di['mod_service']('email')->sendTemplate($email);
 
-        $this->setOrderMeta($order->id, 'orchestrator_last_emailed_subscription_link', $subscriptionLink);
+        $this->setOrderMeta($order->id, 'orchestrator_last_emailed_config_revision', $revision);
         $this->setOrderMeta($order->id, 'orchestrator_access_email_sent_at', date('Y-m-d H:i:s'));
+    }
+
+    private function isConfigSnapshotReady(?array $snapshot): bool
+    {
+        if (!is_array($snapshot)) {
+            return false;
+        }
+
+        if (!empty($snapshot['ready'])) {
+            return true;
+        }
+
+        foreach (['runtime_payload', 'xray_config'] as $key) {
+            if (isset($snapshot[$key]) && trim((string) $snapshot[$key]) !== '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

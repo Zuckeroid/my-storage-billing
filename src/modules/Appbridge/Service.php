@@ -16,7 +16,7 @@ use RedBeanPHP\OODBBean;
 
 class Service implements \FOSSBilling\InjectionAwareInterface
 {
-    public const string CONTRACT_VERSION = 'appbridge-v1';
+    public const string CONTRACT_VERSION = 'appbridge-v2';
     private const string ACTIVATION_TOKEN_BEAN = 'mod_appbridge_activation_token';
     private const string DEVICE_BEAN = 'mod_appbridge_device';
     private const string PRIMARY_DEVICE_LIMIT_KEY = 'appbridge_device_limit';
@@ -233,7 +233,53 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             $this->di['db']->store($device);
         }
 
+        $this->notifyOrchestratorDeviceEvent($client, $device, 'device_revoked');
+
         return $this->buildAccessBundle($client);
+    }
+
+    public function updateDeviceConfigSnapshotFromOrchestrator(string $externalSubscriptionId, array $snapshot): bool
+    {
+        $this->ensureStorage();
+
+        $orderId = $this->orderIdFromExternalSubscriptionId($externalSubscriptionId);
+        $deviceId = isset($snapshot['device_id']) ? (int) $snapshot['device_id'] : 0;
+        $installId = isset($snapshot['install_id']) ? trim((string) $snapshot['install_id']) : '';
+
+        if ($orderId < 1 || ($deviceId < 1 && $installId === '')) {
+            return false;
+        }
+
+        $params = [
+            ':source_order_id' => $orderId,
+        ];
+        $sql = 'source_order_id = :source_order_id';
+
+        if ($deviceId > 0) {
+            $sql .= ' AND id = :device_id';
+            $params[':device_id'] = $deviceId;
+        } else {
+            $sql .= ' AND install_id = :install_id';
+            $params[':install_id'] = $installId;
+        }
+
+        $device = $this->di['db']->findOne(self::DEVICE_BEAN, $sql . ' ORDER BY id DESC LIMIT 1', $params);
+        if (!$device instanceof OODBBean) {
+            return false;
+        }
+
+        $encoded = json_encode($snapshot, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($encoded === false) {
+            throw new \FOSSBilling\Exception('Could not encode device config snapshot');
+        }
+
+        $now = $this->now();
+        $device->config_snapshot = $encoded;
+        $device->config_updated_at = $now;
+        $device->updated_at = $now;
+        $this->di['db']->store($device);
+
+        return true;
     }
 
     private function exchangeActivationToken(OODBBean $activationToken, array $deviceData): array
@@ -311,6 +357,8 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $device->updated_at = $now;
         $this->di['db']->store($device);
 
+        $this->notifyOrchestratorDeviceEvent($client, $device, 'device_activated');
+
         return $this->buildAccessBundle($client, $deviceToken, $expiresAt, $now, $device);
     }
 
@@ -371,7 +419,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $deviceSubscription = $preferredOrderId !== null
             ? $this->findSubscriptionByOrderId($subscriptions, $preferredOrderId)
             : null;
-        $activeLinks = [];
         $activeConnections = [];
 
         foreach ($subscriptions as $subscription) {
@@ -388,9 +435,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 && !empty($subscription['connection_ready'])
             ) {
                 $activeConnections[] = $subscription;
-                if (!empty($subscription['subscription_link'])) {
-                    $activeLinks[] = $subscription['subscription_link'];
-                }
             }
         }
 
@@ -398,7 +442,10 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $primarySubscription = $preferredOrderId !== null
             ? $deviceSubscription
             : $this->resolvePrimarySubscription($subscriptions);
-        $connection = $this->buildConnectionPayload($subscriptions, $activeLinks, $primarySubscription);
+        if ($device instanceof OODBBean && $primarySubscription !== null) {
+            $primarySubscription = $this->applyDeviceSnapshotToSubscription($primarySubscription, $device);
+        }
+        $connection = $this->buildConnectionPayload($subscriptions, $primarySubscription);
         $service = $this->buildPrimaryServicePayload($primarySubscription);
         $hasActiveAccess = $preferredOrderId !== null
             ? (
@@ -441,7 +488,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'connection' => $connection,
             'service' => $service,
             'has_active_access' => $hasActiveAccess,
-            'active_subscription_links' => array_values($activeLinks),
             'subscriptions' => $subscriptions,
             'devices' => $overview,
             'generated_at' => date(DATE_ATOM),
@@ -556,9 +602,8 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $subscription;
     }
 
-    private function buildConnectionPayload(array $subscriptions, array $activeLinks, ?array $primarySubscription): array
+    private function buildConnectionPayload(array $subscriptions, ?array $primarySubscription): array
     {
-        $primaryLink = null;
         $runtimeType = null;
         $protocol = null;
         $xrayConfig = null;
@@ -568,9 +613,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $nodeCountry = null;
         $nodeHost = null;
         if ($primarySubscription !== null) {
-            $primaryLink = isset($primarySubscription['subscription_link'])
-                ? trim((string) $primarySubscription['subscription_link'])
-                : null;
             $runtimeType = isset($primarySubscription['runtime_type'])
                 ? trim((string) $primarySubscription['runtime_type'])
                 : null;
@@ -596,9 +638,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 ? trim((string) $primarySubscription['node_host'])
                 : null;
 
-            if ($primaryLink === '') {
-                $primaryLink = null;
-            }
             if ($runtimeType === '') {
                 $runtimeType = null;
             }
@@ -625,10 +664,8 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             }
         }
 
-        $primaryLink ??= $activeLinks[0] ?? null;
-        $type = $runtimeType ?? $protocol ?? $this->detectConnectionType($primaryLink);
+        $type = $runtimeType ?? $protocol;
         $ready = $xrayConfig !== null
-            || $primaryLink !== null
             || ($primarySubscription !== null && !empty($primarySubscription['connection_ready']));
         $readyConnectionCount = count(array_filter(
             $subscriptions,
@@ -640,8 +677,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'type' => $type,
             'runtime_type' => $runtimeType,
             'protocol' => $protocol,
-            'link' => $primaryLink,
-            'links' => array_values($activeLinks),
             'xray_config' => $xrayConfig,
             'payload' => $xrayConfig,
             'node_id' => $nodeId,
@@ -650,7 +685,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'node_host' => $nodeHost,
             'source_order_id' => $primarySubscription['order_id'] ?? null,
             'source_title' => $primarySubscription['title'] ?? null,
-            'revision' => $configRevision ?? ($ready ? hash('sha256', (string) ($xrayConfig ?? $primaryLink)) : null),
+            'revision' => $configRevision ?? ($ready ? hash('sha256', (string) $xrayConfig) : null),
             'available_connection_count' => $readyConnectionCount,
             'service_count' => count($subscriptions),
         ];
@@ -676,6 +711,30 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'last_sync_at' => $primarySubscription['last_sync_at'] ?? null,
             'access_email_sent_at' => $primarySubscription['access_email_sent_at'] ?? null,
         ];
+    }
+
+    private function applyDeviceSnapshotToSubscription(array $subscription, OODBBean $device): array
+    {
+        $snapshot = $this->getDeviceConfigSnapshot($device);
+        if ($snapshot === null) {
+            $subscription['connection_ready'] = false;
+            $subscription['xray_config'] = null;
+
+            return $subscription;
+        }
+
+        $runtimePayload = $this->extractConfigSnapshotPayload($snapshot);
+        $subscription['connection_ready'] = $this->isConnectionSnapshotReady($snapshot, $runtimePayload);
+        $subscription['runtime_type'] = $this->extractConfigSnapshotString($snapshot, 'runtime_type');
+        $subscription['protocol'] = $this->extractConfigSnapshotString($snapshot, 'protocol');
+        $subscription['config_revision'] = $this->extractConfigSnapshotString($snapshot, 'config_revision');
+        $subscription['xray_config'] = $runtimePayload;
+        $subscription['node_id'] = $this->extractConfigSnapshotString($snapshot, 'node_id');
+        $subscription['node_label'] = $this->extractConfigSnapshotString($snapshot, 'node_label');
+        $subscription['node_country'] = $this->extractConfigSnapshotString($snapshot, 'node_country');
+        $subscription['node_host'] = $this->extractConfigSnapshotString($snapshot, 'node_host');
+
+        return $subscription;
     }
 
     private function detectConnectionType(?string $link): ?string
@@ -721,14 +780,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             $nodeLabel = $this->extractConfigSnapshotString($configSnapshot, 'node_label');
             $nodeCountry = $this->extractConfigSnapshotString($configSnapshot, 'node_country');
             $nodeHost = $this->extractConfigSnapshotString($configSnapshot, 'node_host');
-            $sourceSubscriptionLink = $this->extractConfigSnapshotString($configSnapshot, 'source_subscription_link');
-            $subscriptionLink = isset($access['subscription_link']) && trim((string) $access['subscription_link']) !== ''
-                ? trim((string) $access['subscription_link'])
-                : $sourceSubscriptionLink;
-            $connectionReady = $this->isConnectionSnapshotReady($configSnapshot, $runtimePayload, $subscriptionLink);
+            $connectionReady = $this->isConnectionSnapshotReady($configSnapshot, $runtimePayload);
             $hasBridgeData =
                 !empty($access['status'])
-                || !empty($subscriptionLink)
                 || $configSnapshot !== null
                 || !empty($access['error'])
                 || !empty($access['last_sync_at']);
@@ -740,8 +794,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             $deviceLimitMeta = $this->resolveOrderDeviceLimitMeta($order, $access);
             $eligibleForApp =
                 ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
-                && ($access['status'] ?? null) === self::STATUS_ACTIVE
-                && $connectionReady;
+                && ($access['status'] ?? null) === self::STATUS_ACTIVE;
 
             $subscriptions[] = [
                 'order_id' => (int) $order->id,
@@ -751,7 +804,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'expires_at' => !empty($order->expires_at) ? (string) $order->expires_at : null,
                 'days_remaining' => $this->calculateDaysRemaining(!empty($order->expires_at) ? (string) $order->expires_at : null),
                 'can_renew' => $this->canRenewOrder($order),
-                'subscription_link' => $subscriptionLink,
                 'connection_ready' => $connectionReady,
                 'runtime_type' => $runtimeType,
                 'protocol' => $protocol,
@@ -794,7 +846,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->extractConfigSnapshotString($snapshot, 'xray_config');
     }
 
-    private function isConnectionSnapshotReady(?array $snapshot, ?string $runtimePayload, ?string $subscriptionLink): bool
+    private function isConnectionSnapshotReady(?array $snapshot, ?string $runtimePayload): bool
     {
         if (is_array($snapshot) && !empty($snapshot['ready'])) {
             return true;
@@ -804,7 +856,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             return true;
         }
 
-        return $subscriptionLink !== null && $subscriptionLink !== '';
+        return false;
     }
 
     private function getDeviceOverview(\Model_Client $client, ?int $ignoreActivationTokenId = null): array
@@ -1021,8 +1073,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
             && ($access['status'] ?? null) === self::STATUS_ACTIVE
             && (
-                !empty($access['subscription_link'])
-                || !empty($access['config_snapshot']['ready'])
+                !empty($access['config_snapshot']['ready'])
                 || !empty($access['config_snapshot']['runtime_payload'])
                 || !empty($access['config_snapshot']['xray_config'])
             )
@@ -1136,6 +1187,45 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return max(0, (int) ceil(($timestamp - time()) / 86400));
     }
 
+    private function getDeviceConfigSnapshot(OODBBean $device): ?array
+    {
+        $raw = isset($device->config_snapshot) ? trim((string) $device->config_snapshot) : '';
+        if ($raw === '') {
+            return null;
+        }
+
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    private function notifyOrchestratorDeviceEvent(\Model_Client $client, OODBBean $device, string $eventName): void
+    {
+        if (!in_array($eventName, ['device_activated', 'device_revoked'], true)) {
+            return;
+        }
+
+        try {
+            $this->di['mod_service']('Orchestrator')->sendDeviceEvent($client, $device, $eventName);
+        } catch (\Throwable $e) {
+            $this->di['logger']->error(
+                'Failed to deliver Orchestrator device event {event} for device {device_id}: {message}',
+                [
+                    'event' => $eventName,
+                    'device_id' => isset($device->id) ? (int) $device->id : 0,
+                    'message' => $e->getMessage(),
+                ],
+            );
+        }
+    }
+
+    private function orderIdFromExternalSubscriptionId(string $externalSubscriptionId): int
+    {
+        $normalized = preg_replace('/^order_/', '', trim($externalSubscriptionId));
+
+        return is_numeric($normalized) ? (int) $normalized : 0;
+    }
+
     private function sanitizeDeviceData(array $deviceData): array
     {
         $clean = [];
@@ -1190,9 +1280,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 `platform` varchar(255) DEFAULT NULL,
                 `install_id` varchar(255) DEFAULT NULL,
                 `device_token_hash` varchar(64) NOT NULL,
+                `config_snapshot` longtext DEFAULT NULL,
                 `status` varchar(32) NOT NULL DEFAULT \'' . self::STATUS_ACTIVE . '\',
                 `expires_at` datetime NOT NULL,
                 `last_seen_at` datetime DEFAULT NULL,
+                `config_updated_at` datetime DEFAULT NULL,
                 `created_at` datetime DEFAULT NULL,
                 `updated_at` datetime DEFAULT NULL,
                 PRIMARY KEY (`id`),
@@ -1202,6 +1294,16 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 KEY `idx_install_id` (`install_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             ',
+        );
+
+        $this->di['db']->exec(
+            'ALTER TABLE `' . self::DEVICE_BEAN . '`
+                ADD COLUMN IF NOT EXISTS `config_snapshot` longtext DEFAULT NULL AFTER `device_token_hash`',
+        );
+
+        $this->di['db']->exec(
+            'ALTER TABLE `' . self::DEVICE_BEAN . '`
+                ADD COLUMN IF NOT EXISTS `config_updated_at` datetime DEFAULT NULL AFTER `last_seen_at`',
         );
 
         $this->storageEnsured = true;
