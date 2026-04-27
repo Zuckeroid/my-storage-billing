@@ -114,16 +114,6 @@
                             </article>
                         {% else %}
                             {% for group in appbridge_groups %}
-                                {% set limit_source = group.device_limit_source|default('') %}
-                                {% if limit_source starts with 'product.' %}
-                                    {% set limit_source_label = is_en ? 'Billing tariff' : 'Тариф в биллинге' %}
-                                {% elseif limit_source starts with 'order.' %}
-                                    {% set limit_source_label = is_en ? 'Order snapshot' : 'Снимок заказа' %}
-                                {% elseif limit_source == 'fallback.active_access' %}
-                                    {% set limit_source_label = is_en ? 'Automatic fallback' : 'Автоматический fallback' %}
-                                {% else %}
-                                    {% set limit_source_label = '' %}
-                                {% endif %}
                                 <section class="mt-4" data-appbridge-order="{{ group.order_id }}">
                                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                                         <div>
@@ -135,18 +125,27 @@
                                                     {{ is_en ? 'Will become available after the service is fully activated' : 'Станет доступно после полной активации услуги' }}
                                                 {% endif %}
                                             </p>
-                                            {% if limit_source_label %}
+                                        </div>
+                                        <div class="text-md-end">
+                                            {% if group.days_remaining is not null %}
+                                                <strong class="d-block">
+                                                    {{ is_en ? group.days_remaining ~ ' days left' : 'Осталось ' ~ group.days_remaining ~ ' дн.' }}
+                                                </strong>
+                                            {% endif %}
+                                            {% if group.expires_at %}
                                                 <p class="mb-0 text-secondary small">
-                                                    {{ is_en ? 'Device limit source:' : 'Источник лимита устройств:' }} {{ limit_source_label }}
+                                                    {{ is_en ? 'Paid through' : 'Оплачен до' }} {{ group.expires_at|format_date }}
                                                 </p>
                                             {% endif %}
-                                            {% if group.pending_tokens|default(0) > 0 %}
-                                                <p class="mb-0 text-secondary small">
-                                                    {{ is_en ? 'A single-use token is waiting for activation.' : 'Есть одноразовый токен, ожидающий активации.' }}
-                                                    {% if group.latest_pending_created_at %}
-                                                        {{ is_en ? 'Created:' : 'Создан:' }} {{ group.latest_pending_created_at }}
-                                                    {% endif %}
-                                                </p>
+                                            {% if group.can_renew %}
+                                                <button
+                                                    class="btn btn-outline-primary btn-sm mt-2"
+                                                    type="button"
+                                                    data-appbridge-renew
+                                                    data-order-id="{{ group.order_id }}"
+                                                >
+                                                    {{ is_en ? 'Renew' : 'Продлить' }}
+                                                </button>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -165,16 +164,8 @@
 
                                     <div class="znet-appbridge-stats mt-3">
                                         <article class="znet-appbridge-stat">
-                                            <span>{{ is_en ? 'Device limit' : 'Лимит устройств' }}</span>
-                                            <strong data-appbridge-order-allowed>{{ appbridge_unlimited and group.eligible_for_app ? '∞' : group.device_limit }}</strong>
-                                        </article>
-                                        <article class="znet-appbridge-stat">
-                                            <span>{{ is_en ? 'Free slots' : 'Свободно слотов' }}</span>
-                                            <strong data-appbridge-order-available>{{ appbridge_unlimited and group.eligible_for_app ? '∞' : group.available }}</strong>
-                                        </article>
-                                        <article class="znet-appbridge-stat">
-                                            <span>{{ is_en ? 'Connected devices' : 'Подключено устройств' }}</span>
-                                            <strong data-appbridge-order-active>{{ group.active }}</strong>
+                                            <span>{{ is_en ? 'Devices' : 'Устройства' }}</span>
+                                            <strong data-appbridge-order-device-ratio>{{ group.active }}/{{ appbridge_unlimited and group.eligible_for_app ? '∞' : group.device_limit }}</strong>
                                         </article>
                                         <article class="znet-appbridge-stat">
                                             <span>{{ is_en ? 'Pending tokens' : 'Ожидают активации' }}</span>
@@ -413,23 +404,14 @@
                         return;
                     }
 
-                    const allowed = root.querySelector('[data-appbridge-order-allowed]');
-                    const available = root.querySelector('[data-appbridge-order-available]');
-                    const active = root.querySelector('[data-appbridge-order-active]');
+                    const deviceRatio = root.querySelector('[data-appbridge-order-device-ratio]');
                     const pending = root.querySelector('[data-appbridge-order-pending]');
                     const addDeviceButton = root.querySelector('[data-appbridge-add-device]');
                     const openTokenButton = root.querySelector('[data-appbridge-open-token]');
 
-                    if (allowed) {
-                        allowed.textContent = isUnlimited && group.eligible_for_app ? '∞' : group.device_limit;
-                    }
-
-                    if (available) {
-                        available.textContent = isUnlimited && group.eligible_for_app ? '∞' : group.available;
-                    }
-
-                    if (active) {
-                        active.textContent = group.active;
+                    if (deviceRatio) {
+                        const deviceLimit = isUnlimited && group.eligible_for_app ? '∞' : group.device_limit;
+                        deviceRatio.textContent = `${group.active}/${deviceLimit}`;
                     }
 
                     if (pending) {
@@ -584,6 +566,29 @@
             }
 
             document.addEventListener('click', (event) => {
+                const renewButton = event.target.closest('[data-appbridge-renew]');
+                if (renewButton) {
+                    const orderId = Number(renewButton.getAttribute('data-order-id') || 0);
+                    if (!orderId) {
+                        return;
+                    }
+
+                    const confirmed = window.confirm('{{ is_en ? 'This will create a renewal invoice. Continue?' : 'Будет создан счет на продление. Продолжить?' }}');
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    renewButton.disabled = true;
+                    API.client.post('invoice/renewal_invoice', { order_id: orderId }, (result) => {
+                        window.location = "{{ 'invoice'|link }}/" + result;
+                    }, (error) => {
+                        renewButton.disabled = false;
+                        setMessage(`${error.message} (${error.code})`, 'error');
+                    });
+
+                    return;
+                }
+
                 const revokeButton = event.target.closest('[data-appbridge-revoke]');
                 if (!revokeButton) {
                     return;

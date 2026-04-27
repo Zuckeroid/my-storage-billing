@@ -776,7 +776,7 @@ html {
 
 .znet-shell-page .znet-appbridge-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
 }
 
@@ -842,7 +842,7 @@ html {
   justify-content: flex-start;
 }
 
-.znet-shell-page .znet-appbridge-modal {
+.znet-appbridge-modal {
   position: fixed;
   inset: 0;
   z-index: 80;
@@ -856,18 +856,18 @@ html {
   overscroll-behavior: contain;
 }
 
-.znet-shell-page .znet-appbridge-modal[hidden] {
+.znet-appbridge-modal[hidden] {
   display: none;
 }
 
-.znet-shell-page .znet-appbridge-modal-backdrop {
+.znet-appbridge-modal-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(1, 4, 9, 0.56);
   backdrop-filter: blur(10px);
 }
 
-.znet-shell-page .znet-appbridge-modal-dialog {
+.znet-appbridge-modal-dialog {
   position: relative;
   z-index: 1;
   width: min(560px, calc(100vw - 32px));
@@ -875,7 +875,7 @@ html {
   margin: auto;
 }
 
-.znet-shell-page .znet-appbridge-token-field {
+.znet-appbridge-token-field {
   width: 100%;
   min-height: 64px;
   border: 1px solid rgba(134, 239, 172, 0.12);
@@ -891,12 +891,12 @@ html {
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.znet-shell-page .znet-appbridge-token-field:hover {
+.znet-appbridge-token-field:hover {
   border-color: rgba(134, 239, 172, 0.28);
   background: rgba(255, 255, 255, 0.05);
 }
 
-.znet-shell-page .znet-appbridge-token-field span {
+.znet-appbridge-token-field span {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 18px;
   line-height: 1.4;
@@ -904,7 +904,7 @@ html {
   word-break: break-all;
 }
 
-.znet-shell-page .znet-appbridge-token-field.is-masked span {
+.znet-appbridge-token-field.is-masked span {
   filter: blur(8px);
   user-select: none;
 }

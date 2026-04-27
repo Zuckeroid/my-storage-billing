@@ -481,6 +481,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'title' => $primarySubscription['title'] ?? null,
             'order_status' => $primarySubscription['order_status'] ?? null,
             'provision_status' => $primarySubscription['provision_status'] ?? null,
+            'expires_at' => $primarySubscription['expires_at'] ?? null,
+            'days_remaining' => $primarySubscription['days_remaining'] ?? null,
+            'can_renew' => !empty($primarySubscription['can_renew']),
             'device_limit' => $primarySubscription['device_limit'] ?? 0,
             'device_limit_source' => $primarySubscription['device_limit_source'] ?? null,
             'eligible_for_app' => !empty($primarySubscription['eligible_for_app']),
@@ -542,6 +545,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'title' => trim((string) ($order->title ?? '')),
                 'order_status' => (string) $order->status,
                 'provision_status' => $access['status'] ?? null,
+                'expires_at' => !empty($order->expires_at) ? (string) $order->expires_at : null,
+                'days_remaining' => $this->calculateDaysRemaining(!empty($order->expires_at) ? (string) $order->expires_at : null),
+                'can_renew' => $this->canRenewOrder($order),
                 'subscription_link' => $access['subscription_link'] ?? null,
                 'error' => $access['error'] ?? null,
                 'last_sync_at' => $this->formatDateAtom($access['last_sync_at'] ?? null),
@@ -579,6 +585,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'title' => $subscription['title'] ?? null,
                 'order_status' => $subscription['order_status'] ?? null,
                 'provision_status' => $subscription['provision_status'] ?? null,
+                'expires_at' => $subscription['expires_at'] ?? null,
+                'days_remaining' => $subscription['days_remaining'] ?? null,
+                'can_renew' => !empty($subscription['can_renew']),
                 'device_limit' => max(0, (int) ($subscription['device_limit'] ?? 0)),
                 'device_limit_source' => $subscription['device_limit_source'] ?? null,
                 'eligible_for_app' => !empty($subscription['eligible_for_app']),
@@ -847,6 +856,33 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'value' => null,
             'source' => null,
         ];
+    }
+
+    private function canRenewOrder(\Model_ClientOrder $order): bool
+    {
+        if (empty($order->period)) {
+            return false;
+        }
+
+        if (($order->status ?? null) === \Model_ClientOrder::STATUS_FAILED_RENEW) {
+            return false;
+        }
+
+        return (float) ($order->price ?? 0) > 0;
+    }
+
+    private function calculateDaysRemaining(?string $expiresAt): ?int
+    {
+        if ($expiresAt === null || trim($expiresAt) === '') {
+            return null;
+        }
+
+        $timestamp = strtotime($expiresAt);
+        if ($timestamp === false) {
+            return null;
+        }
+
+        return max(0, (int) ceil(($timestamp - time()) / 86400));
     }
 
     private function sanitizeDeviceData(array $deviceData): array
