@@ -486,6 +486,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'revoke_scope' => 'application-token',
             ],
             'connection' => $connection,
+            'domains' => $connection['domain_bundle'] ?? null,
             'service' => $service,
             'has_active_access' => $hasActiveAccess,
             'subscriptions' => $subscriptions,
@@ -616,6 +617,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $automationPolicy = null;
         $profiles = null;
         $telemetryProfile = null;
+        $domainBundle = null;
         if ($primarySubscription !== null) {
             $runtimeType = isset($primarySubscription['runtime_type'])
                 ? trim((string) $primarySubscription['runtime_type'])
@@ -652,6 +654,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 : null;
             $telemetryProfile = isset($primarySubscription['telemetry_profile']) && is_array($primarySubscription['telemetry_profile'])
                 ? $primarySubscription['telemetry_profile']
+                : null;
+            $domainBundle = isset($primarySubscription['domain_bundle']) && is_array($primarySubscription['domain_bundle'])
+                ? $primarySubscription['domain_bundle']
                 : null;
 
             if ($runtimeType === '') {
@@ -703,6 +708,8 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'automation_policy' => $automationPolicy,
             'profiles' => $profiles,
             'telemetry_profile' => $telemetryProfile,
+            'domain_bundle' => $domainBundle,
+            'domains' => $domainBundle,
             'source_order_id' => $primarySubscription['order_id'] ?? null,
             'source_title' => $primarySubscription['title'] ?? null,
             'revision' => $configRevision ?? ($ready ? hash('sha256', (string) $xrayConfig) : null),
@@ -757,6 +764,8 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $subscription['automation_policy'] = $this->extractConfigSnapshotArray($snapshot, 'automation_policy');
         $subscription['profiles'] = $this->extractConfigSnapshotArray($snapshot, 'profiles');
         $subscription['telemetry_profile'] = $this->extractConfigSnapshotArray($snapshot, 'telemetry_profile');
+        $subscription['domain_bundle'] = $this->extractConfigSnapshotArray($snapshot, 'domain_bundle')
+            ?? $this->extractConfigSnapshotArray($snapshot, 'domains');
 
         return $subscription;
     }
@@ -808,6 +817,8 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             $automationPolicy = $this->extractConfigSnapshotArray($configSnapshot, 'automation_policy');
             $profiles = $this->extractConfigSnapshotArray($configSnapshot, 'profiles');
             $telemetryProfile = $this->extractConfigSnapshotArray($configSnapshot, 'telemetry_profile');
+            $domainBundle = $this->extractConfigSnapshotArray($configSnapshot, 'domain_bundle')
+                ?? $this->extractConfigSnapshotArray($configSnapshot, 'domains');
             $connectionReady = $this->isConnectionSnapshotReady($configSnapshot, $runtimePayload);
             $hasBridgeData =
                 !empty($access['status'])
@@ -845,6 +856,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'automation_policy' => $automationPolicy,
                 'profiles' => $profiles,
                 'telemetry_profile' => $telemetryProfile,
+                'domain_bundle' => $domainBundle,
                 'error' => $access['error'] ?? null,
                 'last_sync_at' => $this->formatDateAtom($access['last_sync_at'] ?? null),
                 'access_email_sent_at' => $this->formatDateAtom($access['access_email_sent_at'] ?? null),

@@ -769,6 +769,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'automation_policy' => $this->normalizeSnapshotArrayField($snapshot['automation_policy'] ?? null),
             'profiles' => $this->normalizeSnapshotArrayField($snapshot['profiles'] ?? null),
             'telemetry_profile' => $this->normalizeSnapshotArrayField($snapshot['telemetry_profile'] ?? null),
+            'domain_bundle' => $this->normalizeSnapshotArrayField($snapshot['domain_bundle'] ?? ($snapshot['domains'] ?? null)),
             'generated_at' => isset($snapshot['generated_at']) ? trim((string) $snapshot['generated_at']) : null,
         ];
     }
