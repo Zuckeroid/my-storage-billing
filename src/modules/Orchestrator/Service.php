@@ -767,6 +767,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'node_host' => isset($snapshot['node_host']) ? trim((string) $snapshot['node_host']) : null,
             'routing_policy' => $this->normalizeSnapshotArrayField($snapshot['routing_policy'] ?? null),
             'automation_policy' => $this->normalizeSnapshotArrayField($snapshot['automation_policy'] ?? null),
+            'profiles' => $this->normalizeSnapshotArrayField($snapshot['profiles'] ?? null),
             'telemetry_profile' => $this->normalizeSnapshotArrayField($snapshot['telemetry_profile'] ?? null),
             'generated_at' => isset($snapshot['generated_at']) ? trim((string) $snapshot['generated_at']) : null,
         ];

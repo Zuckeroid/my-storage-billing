@@ -614,6 +614,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $nodeHost = null;
         $routingPolicy = null;
         $automationPolicy = null;
+        $profiles = null;
         $telemetryProfile = null;
         if ($primarySubscription !== null) {
             $runtimeType = isset($primarySubscription['runtime_type'])
@@ -645,6 +646,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 : null;
             $automationPolicy = isset($primarySubscription['automation_policy']) && is_array($primarySubscription['automation_policy'])
                 ? $primarySubscription['automation_policy']
+                : null;
+            $profiles = isset($primarySubscription['profiles']) && is_array($primarySubscription['profiles'])
+                ? $primarySubscription['profiles']
                 : null;
             $telemetryProfile = isset($primarySubscription['telemetry_profile']) && is_array($primarySubscription['telemetry_profile'])
                 ? $primarySubscription['telemetry_profile']
@@ -697,6 +701,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'node_host' => $nodeHost,
             'routing_policy' => $routingPolicy,
             'automation_policy' => $automationPolicy,
+            'profiles' => $profiles,
             'telemetry_profile' => $telemetryProfile,
             'source_order_id' => $primarySubscription['order_id'] ?? null,
             'source_title' => $primarySubscription['title'] ?? null,
@@ -750,6 +755,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $subscription['node_host'] = $this->extractConfigSnapshotString($snapshot, 'node_host');
         $subscription['routing_policy'] = $this->extractConfigSnapshotArray($snapshot, 'routing_policy');
         $subscription['automation_policy'] = $this->extractConfigSnapshotArray($snapshot, 'automation_policy');
+        $subscription['profiles'] = $this->extractConfigSnapshotArray($snapshot, 'profiles');
         $subscription['telemetry_profile'] = $this->extractConfigSnapshotArray($snapshot, 'telemetry_profile');
 
         return $subscription;
@@ -800,6 +806,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             $nodeHost = $this->extractConfigSnapshotString($configSnapshot, 'node_host');
             $routingPolicy = $this->extractConfigSnapshotArray($configSnapshot, 'routing_policy');
             $automationPolicy = $this->extractConfigSnapshotArray($configSnapshot, 'automation_policy');
+            $profiles = $this->extractConfigSnapshotArray($configSnapshot, 'profiles');
             $telemetryProfile = $this->extractConfigSnapshotArray($configSnapshot, 'telemetry_profile');
             $connectionReady = $this->isConnectionSnapshotReady($configSnapshot, $runtimePayload);
             $hasBridgeData =
@@ -836,6 +843,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 'node_host' => $nodeHost,
                 'routing_policy' => $routingPolicy,
                 'automation_policy' => $automationPolicy,
+                'profiles' => $profiles,
                 'telemetry_profile' => $telemetryProfile,
                 'error' => $access['error'] ?? null,
                 'last_sync_at' => $this->formatDateAtom($access['last_sync_at'] ?? null),
