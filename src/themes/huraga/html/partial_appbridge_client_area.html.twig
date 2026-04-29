@@ -1,3 +1,9 @@
+{% set android_apk_url = 'downloads/znet-android-0.1.0-399ee74.apk' | asset_url %}
+{% set android_apk_version = '0.1.0' %}
+{% set android_apk_build = '399ee74' %}
+{% set android_apk_size = '54.1 MB' %}
+{% set android_apk_sha256 = '728E1654C87099B166E5F780C3B46A279FF15D5DAD0B8F8A7F4FD4778A01669F' %}
+
 <section class="znet-shell-section">
     <div class="znet-shell-section-head">
         <div>
@@ -9,6 +15,52 @@
             </p>
         </div>
     </div>
+
+    <div class="znet-app-download">
+        <div class="znet-app-download-copy">
+            <span class="znet-app-download-kicker">{{ is_en ? 'Android test build' : 'Тестовая сборка Android' }}</span>
+            <h3>{{ is_en ? 'Install Znet on your phone' : 'Установите Znet на телефон' }}</h3>
+            <p>
+                {{ is_en
+                    ? 'Download the APK, install it on Android, then create a device token below and paste it into the app.'
+                    : 'Скачайте APK, установите его на Android, затем создайте токен ниже и вставьте его в приложение.' }}
+            </p>
+        </div>
+        <div class="znet-app-download-actions">
+            <a class="btn btn-primary" href="{{ android_apk_url }}" download>
+                {{ is_en ? 'Download APK' : 'Скачать APK' }}
+            </a>
+            <span class="znet-app-download-meta">
+                v{{ android_apk_version }} · build {{ android_apk_build }} · {{ android_apk_size }}
+            </span>
+            <span class="znet-app-download-hash">SHA-256: <code>{{ android_apk_sha256 }}</code></span>
+        </div>
+    </div>
+
+    <details class="znet-app-install-guide" open>
+        <summary>{{ is_en ? 'Installation guide' : 'Инструкция по установке' }}</summary>
+        {% if is_en %}
+            <ol>
+                <li>Open this account page on your Android phone.</li>
+                <li>Tap “Download APK” and confirm the browser warning if Android asks.</li>
+                <li>Open the downloaded file and allow installation from this source.</li>
+                <li>Install and launch Znet.</li>
+                <li>Create a device token below, copy it, and paste it into the app.</li>
+                <li>Allow the VPN connection request and notifications.</li>
+                <li>For Auto ON/OFF, open Znet settings and tap “Activity access”. If Android says restricted settings are blocked, open Znet app info, tap the three-dot menu, choose “Allow restricted settings”, then enable Znet in Usage Access.</li>
+            </ol>
+        {% else %}
+            <ol>
+                <li>Откройте этот личный кабинет на телефоне Android.</li>
+                <li>Нажмите “Скачать APK” и подтвердите предупреждение браузера, если Android его покажет.</li>
+                <li>Откройте скачанный файл и разрешите установку из этого источника.</li>
+                <li>Установите и запустите Znet.</li>
+                <li>Создайте токен устройства ниже, скопируйте его и вставьте в приложение.</li>
+                <li>Разрешите VPN-подключение и уведомления.</li>
+                <li>Для Auto ON/OFF откройте настройки Znet и нажмите “Доступ к активности”. Если Android пишет, что доступ ограничен, откройте карточку приложения Znet, нажмите меню с тремя точками, выберите “Разрешить ограниченные настройки”, затем включите Znet в разделе “Доступ к активности”.</li>
+            </ol>
+        {% endif %}
+    </details>
 
     <div class="card">
         <div class="card-body">

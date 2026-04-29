@@ -774,6 +774,96 @@ html {
   flex: 1 1 220px;
 }
 
+.znet-shell-page .znet-app-download {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.znet-shell-page .znet-app-download-copy {
+  min-width: 0;
+}
+
+.znet-shell-page .znet-app-download-kicker {
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: var(--znet-accent-soft);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.znet-shell-page .znet-app-download h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+.znet-shell-page .znet-app-download p {
+  max-width: 760px;
+  margin: 10px 0 0;
+  color: var(--znet-text-soft);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.znet-shell-page .znet-app-download-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  min-width: min(320px, 100%);
+}
+
+.znet-shell-page .znet-app-download-actions .btn {
+  min-width: 220px;
+}
+
+.znet-shell-page .znet-app-download-meta,
+.znet-shell-page .znet-app-download-hash {
+  color: var(--znet-text-soft);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.znet-shell-page .znet-app-download-hash code {
+  color: rgba(255, 255, 255, 0.78);
+  word-break: break-all;
+}
+
+.znet-shell-page .znet-app-install-guide {
+  padding: 16px 18px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page .znet-app-install-guide summary {
+  cursor: pointer;
+  color: var(--znet-text);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.znet-shell-page .znet-app-install-guide ol {
+  margin: 14px 0 0;
+  padding-left: 22px;
+  color: var(--znet-text-soft);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.znet-shell-page .znet-app-install-guide li + li {
+  margin-top: 8px;
+}
+
 .znet-shell-page .znet-appbridge-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1280,6 +1370,25 @@ html {
   .znet-shell-page .znet-shell-card-grid-2,
   .znet-shell-page .znet-appbridge-stats {
     grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-app-download {
+    grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-app-download-actions {
+    justify-items: stretch;
+    min-width: 0;
+  }
+
+  .znet-shell-page .znet-app-download-actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .znet-shell-page .znet-app-download-meta,
+  .znet-shell-page .znet-app-download-hash {
+    text-align: left;
   }
 
   .znet-shell-page .znet-appbridge-device {
