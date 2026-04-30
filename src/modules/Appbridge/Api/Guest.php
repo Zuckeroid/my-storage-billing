@@ -33,4 +33,13 @@ class Guest extends \Api_Abstract
             $data,
         );
     }
+
+    #[RequiredParams(['app_token' => 'App token required'])]
+    public function telemetry(array $data): array
+    {
+        return $this->getService()->submitTelemetryEvent(
+            (string) $data['app_token'],
+            $data,
+        );
+    }
 }

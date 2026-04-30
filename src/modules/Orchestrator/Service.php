@@ -199,6 +199,57 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $this->setOrderMeta($orderId, 'orchestrator_last_device_webhook_at', date('Y-m-d H:i:s'));
     }
 
+    public function sendTelemetryEvent(array $payload): array
+    {
+        $config = $this->getConfig();
+        $enabled = !empty($config['enabled']);
+        if (!$enabled) {
+            return [
+                'accepted' => false,
+                'reason' => 'orchestrator_disabled',
+            ];
+        }
+
+        $webhookUrl = trim((string) ($config['orchestrator_webhook_url'] ?? ''));
+        $apiKey = trim((string) ($config['orchestrator_webhook_api_key'] ?? ''));
+        $signingSecret = trim((string) ($config['orchestrator_webhook_signing_secret'] ?? ''));
+        if ($webhookUrl === '' || $apiKey === '' || $signingSecret === '') {
+            throw new \FOSSBilling\Exception('Orchestrator webhook settings are incomplete');
+        }
+
+        $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($body === false) {
+            throw new \FOSSBilling\Exception('Could not encode Orchestrator telemetry payload');
+        }
+
+        $timestamp = (string) time();
+        $signature = hash_hmac('sha256', $body, $signingSecret);
+        $clientHttp = HttpClient::create([
+            'bindto' => BIND_TO,
+            'timeout' => 10,
+        ]);
+        $response = $clientHttp->request('POST', $this->buildTelemetryUrl($webhookUrl), [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'X-Api-Key' => $apiKey,
+                'X-Timestamp' => $timestamp,
+                'X-Signature' => $signature,
+            ],
+            'body' => $body,
+        ]);
+
+        $statusCode = $response->getStatusCode();
+        if ($statusCode < 200 || $statusCode >= 300) {
+            throw new \FOSSBilling\Exception(
+                'Orchestrator telemetry endpoint returned HTTP :status',
+                [':status' => $statusCode],
+            );
+        }
+
+        $decoded = json_decode($response->getContent(false), true);
+        return is_array($decoded) ? $decoded : ['accepted' => true];
+    }
+
     public function getConfig(): array
     {
         return $this->di['mod_service']('extension')->getConfig('mod_orchestrator');
@@ -468,6 +519,16 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         return $normalized . '/preflight';
+    }
+
+    private function buildTelemetryUrl(string $webhookUrl): string
+    {
+        $normalized = rtrim($webhookUrl, '/');
+        if (str_ends_with($normalized, '/webhook/billing')) {
+            return $normalized . '/telemetry';
+        }
+
+        return $normalized . '/telemetry';
     }
 
     private function storeConnectionStatus(array $status): void

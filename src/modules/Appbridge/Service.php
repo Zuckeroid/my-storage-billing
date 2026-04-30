@@ -109,6 +109,54 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
     }
 
+    public function submitTelemetryEvent(string $appToken, array $data): array
+    {
+        $this->ensureStorage();
+        $this->expireDeviceTokens();
+
+        $device = $this->findActiveDeviceByToken($appToken);
+        if (!$device instanceof OODBBean) {
+            throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
+        }
+
+        $client = $this->getClientById((int) $device->client_id);
+        if (!$client instanceof \Model_Client || $client->status !== \Model_Client::ACTIVE) {
+            throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
+        }
+
+        if (strtotime((string) $device->expires_at) < time()) {
+            $this->markDeviceExpired($device);
+            throw new \FOSSBilling\InformationException('Application token has expired. Create a new token in the client area.', [], 401);
+        }
+
+        $installId = $this->readString($data, ['install_id', 'installId']);
+        if ($installId !== null) {
+            $storedInstallId = $device->install_id ? trim((string) $device->install_id) : '';
+            if ($storedInstallId === '' || !hash_equals($storedInstallId, $installId)) {
+                throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
+            }
+        }
+
+        $subscription = $this->resolveActiveDeviceSubscription($client, $device);
+        if ($subscription === null) {
+            $this->markDeviceRevoked($device);
+            throw new \FOSSBilling\InformationException('Application token is invalid.', [], 401);
+        }
+
+        $payload = $this->buildTelemetryPayload($client, $device, $subscription, $data);
+        $this->di['mod_service']('Orchestrator')->sendTelemetryEvent($payload);
+
+        $now = $this->now();
+        $device->last_seen_at = $now;
+        $device->updated_at = $now;
+        $this->di['db']->store($device);
+
+        return [
+            'accepted' => true,
+            'observed_at' => $payload['observedAt'] ?? date(DATE_ATOM),
+        ];
+    }
+
     public function getBundleForClient(\Model_Client $client): array
     {
         $this->ensureStorage();
@@ -1288,6 +1336,170 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $normalized = preg_replace('/^order_/', '', trim($externalSubscriptionId));
 
         return is_numeric($normalized) ? (int) $normalized : 0;
+    }
+
+    private function buildTelemetryPayload(
+        \Model_Client $client,
+        OODBBean $device,
+        array $subscription,
+        array $data,
+    ): array {
+        $eventType = $this->readString($data, ['eventType', 'event_type'], 64);
+        $result = $this->readString($data, ['result'], 32);
+        $allowedEventTypes = [
+            'dns_resolution',
+            'node_tcp_connect',
+            'vpn_handshake',
+            'tunnel_http',
+            'route_probe',
+        ];
+        $allowedResults = ['success', 'failed', 'timeout', 'skipped'];
+        if ($eventType === null || !in_array($eventType, $allowedEventTypes, true)) {
+            throw new \FOSSBilling\InformationException('Unsupported telemetry event type.', [], 400);
+        }
+        if ($result === null || !in_array($result, $allowedResults, true)) {
+            throw new \FOSSBilling\InformationException('Unsupported telemetry result.', [], 400);
+        }
+
+        $classification = $this->readString($data, ['classification'], 64);
+        $allowedClassifications = [
+            'dns_suspected',
+            'ip_or_port_suspected',
+            'protocol_suspected',
+            'node_exit_degraded',
+            'provider_dpi_suspected',
+            'client_network_changed',
+            'unknown',
+        ];
+        if ($classification !== null && !in_array($classification, $allowedClassifications, true)) {
+            $classification = null;
+        }
+
+        $details = $this->readArray($data, ['details']) ?? [];
+        $details['billing_service_title'] = $subscription['title'] ?? null;
+
+        $rawNodeId = $this->readString($data, ['nodeId', 'node_id'], 255);
+        if ($rawNodeId !== null && !$this->isUuid($rawNodeId)) {
+            $details['raw_node_id'] = $rawNodeId;
+            $rawNodeId = null;
+        }
+
+        $deviceConfigId = $this->readString($data, ['deviceConfigId', 'device_config_id'], 255);
+        if ($deviceConfigId !== null && !$this->isUuid($deviceConfigId)) {
+            $details['raw_device_config_id'] = $deviceConfigId;
+            $deviceConfigId = null;
+        }
+
+        $installIdHash = $this->readString($data, ['installIdHash', 'install_id_hash'], 255);
+        if ($installIdHash === null && !empty($device->install_id)) {
+            $installIdHash = hash('sha256', trim((string) $device->install_id));
+        }
+
+        $payload = [
+            'eventType' => $eventType,
+            'result' => $result,
+            'nodeId' => $rawNodeId,
+            'nodeName' => $this->readString($data, ['nodeName', 'node_name'], 255),
+            'nodeCountry' => $this->readString($data, ['nodeCountry', 'node_country'], 32),
+            'nodeHost' => $this->readString($data, ['nodeHost', 'node_host'], 255),
+            'nodePort' => $this->readInt($data, ['nodePort', 'node_port'], 1, 65535),
+            'protocol' => $this->readString($data, ['protocol'], 64),
+            'transport' => $this->readString($data, ['transport'], 64),
+            'networkType' => $this->readString($data, ['networkType', 'network_type'], 64),
+            'carrierName' => $this->readString($data, ['carrierName', 'carrier_name'], 255),
+            'mcc' => $this->readString($data, ['mcc'], 16),
+            'mnc' => $this->readString($data, ['mnc'], 16),
+            'appVersion' => $this->readString($data, ['appVersion', 'app_version'], 64),
+            'platform' => $this->readString($data, ['platform'], 64) ?: ($device->platform ? (string) $device->platform : null),
+            'installIdHash' => $installIdHash,
+            'deviceConfigId' => $deviceConfigId,
+            'latencyMs' => $this->readInt($data, ['latencyMs', 'latency_ms'], 0, 120000),
+            'errorCode' => $this->readString($data, ['errorCode', 'error_code'], 128),
+            'errorMessage' => $this->readString($data, ['errorMessage', 'error_message'], 1000),
+            'details' => $details,
+            'observedAt' => $this->normalizeObservedAt(
+                $this->readString($data, ['observedAt', 'observed_at'], 64),
+            ),
+        ];
+
+        if ($classification !== null) {
+            $payload['classification'] = $classification;
+        }
+
+        return array_filter(
+            $payload,
+            static fn($value): bool => $value !== null,
+        );
+    }
+
+    private function readString(array $data, array $keys, int $maxLength = 255): ?string
+    {
+        foreach ($keys as $key) {
+            if (!array_key_exists($key, $data)) {
+                continue;
+            }
+
+            $value = $data[$key];
+            if (is_array($value) || is_object($value)) {
+                continue;
+            }
+
+            $normalized = trim((string) $value);
+            if ($normalized !== '') {
+                return mb_substr($normalized, 0, $maxLength);
+            }
+        }
+
+        return null;
+    }
+
+    private function readInt(array $data, array $keys, int $min, int $max): ?int
+    {
+        foreach ($keys as $key) {
+            if (!array_key_exists($key, $data)) {
+                continue;
+            }
+
+            $value = $data[$key];
+            if (is_int($value)) {
+                $parsed = $value;
+            } elseif (is_string($value) && trim($value) !== '' && is_numeric($value)) {
+                $parsed = (int) $value;
+            } else {
+                continue;
+            }
+
+            if ($parsed >= $min && $parsed <= $max) {
+                return $parsed;
+            }
+        }
+
+        return null;
+    }
+
+    private function readArray(array $data, array $keys): ?array
+    {
+        foreach ($keys as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                return $data[$key];
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizeObservedAt(?string $value): string
+    {
+        if ($value !== null && strtotime($value) !== false) {
+            return date(DATE_ATOM, strtotime($value));
+        }
+
+        return date(DATE_ATOM);
+    }
+
+    private function isUuid(string $value): bool
+    {
+        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $value) === 1;
     }
 
     private function sanitizeDeviceData(array $deviceData): array
