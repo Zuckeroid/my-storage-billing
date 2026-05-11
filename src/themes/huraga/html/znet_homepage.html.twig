@@ -273,7 +273,7 @@
                                     {% endif %}
                                     <div class="znet-plan-highlight">
                                         <span class="znet-check">✓</span>
-                                        <span>{{ description ?: (is_en ? 'Built for everyday private use.' : 'Подходит для повседневного личного использования.') }}</span>
+                                        <span>{{ description ?: (is_en ? 'VPN access for everyday private use.' : 'VPN-доступ для повседневного личного использования.') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -310,7 +310,11 @@
                 <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
                 <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
                 <a href="#faq">FAQ</a>
-                <a href="#support">{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                <a href="{{ '/payment'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                <a href="{{ '/offer'|link }}">{{ is_en ? 'Offer' : 'Оферта' }}</a>
+                <a href="{{ '/privacy-policy'|link }}">{{ is_en ? 'Privacy' : 'Конфиденциальность' }}</a>
+                <a href="{{ '/refund-policy'|link }}">{{ is_en ? 'Refunds' : 'Возврат' }}</a>
+                <a href="{{ '/contacts'|link }}">{{ is_en ? 'Support' : 'Поддержка' }}</a>
             </nav>
         </div>
     </footer>

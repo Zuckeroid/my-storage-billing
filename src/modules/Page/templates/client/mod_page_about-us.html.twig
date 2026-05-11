@@ -1,7 +1,7 @@
 {% extends "layout_default.html.twig" %}
 
 {% block meta_title %}О сервисе{% endblock %}
-{% block meta_description %}Znet — личное облачное хранилище для документов, фотографий и важных файлов.{% endblock %}
+{% block meta_description %}Znet — сервис защищенного VPN-доступа для личного использования.{% endblock %}
 {% block body_class %}about-us{% endblock %}
 
 {% block breadcrumb %}
@@ -10,27 +10,44 @@
 
 {% block content %}
     {% set company = guest.system_company %}
+    {% set support_email = company.email|default('support@znetapp.ru') %}
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">Что делает сервис</h2>
+            <h2 class="h5">Что делает Znet</h2>
             <p>
-                Znet предоставляет личное пространство для хранения файлов и защищенный доступ к ним
-                в рамках выбранного тарифа. После регистрации и оплаты клиент получает инструкции на email.
+                Znet предоставляет пользователям доступ к VPN-сервису для защиты интернет-соединения,
+                приватного подключения к сети и удобного выбора доступных серверов в рамках оплаченного тарифа.
             </p>
             <p class="mb-0">
-                Интерфейс аккаунта оставлен простым: регистрация, выбор тарифа, счета и основные данные пользователя.
+                После регистрации и оплаты клиент получает доступ к личному кабинету, приложению Znet
+                и инструкциям по подключению. Услуга оказывается дистанционно.
             </p>
+        </div>
+    </section>
+
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">Как предоставляется доступ</h2>
+            <ul class="mb-0">
+                <li>Клиент выбирает тариф и оплачивает счет на сайте.</li>
+                <li>После подтверждения оплаты доступ активируется автоматически или после обработки заказа.</li>
+                <li>Инструкции и сервисные уведомления отправляются на email, указанный при регистрации.</li>
+                <li>Поддержка по вопросам оплаты, доступа и работы приложения доступна через страницу поддержки.</li>
+            </ul>
         </div>
     </section>
 
     <section class="card">
         <div class="card-body">
             <h2 class="h5">Юридическая информация</h2>
-            <p class="mb-1">{{ company.address_2 }}</p>
+            {% if company.name %}<p class="mb-1">Наименование: {{ company.name }}</p>{% endif %}
+            {% if company.address_2 %}<p class="mb-1">{{ company.address_2 }}</p>{% endif %}
             {% if company.vat_number %}<p class="mb-1">ИНН {{ company.vat_number }}</p>{% endif %}
             {% if company.number %}<p class="mb-1">ОГРНИП {{ company.number }}</p>{% endif %}
-            {% if company.address_1 %}<p class="mb-0">Адрес: {{ company.address_1 }}</p>{% endif %}
+            {% if company.address_1 %}<p class="mb-1">Адрес: {{ company.address_1 }}</p>{% endif %}
+            {% if company.tel %}<p class="mb-1">Телефон: {{ company.tel }}</p>{% endif %}
+            <p class="mb-0">Email: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
         </div>
     </section>
 {% endblock %}

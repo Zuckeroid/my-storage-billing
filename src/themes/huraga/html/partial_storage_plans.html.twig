@@ -16,7 +16,7 @@
         {% set price = 0|money_convert %}
     {% endif %}
     {% set description = product.description ? product.description|striptags : '' %}
-    {% set plan_description = description ?: (is_en ? 'Built for everyday private use.' : 'Подходит для повседневного личного использования.') %}
+    {% set plan_description = description ?: (is_en ? 'VPN access for everyday private use.' : 'VPN-доступ для повседневного личного использования.') %}
     {% set href = '/order/' ~ product.slug %}
 
     {% if storage_plan_view == 'dashboard_cards' %}
@@ -71,7 +71,7 @@
 {% else %}
     {% if storage_plan_view == 'dashboard_cards' %}
         <div class="znet-plans-empty">
-            {{ is_en ? 'Plans are being updated.' : 'Тарифы обновляются.' }}
+                            {{ is_en ? 'Plans are being updated.' : 'Тарифы обновляются.' }}
         </div>
     {% elseif storage_plan_view == 'card_items' %}
         <div class="col-12">

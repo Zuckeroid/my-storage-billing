@@ -10,13 +10,13 @@
 
 {% block content %}
     {% set company = guest.system_company %}
-    {% set support_email = company.email|default('support@my-storage.org') %}
+    {% set support_email = company.email|default('support@znetapp.ru') %}
 
     <section class="card mb-3">
         <div class="card-body">
             <h2 class="h5">1. Оператор данных</h2>
             <p class="mb-0">
-                Оператор: {{ company.address_2 }}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
+                Оператор: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
                 Email для обращений: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
             </p>
         </div>
@@ -29,6 +29,7 @@
                 <li>Email, имя и контактные данные, указанные при регистрации.</li>
                 <li>Данные о выбранном тарифе, заказах, счетах и платежах.</li>
                 <li>Технические данные, необходимые для работы сайта и защиты аккаунта.</li>
+                <li>Технические события приложения Znet, необходимые для диагностики подключения и качества сервиса.</li>
             </ul>
         </div>
     </section>
@@ -41,6 +42,7 @@
                 <li>Выставление счетов и прием оплаты.</li>
                 <li>Отправка инструкций и сервисных уведомлений на зарегистрированный email.</li>
                 <li>Обработка обращений в поддержку.</li>
+                <li>Диагностика ошибок подключения, стабильности VPN-доступа и работы приложения.</li>
             </ul>
         </div>
     </section>
@@ -51,6 +53,7 @@
             <p class="mb-0">
                 Данные обрабатываются в объеме, необходимом для оказания услуги, выполнения обязательств перед клиентом
                 и соблюдения требований законодательства. Доступ к данным ограничивается техническими и организационными мерами.
+                Полные данные банковских карт и коды проверки карты не обрабатываются и не хранятся на сайте Znet.
             </p>
         </div>
     </section>

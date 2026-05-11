@@ -20,7 +20,7 @@
     {% endif %}
 {% endblock %}
 
-{% block meta_description %}{% if not client %}{{ is_en ? 'Private storage, secure access, clear plans, and fast setup in one account.' : 'Личное хранилище, безопасный доступ, понятные тарифы и быстрый старт в одном аккаунте.' }}{% endif %}{% endblock %}
+{% block meta_description %}{% if not client %}{{ is_en ? 'Secure VPN access, clear plans, and fast setup in one account.' : 'Защищенный VPN-доступ, понятные тарифы и быстрый старт в одном аккаунте.' }}{% endif %}{% endblock %}
 
 {% block head %}
     {% if not client %}
@@ -28,7 +28,7 @@
     {% endif %}
 {% endblock %}
 
-{% block page_header %}{{ is_en ? 'Storage' : 'Хранилище' }}{% endblock %}
+{% block page_header %}{{ is_en ? 'VPN access' : 'VPN-доступ' }}{% endblock %}
 {% block body_class %}{% if client %}dashboard storage-dashboard{% else %}public-homepage znet-homepage{% endif %}{% endblock %}
 {% block shell_eyebrow %}{% if not client %}{{ parent() }}{% endif %}{% endblock %}
 {% block shell_title %}{% if client %}{{ is_en ? 'Your workspace' : 'Ваше рабочее пространство' }}{% endif %}{% endblock %}
@@ -39,7 +39,7 @@
     {% if client and not settings.hide_dashboard_breadcrumb %}
         <ul class="breadcrumb">
             <li><a href="{{ '/'|link }}">{{ is_en ? 'Home' : 'Главная' }}</a> <span class="dropdown-divider">/</span></li>
-            <li class="active">{{ is_en ? 'Storage' : 'Хранилище' }}</li>
+            <li class="active">{{ is_en ? 'VPN access' : 'VPN-доступ' }}</li>
         </ul>
     {% endif %}
 {% endblock %}
