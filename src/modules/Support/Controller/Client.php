@@ -55,20 +55,14 @@ class Client implements \FOSSBilling\InjectionAwareInterface
         return $app->render('mod_support_ticket', ['ticket' => $ticket]);
     }
 
-    public function get_contact_us(\Box_App $app): string
+    public function get_contact_us(\Box_App $app): never
     {
-        return $app->render('mod_support_contact_us');
+        $app->redirect('/contacts');
     }
 
-    public function get_contact_us_conversation(\Box_App $app, $hash): string
+    public function get_contact_us_conversation(\Box_App $app, $hash): never
     {
-        $api = $this->di['api_guest'];
-        $data = [
-            'hash' => $hash,
-        ];
-        $array = $api->support_ticket_get($data);
-
-        return $app->render('mod_support_contact_us_conversation', ['ticket' => $array]);
+        $app->redirect('/contacts');
     }
 
     /*

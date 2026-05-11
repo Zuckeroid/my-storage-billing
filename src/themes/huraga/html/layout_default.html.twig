@@ -6,7 +6,7 @@
 
     <meta name="description" content="{% block meta_description %}{{ settings.meta_description }}{% endblock %}">
     <meta name="keywords" content="{{ settings.meta_keywords }}">
-    <meta name="robots" content="{{ settings.meta_robots }}">
+    <meta name="robots" content="{% block meta_robots %}{{ settings.meta_robots }}{% endblock %}">
     <meta name="author" content="{{ settings.meta_author }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 

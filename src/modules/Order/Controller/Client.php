@@ -37,7 +37,7 @@ class Client implements \FOSSBilling\InjectionAwareInterface
 
     public function get_products(\Box_App $app): never
     {
-        $app->redirect('/pricing');
+        $app->redirect('/#plans');
     }
 
     public function get_configure_product_by_slug(\Box_App $app, $slug): string

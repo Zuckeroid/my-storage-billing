@@ -7,16 +7,16 @@
 {% set company = guest.system_company %}
 {% set storage_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false, 'type': 'custom' }).list|default([]) %}
 
-{% block meta_title %}{% if client %}{{ is_en ? 'Client area' : 'Личный кабинет' }}{% else %}{{ is_en ? 'Private cloud storage and secure access' : 'Личное облачное хранилище и безопасный доступ' }}{% endif %}{% endblock %}
-{% block meta_description %}{% if client %}{{ is_en ? 'Manage your storage plans, invoices, and access details.' : 'Управляйте тарифами хранения, счетами и доступом в одном кабинете.' }}{% else %}{{ is_en ? 'Store documents, family archives, and work files in one personal space with fast setup and clear online billing.' : 'Храните документы, семейные архивы и рабочие файлы в одном личном пространстве с быстрым подключением и понятной онлайн-оплатой.' }}{% endif %}{% endblock %}
-{% block page_header %}{{ is_en ? 'Storage' : 'Хранилище' }}{% endblock %}
+{% block meta_title %}{% if client %}{{ is_en ? 'Client area' : 'Личный кабинет' }}{% else %}{{ is_en ? 'Private VPN access' : 'Персональный VPN-доступ' }}{% endif %}{% endblock %}
+{% block meta_description %}{% if client %}{{ is_en ? 'Manage your VPN plans, invoices, and access details.' : 'Управляйте VPN-тарифами, счетами и доступом в одном кабинете.' }}{% else %}{{ is_en ? 'Choose a Znet VPN plan, pay online, and receive access instructions by email.' : 'Выберите VPN-тариф Znet, оплатите онлайн и получите инструкции по доступу на email.' }}{% endif %}{% endblock %}
+{% block page_header %}{{ is_en ? 'Znet VPN' : 'Znet VPN' }}{% endblock %}
 {% block body_class %}{% if client %}dashboard storage-dashboard{% else %}public-homepage{% endif %}{% endblock %}
 
 {% block breadcrumbs %}
     {% if client and not settings.hide_dashboard_breadcrumb %}
         <ul class="breadcrumb">
             <li><a href="{{ '/'|link }}">{{ is_en ? 'Home' : 'Главная' }}</a> <span class="dropdown-divider">/</span></li>
-            <li class="active">{{ is_en ? 'Storage' : 'Хранилище' }}</li>
+            <li class="active">{{ is_en ? 'Znet VPN' : 'Znet VPN' }}</li>
         </ul>
     {% endif %}
 {% endblock %}
@@ -29,7 +29,7 @@
         <section class="storage-page-head mb-4">
             <div>
                 <span class="storage-kicker">{{ is_en ? 'Account' : 'Личный кабинет' }}</span>
-                <h1 class="mb-2">{{ is_en ? 'Your cloud storage' : 'Ваше облачное хранилище' }}</h1>
+                <h1 class="mb-2">{{ is_en ? 'Your VPN access' : 'Ваш VPN-доступ' }}</h1>
                 <p class="text-secondary mb-0">{{ is_en ? 'Choose a plan, pay the invoice, and access instructions will be sent to your account email.' : 'Выберите тариф, оплатите счет, а инструкции по доступу придут на email аккаунта.' }}</p>
             </div>
             <div class="storage-email-panel">
@@ -124,13 +124,13 @@
             <section class="public-hero">
                 <div class="public-site-shell public-hero-shell">
                     <div class="public-hero-copy">
-                        <span class="public-eyebrow">{{ is_en ? 'Private cloud storage' : 'Личное облачное хранилище' }}</span>
+                        <span class="public-eyebrow">{{ is_en ? 'Private VPN access' : 'Персональный VPN-доступ' }}</span>
                         <h1>
-                            {{ is_en ? 'Storage.' : 'Хранение.' }}<br>
+                            {{ is_en ? 'VPN.' : 'VPN.' }}<br>
                             {{ is_en ? 'Secure access.' : 'Безопасный доступ.' }}<br>
                             <span>{{ is_en ? 'No extra noise.' : 'Без лишнего шума.' }}</span>
                         </h1>
-                        <p>{{ is_en ? 'Keep documents, photos, and backups in one private space. Choose a plan, pay online, and receive access details by email.' : 'Храните документы, фотографии и резервные копии в одном личном пространстве. Выберите тариф, оплатите онлайн и получите доступ на email.' }}</p>
+                        <p>{{ is_en ? 'Choose a plan, pay online, and receive VPN access details by email.' : 'Выберите тариф, оплатите онлайн и получите VPN-доступ на email.' }}</p>
                         <div class="public-checks">
                             <div class="public-check-item">
                                 <span class="public-check-icon">✓</span>
@@ -172,8 +172,8 @@
                                 <path d="M4 4.75C4 3.78 4.78 3 5.75 3h6.5L18 8.75v10.5c0 .97-.78 1.75-1.75 1.75H5.75C4.78 21 4 20.22 4 19.25V4.75Zm8 0V9h4.25L12 4.75Z"/>
                             </svg>
                         </span>
-                        <h3>{{ is_en ? 'Private file space' : 'Личное пространство для файлов' }}</h3>
-                        <p>{{ is_en ? 'Documents, photos, archives, and backups stay together instead of being scattered across devices.' : 'Документы, фото, архивы и резервные копии находятся в одном месте, а не разбросаны по устройствам.' }}</p>
+                        <h3>{{ is_en ? 'Private VPN route' : 'Персональный VPN-маршрут' }}</h3>
+                        <p>{{ is_en ? 'Znet helps keep everyday internet access predictable across your usual devices.' : 'Znet помогает держать повседневный доступ к интернету предсказуемым на привычных устройствах.' }}</p>
                     </article>
                     <article class="public-feature-card">
                         <span class="public-feature-icon" aria-hidden="true">
@@ -191,7 +191,7 @@
                             </svg>
                         </span>
                         <h3>{{ is_en ? 'Works from your usual devices' : 'Работает с привычных устройств' }}</h3>
-                        <p>{{ is_en ? 'The service is made for normal everyday use: laptop, home machine, phone, and family access.' : 'Сервис рассчитан на обычные повседневные сценарии: ноутбук, домашний компьютер, телефон и семейное использование.' }}</p>
+                        <p>{{ is_en ? 'The service is made for normal everyday use: laptop, home machine, phone, and travel access.' : 'Сервис рассчитан на обычные повседневные сценарии: ноутбук, домашний компьютер, телефон и поездки.' }}</p>
                     </article>
                     <article class="public-feature-card">
                         <span class="public-feature-icon" aria-hidden="true">
@@ -210,7 +210,7 @@
                     <div class="public-section-head">
                         <span class="public-section-kicker">{{ is_en ? 'Plans' : 'Тарифы' }}</span>
                         <h2>{{ is_en ? 'Choose the plan that fits your routine' : 'Выберите тариф, который подходит вашему объему и привычкам' }}</h2>
-                        <p>{{ is_en ? 'Current plans are loaded directly from billing, so the homepage always shows the real catalog.' : 'Текущие тарифы подтягиваются прямо из биллинга, поэтому на главной всегда показан реальный каталог.' }}</p>
+                        <p>{{ is_en ? 'Current VPN plans are loaded directly from billing, so the homepage always shows the real catalog.' : 'Текущие VPN-тарифы подтягиваются прямо из биллинга, поэтому на главной всегда показан реальный каталог.' }}</p>
                     </div>
 
                     <div class="row">
@@ -256,7 +256,7 @@
                 <div class="public-site-shell public-final-cta-shell">
                     <div>
                         <span class="public-section-kicker">{{ is_en ? 'Ready to start' : 'Можно начать сегодня' }}</span>
-                        <h2>{{ is_en ? 'Create an account, choose a plan, and keep the rest predictable.' : 'Создайте аккаунт, выберите тариф и держите остальной путь предсказуемым.' }}</h2>
+                        <h2>{{ is_en ? 'Create an account, choose a plan, and keep connection setup predictable.' : 'Создайте аккаунт, выберите тариф и держите настройку подключения предсказуемой.' }}</h2>
                         <p>{{ is_en ? 'Start from the plan list or go straight to account creation.' : 'Начните с выбора тарифа или сразу переходите к созданию аккаунта.' }}</p>
                     </div>
                     <div class="public-final-actions">
@@ -277,7 +277,7 @@
                     </span>
                     <div>
                         <strong>{{ company.name }}</strong>
-                        <span>{{ is_en ? 'Private cloud storage and secure access' : 'Личное облачное хранилище и безопасный доступ' }}</span>
+                        <span>{{ is_en ? 'Private VPN access' : 'Персональный VPN-доступ' }}</span>
                     </div>
                 </div>
                 <nav class="public-site-footer-links" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">

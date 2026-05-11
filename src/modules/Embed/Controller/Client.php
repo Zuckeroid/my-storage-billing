@@ -38,10 +38,14 @@ class Client implements \FOSSBilling\InjectionAwareInterface
         $app->get('/embed/:what', 'get_object', ['what' => '[a-z0-9-]+'], static::class);
     }
 
-    public function get_object(\Box_App $app, $what): string
+    public function get_object(\Box_App $app, $what): never
     {
-        $tpl = 'mod_embed_' . $what;
+        $target = match ($what) {
+            'contact' => '/contacts',
+            'loginform' => '/login',
+            default => '/',
+        };
 
-        return $app->render($tpl);
+        $app->redirect($target);
     }
 }

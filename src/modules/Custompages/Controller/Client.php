@@ -47,10 +47,15 @@ class Client implements \FOSSBilling\InjectionAwareInterface
     {
         $service = new \Box\Mod\Custompages\Service();
         $service->setDi($this->di);
-        $page = $service->getPage($slug, 'slug');
+        try {
+            $page = $service->getPage($slug, 'slug');
+        } catch (\Throwable) {
+            $app->redirect('/');
+        }
+
         if (isset($page['id'])) {
             return $app->render('mod_custompages_content', ['page' => $page]);
         }
-        exit(header('Location: ' . $this->di['url']->get('')));
+        $app->redirect('/');
     }
 }

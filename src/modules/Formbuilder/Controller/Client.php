@@ -31,8 +31,8 @@ class Client implements \FOSSBilling\InjectionAwareInterface
         $app->get('/formbuilder/:id', 'get_form', ['id' => '[0-9]+'], static::class);
     }
 
-    public function get_form(\Box_App $app, $id): string
+    public function get_form(\Box_App $app, $id): never
     {
-        return $app->render('mod_formbuilder_build', ['id' => $id]);
+        $app->redirect('/contacts');
     }
 }

@@ -32,15 +32,13 @@ class Client implements \FOSSBilling\InjectionAwareInterface
         $app->get('/news/:slug', 'get_news_item', ['slug' => '[a-z0-9-]+'], static::class);
     }
 
-    public function get_news(\Box_App $app): string
+    public function get_news(\Box_App $app): never
     {
-        return $app->render('mod_news_index');
+        $app->redirect('/');
     }
 
-    public function get_news_item(\Box_App $app, $slug): string
+    public function get_news_item(\Box_App $app, $slug): never
     {
-        $post = $this->di['api_guest']->news_get(['slug' => $slug]);
-
-        return $app->render('mod_news_post', ['post' => $post]);
+        $app->redirect('/');
     }
 }

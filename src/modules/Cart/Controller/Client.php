@@ -31,8 +31,8 @@ class Client implements \FOSSBilling\InjectionAwareInterface
         $app->get('/cart', 'get_cart', [], static::class);
     }
 
-    public function get_cart(\Box_App $app): string
+    public function get_cart(\Box_App $app): never
     {
-        return $app->render('mod_cart_index');
+        $app->redirect('/#plans');
     }
 }
