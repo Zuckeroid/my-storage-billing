@@ -51,7 +51,7 @@ Status after local hardening changes:
 - `/order`: redirected to `/#plans`.
 - `/pricing`: redirected to `/#plans`.
 - `/cart`: redirected to `/#plans`.
-- `/sitemap.xml`: no longer includes News module articles.
+- `/sitemap.xml`: static-only; it no longer includes News, products, or knowledge-base entries.
 - Public error pages no longer print raw exception messages and use `noindex,nofollow`.
 - Remaining client-facing cloud-storage wording in order/signup/access emails was changed to VPN wording.
 
