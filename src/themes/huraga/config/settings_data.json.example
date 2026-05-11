@@ -27,7 +27,7 @@
       "side_menu_services": "1",
       "side_menu_invoices": "1",
       "side_menu_emails": "0",
-      "side_menu_payments": "0",
+      "side_menu_payments": "1",
       "side_menu_news": "0",
       "sidebar_note_enabled": "1",
       "sidebar_note_title": "Access instructions",

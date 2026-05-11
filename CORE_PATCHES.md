@@ -75,6 +75,9 @@ These files are not separate extensions; they are upstream modules we already ch
   - profile simplification
   - Appbridge token/device UI
   - per-service device pools and order-scoped token creation
+- `src/modules/Client/templates/client/mod_client_balance.html.twig`
+  - wallet/balance page restyled for Znet
+  - uses existing FOSSBilling add-funds invoice flow
 - `src/modules/Index/templates/client/mod_index_dashboard.html.twig`
   - dashboard cleanup and product-card changes
 - `src/modules/Page/templates/client/*`
@@ -88,8 +91,13 @@ These files are not separate extensions; they are upstream modules we already ch
   - order query/meta behavior adjusted
 - `src/modules/Order/templates/client/*`
   - client order/service UI changes
+  - service support/cancellation/upgrade actions route users to `/contacts`
 - `src/modules/Orderbutton/templates/client/*`
   - checkout/order button flow adjustments
+
+#### Support behavior
+- `src/modules/Support/Controller/Client.php`
+  - client support/ticket/knowledge-base routes redirect to `/contacts`
 
 #### Invoice behavior
 - `src/modules/Invoice/Api/Client.php`

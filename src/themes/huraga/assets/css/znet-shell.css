@@ -557,7 +557,7 @@ html {
 
 .znet-shell-page .znet-shell-stat-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
 }
 
@@ -753,6 +753,93 @@ html {
   font-size: 12px;
   line-height: 1;
   flex: 0 0 auto;
+}
+
+.znet-shell-page .znet-wallet-topup-form {
+  display: grid;
+  gap: 10px;
+}
+
+.znet-shell-page .znet-wallet-topup-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.znet-shell-page .znet-wallet-topup-row .btn {
+  min-height: 48px;
+  white-space: nowrap;
+}
+
+.znet-shell-page .znet-orderbutton-card {
+  margin-bottom: 0;
+}
+
+.znet-shell-page #orderManager {
+  display: grid;
+  gap: 12px;
+}
+
+.znet-shell-page #orderManager.accordion {
+  --bs-accordion-bg: transparent;
+  --bs-accordion-border-color: transparent;
+  --bs-accordion-btn-focus-box-shadow: none;
+  --bs-accordion-active-color: var(--znet-text);
+  --bs-accordion-active-bg: rgba(255, 255, 255, 0.05);
+  --bs-accordion-btn-color: var(--znet-text);
+  --bs-accordion-btn-bg: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page #orderManager .accordion-item {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+}
+
+.znet-shell-page #orderManager .accordion-button {
+  min-height: 58px;
+  border-radius: 8px;
+  color: var(--znet-text);
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.znet-shell-page #orderManager .accordion-button::after {
+  filter: invert(1) opacity(0.7);
+}
+
+.znet-shell-page #orderManager .accordion-body {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--znet-text-soft);
+}
+
+.znet-shell-page #orderManager .well {
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page #orderManager .radio {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  color: var(--znet-text);
+}
+
+.znet-shell-page #orderManager .input-append {
+  display: flex;
+  gap: 8px;
+  align-items: start;
+  flex-wrap: wrap;
+}
+
+.znet-shell-page #orderManager .input-append .span8 {
+  min-width: min(100%, 240px);
 }
 
 .znet-shell-page .znet-shell-auth-wrap {
@@ -1475,5 +1562,13 @@ html {
   .znet-shell-page .znet-shell-head-actions .znet-btn,
   .znet-shell-page .znet-shell-link-row .btn {
     flex: 1 1 100%;
+  }
+
+  .znet-shell-page .znet-wallet-topup-row {
+    grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-wallet-topup-row .btn {
+    width: 100%;
   }
 }

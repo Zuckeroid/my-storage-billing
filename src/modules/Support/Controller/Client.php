@@ -40,19 +40,14 @@ class Client implements \FOSSBilling\InjectionAwareInterface
         }
     }
 
-    public function get_tickets(\Box_App $app): string
+    public function get_tickets(\Box_App $app): never
     {
-        $this->di['is_client_logged'];
-
-        return $app->render('mod_support_tickets');
+        $app->redirect('/contacts');
     }
 
-    public function get_ticket(\Box_App $app, $id): string
+    public function get_ticket(\Box_App $app, $id): never
     {
-        $api = $this->di['api_client'];
-        $ticket = $api->support_ticket_get(['id' => $id]);
-
-        return $app->render('mod_support_ticket', ['ticket' => $ticket]);
+        $app->redirect('/contacts');
     }
 
     public function get_contact_us(\Box_App $app): never
@@ -68,26 +63,18 @@ class Client implements \FOSSBilling\InjectionAwareInterface
     /*
     * Support Knowledge Base.
     */
-    public function get_kb_index(\Box_App $app): string
+    public function get_kb_index(\Box_App $app): never
     {
-        return $app->render('mod_support_kb_index');
+        $app->redirect('/contacts');
     }
 
-    public function get_kb_category(\Box_App $app, $category): string
+    public function get_kb_category(\Box_App $app, $category): never
     {
-        $api = $this->di['api_guest'];
-        $data = ['slug' => $category];
-        $model = $api->support_kb_category_get($data);
-
-        return $app->render('mod_support_kb_category', ['category' => $model]);
+        $app->redirect('/contacts');
     }
 
-    public function get_kb_article(\Box_App $app, $category, $slug): string
+    public function get_kb_article(\Box_App $app, $category, $slug): never
     {
-        $api = $this->di['api_guest'];
-        $data = ['slug' => $slug];
-        $article = $api->support_kb_article_get($data);
-
-        return $app->render('mod_support_kb_article', ['article' => $article]);
+        $app->redirect('/contacts');
     }
 }

@@ -18,10 +18,6 @@
 {% set upgradables = client.order_upgradables({ 'id': order.id }) %}
 {% set orchestrator_access = client.orchestrator_access({ 'order_id': order.id }) %}
 
-{% block head %}
-    {{ mf.wysiwyg('.editor-textarea') }}
-{% endblock %}
-
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -93,11 +89,9 @@
 
                         {% if order.active_tickets > 0 %}
                             <tr>
-                                <td><label>{{ 'Active support tickets'|trans }}</label></td>
+                                <td><label>{{ 'Support'|trans }}</label></td>
                                 <td>
-                                    <div class="num"><a href="{{ 'support'|link }}" class="redNum">{{ order.active_tickets }}</a></div>
-                                    {# <div class="num"><a href="{{ 'support'|link }}" class="greenNum">{{ order.active_tickets }}</a></div> #}
-                                    {# <div class="num"><a href="{{ 'support'|link }}" class="bludNum">{{ order.active_tickets }}</a></div> #}
+                                    <a href="{{ '/contacts'|link }}">{{ 'Contact support'|trans }}</a>
                                 </td>
                             </tr>
                         {% endif %}
@@ -108,13 +102,7 @@
                     {% if order.period and order.status != 'failed_renew' %}
                         <button class="btn btn-primary btn-sm" type="button" id="renewal-button">{{ 'Renew now'|trans }}</button>
                     {% endif %}
-                    {% if upgradables %}
-                        <button class="btn btn-success btn-sm" type="button" id="request-upgrade" data-bs-toggle="modal" data-bs-target="#upgrade-request-modal">{{ 'Request Upgrade'|trans }}</button>
-                    {% endif %}
-                    <button class="btn btn-info btn-sm" type="button" id="open-ticket" data-bs-toggle="modal" data-bs-target="#open-ticket-modal">{{ 'Open ticket'|trans }}</button>
-                    {% if order.status == 'active' %}
-                        <button class="btn btn-danger btn-sm" type="button" id="request-cancel" data-bs-toggle="modal" data-bs-target="#cancel-request-modal">{{ 'Request cancellation'|trans }}</button>
-                    {% endif %}
+                    <a class="btn btn-outline-primary btn-sm" href="{{ '/contacts'|link }}">{{ 'Contact support'|trans }}</a>
                 </div>
             </div>
 
@@ -219,107 +207,6 @@
                 </div>
             {% endif %}
 
-            <div class="modal fade" id="cancel-request-modal" tabindex="-1" role="dialog" aria-labelledby="cancel-modal" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5">{{ 'Submit Cancellation Request'|trans }}</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'Close'|trans }}"></button>
-                        </div>
-                        <form action="" method="post" id="cancel-request-form" class="request-cancellation">
-                            <div class="modal-body">
-                                <input type="hidden" name="rel_type" value="order">
-                                <input type="hidden" name="rel_id" value="{{ order.id }}">
-                                <input type="hidden" name="rel_task" value="cancel">
-                                <div class="mb-3">
-                                    <label for="support-helpdesk-id" class="form-label">{{ 'Help desk'|trans }}</label>
-                                    {{ mf.selectbox('support_helpdesk_id', client.support_helpdesk_get_pairs, request.support_helpdesk_id, 1) }}
-                                </div>
-                                <div class="mb-3">
-                                    <label for="subject" class="form-label">{{ 'Subject'|trans }}</label>
-                                    <input class="form-control" type="text" name="subject" id="subject" value="{{ request.subject|e }}" required/>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="content" class="form-label">{{ 'Reason'|trans }}</label>
-                                    <textarea class="form-control" id="content" name="content" rows="5" required>{{ request.content|e }}</textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-danger">{{ 'Request'|trans }}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" id="open-ticket-modal" tabindex="-1" role="dialog" aria-labelledby="ticket-modal" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5">{{ 'Submit New Support Ticket'|trans }}</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'Close'|trans }}"></button>
-                        </div>
-                        <form action="" method="post" id="open-ticket-form" class="open-ticket">
-                            <div class="modal-body">
-                                <input type="hidden" name="rel_type" value="order">
-                                <input type="hidden" name="rel_id" value="{{ order.id }}">
-                                <div class="mb-3">
-                                    <label for="support-helpdesk-id" class="form-label">{{ 'Help desk'|trans }}</label>
-                                    {{ mf.selectbox('support_helpdesk_id', client.support_helpdesk_get_pairs, request.support_helpdesk_id, 1) }}
-                                </div>
-                                <div class="mb-3">
-                                    <label for="subject" class="form-label">{{ 'Subject'|trans }}</label>
-                                    <input class="form-control" type="text" name="subject" value="{{ request.subject|e }}" required/>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="content" class="form-label">{{ 'Message'|trans }}</label>
-                                    <textarea class="editor-textarea form-control" id="content" name="content" rows="5" required>{{ request.content|e }}</textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">{{ 'Open ticket'|trans }}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" id="upgrade-request-modal" tabindex="-1" role="dialog" aria-labelledby="upgrade-modal" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5">{{ 'Submit Upgrade Request'|trans }}</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'Close'|trans }}"></button>
-                        </div>
-                        <form action="" method="post" id="upgrade-request-form" class="request-upgrade">
-                            <div class="modal-body">
-                                <input type="hidden" name="rel_type" value="order">
-                                <input type="hidden" name="rel_id" value="{{ order.id }}">
-                                <input type="hidden" name="rel_task" value="upgrade">
-                                <div class="mb-3">
-                                    <label for="support-helpdesk-id" class="form-label">{{ 'Help desk'|trans }}</label>
-                                    {{ mf.selectbox('support_helpdesk_id', client.support_helpdesk_get_pairs, request.support_helpdesk_id, 1) }}
-                                </div>
-                                <div class="mb-3">
-                                    <label for="subject" class="form-label">{{ 'Subject'|trans }}</label>
-                                    <input class="form-control" type="text" name="subject" id="subject" value="{{ request.subject|e }}" required />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="rel_new_value" class="form-label">{{ 'Upgrade to'|trans }}</label>
-                                    {{ mf.selectbox('rel_new_value', upgradables, '', 1) }}
-                                </div>
-                                <div class="mb-3">
-                                    <label for="content" class="form-label">{{ 'Notes'|trans }}</label>
-                                    <textarea id="content" name="content" rows="5" required class="form-control" placeholder="Your comment">{{ 'I would like to upgrade'|trans }} {{ order.title }}</textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary" id="open-ticket-submit">{{ 'Request'|trans }}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -328,67 +215,20 @@
 {% autoescape "js" %}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const cancelRequestForm = document.getElementById('cancel-request-form');
-            const upgradeRequestForm = document.getElementById('upgrade-request-form');
-            const openTicketForm = document.getElementById('open-ticket-form');
+            const renewalButton = document.getElementById('renewal-button');
+            if (renewalButton) {
+                renewalButton.addEventListener('click', function (event) {
+                    event.preventDefault();
 
-            cancelRequestForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                API.client.post('support/ticket_create', Tools.serializeFormDataToObject(new FormData(cancelRequestForm)),
-                    () => {
-                        FOSSBilling.message('Service cancellation request received');
-                        const cancelRequestModal = bootstrap.Modal.getInstance(document.getElementById('cancel-request-modal'))
-                        cancelRequestModal.hide();
-                    },
-                    (res) => {
-                        FOSSBilling.message(`${res.message} (${res.code})`, 'error');
-                    });
-            });
-
-            upgradeRequestForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                API.client.post('support/ticket_create', Tools.serializeFormDataToObject(new FormData(upgradeRequestForm)),
-                    () => {
-                        FOSSBilling.message('Service upgrade request received');
-                        const upgradeRequestModal = bootstrap.Modal.getInstance(document.getElementById('upgrade-request-modal'))
-                        upgradeRequestModal.hide();
-                    },
-                    (res) => {
-                        FOSSBilling.message(`${res.message} (${res.code})`, 'error')
-                    });
-            });
-
-            openTicketForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                API.client.post('support/ticket_create', Tools.serializeFormDataToObject(new FormData(openTicketForm)),
-                    () => {
-                        FOSSBilling.message('Ticket was submitted. If you want to track conversation please go to support section');
-                        let openTicketModal = bootstrap.Modal.getInstance(document.getElementById('open-ticket-modal'));
-                        openTicketModal.hide();
-                    },
-                    (res) => {
-                        FOSSBilling.message(`${res.message} (${res.code})`, 'error')
-                    });
-            });
-
+                    if (confirm("This will generate new invoice. Are you sure you want to continue?")) {
+                        API.client.post('invoice/renewal_invoice', { order_id: {{ order.id }} },
+                            (result) => {
+                                window.location = "{{ 'invoice'|link }}" + '/' + result;
+                            });
+                    }
+                });
+            }
         });
-
-        const renewalButton = document.getElementById('renewal-button');
-        if (renewalButton) {
-            renewalButton.addEventListener('click', function (event) {
-                event.preventDefault();
-
-                if (confirm("This will generate new invoice. Are you sure you want to continue?")) {
-                    API.client.post('invoice/renewal_invoice', { order_id: {{ order.id }} },
-                        (result) => {
-                            window.location = "{{ 'invoice'|link }}" + '/' + result;
-                        });
-                }
-            });
-        }
     </script>
 {% endautoescape %}
 {% endblock %}

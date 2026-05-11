@@ -64,6 +64,12 @@
                 </article>
                 <article class="znet-shell-stat">
                     <div class="znet-shell-stat-line">
+                        <span>{{ is_en ? 'Balance' : 'Баланс' }}</span>
+                        <strong>{{ profile.balance | money(profile.currency) }}</strong>
+                    </div>
+                </article>
+                <article class="znet-shell-stat">
+                    <div class="znet-shell-stat-line">
                         <span>{{ is_en ? 'Available plans' : 'Тарифов доступно' }}</span>
                         <strong>{{ storage_products|length }}</strong>
                     </div>
@@ -84,7 +90,7 @@
         </section>
 
         <section class="znet-shell-section">
-            <div class="znet-shell-card-grid znet-shell-card-grid-2">
+            <div class="znet-shell-card-grid">
                 <article class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
@@ -110,6 +116,20 @@
                         </div>
                         <p class="mb-2">{{ is_en ? 'Unpaid invoices:' : 'Неоплаченные счета:' }} <strong>{{ dashboard.invoices.unpaid }}</strong></p>
                         <p class="mb-0 text-secondary">{{ is_en ? 'Review and pay invoices in one place.' : 'Проверяйте и оплачивайте счета в одном месте.' }}</p>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div>
+                                <h2 class="h5 mb-1">{{ is_en ? 'Wallet' : 'Баланс' }}</h2>
+                                <p class="text-secondary mb-0">{{ is_en ? 'Top up in advance or use funds for invoices.' : 'Пополняйте заранее или оплачивайте счета с баланса.' }}</p>
+                            </div>
+                            <a class="btn btn-sm btn-outline-primary" href="{{ 'client/balance'|link }}">{{ is_en ? 'Open' : 'Открыть' }}</a>
+                        </div>
+                        <p class="mb-2">{{ is_en ? 'Current balance:' : 'Текущий баланс:' }} <strong>{{ profile.balance | money(profile.currency) }}</strong></p>
+                        <p class="mb-0 text-secondary">{{ is_en ? 'A top-up creates an invoice and then goes through the payment gateway.' : 'Пополнение создает счет и проходит через платежный шлюз.' }}</p>
                     </div>
                 </article>
             </div>

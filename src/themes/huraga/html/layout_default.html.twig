@@ -13,7 +13,7 @@
     {% block opengraph %}{% endblock %}
     <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
-    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260429a">
+    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260511a">
     <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
 
     {{ "Api/API.js" | library_url | script_tag }}
@@ -255,6 +255,7 @@
                             <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
                             <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
                             <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                            <a href="{{ '/client/balance'|link }}" data-znet-nav>{{ is_en ? 'Wallet' : 'Баланс' }}</a>
                             <a href="{{ 'client/profile'|link }}" data-znet-nav>{{ is_en ? 'Profile' : 'Профиль' }}</a>
                         </div>
                     {% endif %}
@@ -268,6 +269,7 @@
                                         <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
                                         <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
                                         <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                                        <a href="{{ '/client/balance'|link }}" data-znet-nav>{{ is_en ? 'Wallet' : 'Баланс' }}</a>
                                         <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
                                     </nav>
                                 </div>
@@ -282,6 +284,10 @@
                                         <div class="znet-shell-account-item">
                                             <span>{{ is_en ? 'Name' : 'Имя' }}</span>
                                             <strong>{{ profile.first_name }} {{ profile.last_name }}</strong>
+                                        </div>
+                                        <div class="znet-shell-account-item">
+                                            <span>{{ is_en ? 'Balance' : 'Баланс' }}</span>
+                                            <strong>{{ profile.balance | money(profile.currency) }}</strong>
                                         </div>
                                     </div>
                                 </div>
