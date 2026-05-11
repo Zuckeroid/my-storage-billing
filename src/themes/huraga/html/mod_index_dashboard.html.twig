@@ -5,6 +5,9 @@
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
 {% set company = guest.system_company %}
+{% if not client %}
+    {% set storage_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false, 'type': 'custom' }).list|default([]) %}
+{% endif %}
 
 {% block meta_title %}
     {% if client %}
