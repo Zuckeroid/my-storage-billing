@@ -2,11 +2,24 @@
 
 {% import "macro_functions.html.twig" as mf %}
 
-{% block meta_title %}{{ order.title }}{% endblock %}
-{% block meta_description %}{% endblock %}
-{% block shell_description %}{% endblock %}
-
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 {% set addons = client.order_addons({ "id": order.id }) %}
+{% set service_partial = "mod_service" ~ order.service_type ~ "_manage.html.twig" %}
+{% set orchestrator_access = client.orchestrator_access({ 'order_id': order.id }) %}
+{% set appbridge = client.appbridge_bundle %}
+{% set appbridge_unlimited = appbridge.devices.is_unlimited_test_mode|default(false) %}
+{% set appbridge_groups = appbridge.devices.groups|default([]) %}
+{% set order_appbridge_groups = appbridge_groups|filter(group => group.order_id == order.id) %}
+{% set android_apk_url = 'downloads/znet-android-0.1.0-399ee74.apk' | asset_url %}
+{% set android_apk_version = '0.1.0' %}
+{% set android_apk_build = '399ee74' %}
+{% set android_apk_size = '54.1 MB' %}
+
+{% block meta_title %}{{ is_en ? 'Connection' : 'Подключение' }} · {{ order.title }}{% endblock %}
+{% block meta_description %}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Connection' : 'Подключение' }}{% endblock %}
+{% block shell_description %}{% endblock %}
 
 {% block body_class %}order-manage{% endblock %}
 {% block breadcrumb %}
@@ -14,203 +27,367 @@
 <li class="breadcrumb-item active" aria-current="page">{{ order.title }}</li>
 {% endblock %}
 
-{% set service_partial = "mod_service" ~ order.service_type ~ "_manage.html.twig" %}
-{% set upgradables = client.order_upgradables({ 'id': order.id }) %}
-{% set orchestrator_access = client.orchestrator_access({ 'order_id': order.id }) %}
-
 {% block content %}
-    <div class="row">
-        <div class="col-md-12">
-            {# Order info #}
-            <div class="card mb-4">
-                <div class="card-header py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h1 class="mb-1">{{ 'Service Details'|trans }}</h1>
-                            <span class="small text-secondary">{{ 'All information about your service'|trans }}</span>
-                        </div>
+    <section class="znet-shell-section">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                    <div>
+                        <h1 class="h3 mb-2">{{ order.title }}</h1>
+                        <p class="text-secondary mb-0">
+                            {{ is_en
+                                ? 'Everything needed to connect is on this page.'
+                                : 'Все, что нужно для подключения, находится на этой странице.' }}
+                        </p>
                     </div>
+
+                    <span class="badge {% if order.status == 'active' %}text-bg-success{% elseif order.status == 'pending_setup' %}text-bg-warning{% elseif order.status == 'failed_setup' or order.status == 'suspended' or order.status == 'failed_renew' %}text-bg-danger{% elseif order.status == 'canceled' %}text-bg-secondary{% else %}text-bg-secondary{% endif %}">
+                        {{ mf.status_name(order.status) }}
+                    </span>
                 </div>
+
+                <div class="znet-shell-stat-grid mt-4">
+                    <article class="znet-shell-stat">
+                        <span>{{ is_en ? 'Status' : 'Статус' }}</span>
+                        <strong>{{ mf.status_name(order.status) }}</strong>
+                    </article>
+                    <article class="znet-shell-stat">
+                        <span>{{ is_en ? 'Paid through' : 'Оплачен до' }}</span>
+                        <strong>{% if order.expires_at %}{{ order.expires_at|format_date }}{% else %}-{% endif %}</strong>
+                    </article>
+                    <article class="znet-shell-stat">
+                        <span>{{ is_en ? 'Plan price' : 'Стоимость' }}</span>
+                        <strong>{{ order.total|money(order.currency) }}</strong>
+                    </article>
+                </div>
+
+                <div class="znet-shell-link-row mt-4">
+                    {% if order.period and order.status != 'failed_renew' %}
+                        <button class="btn btn-primary" type="button" id="renewal-button">{{ is_en ? 'Renew' : 'Продлить' }}</button>
+                    {% endif %}
+                    <a class="btn btn-outline-primary" href="{{ '/contacts'|link }}">{{ is_en ? 'Contact support' : 'Написать в поддержку' }}</a>
+                    <a class="btn btn-outline-primary" href="{{ 'order/service'|link }}">{{ is_en ? 'All services' : 'Все услуги' }}</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="znet-shell-section">
+        <div class="znet-shell-section-head">
+            <div>
+                <h2>{{ is_en ? 'How to connect' : 'Как подключиться' }}</h2>
+                <p>
+                    {{ is_en
+                        ? 'Android has the full Znet app experience. iPhone users can connect with a compatible VPN client using the subscription link.'
+                        : 'На Android доступен полный сценарий через приложение Znet. На iPhone пока используем совместимый VPN-клиент и ссылку подписки.' }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                {% if orchestrator_access.status == 'pending' or orchestrator_access.status == 'provisioning' %}
+                    <div class="znet-shell-inline-note mb-3">
+                        {{ is_en ? 'Access is being prepared. Usually it takes less than a minute.' : 'Доступ готовится. Обычно это занимает меньше минуты.' }}
+                    </div>
+                {% elseif orchestrator_access.status == 'failed' %}
+                    <div class="alert alert-warning mb-3">
+                        {{ is_en ? 'Access was not prepared automatically. Please contact support.' : 'Доступ не подготовился автоматически. Напишите в поддержку.' }}
+                    </div>
+                {% endif %}
+
+                {% if orchestrator_access.error %}
+                    <div class="alert alert-warning mb-3">
+                        <strong>{{ is_en ? 'Last error' : 'Последняя ошибка' }}:</strong> {{ orchestrator_access.error }}
+                    </div>
+                {% endif %}
+
+                {% if orchestrator_access.subscription_link %}
+                    <label class="form-label" for="znet-subscription-link">{{ is_en ? 'Subscription link' : 'Ссылка подписки' }}</label>
+                    <div class="input-group">
+                        <input class="form-control" id="znet-subscription-link" type="text" value="{{ orchestrator_access.subscription_link }}" readonly onclick="this.select();">
+                        <button class="btn btn-outline-primary" type="button" data-znet-copy-subscription>{{ is_en ? 'Copy' : 'Скопировать' }}</button>
+                        <a class="btn btn-primary" href="{{ orchestrator_access.subscription_link }}" target="_blank" rel="noopener noreferrer">{{ is_en ? 'Open' : 'Открыть' }}</a>
+                    </div>
+                {% else %}
+                    <p class="text-secondary mb-0">
+                        {{ is_en ? 'The subscription link will appear here after activation.' : 'Ссылка подписки появится здесь после активации.' }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="znet-shell-card-grid znet-shell-card-grid-2">
+            <article class="card">
                 <div class="card-body">
-                    <table class="table table-hover table-bordered table-sm">
-                        <tbody>
+                    <span class="znet-app-download-kicker">{{ is_en ? 'Android' : 'Android' }}</span>
+                    <h3 class="h4 mb-2">{{ is_en ? 'Install Znet app' : 'Установите приложение Znet' }}</h3>
+                    <p class="text-secondary">
+                        {{ is_en
+                            ? 'This is the recommended option. It enables simple sign-in, device binding, and Auto ON/OFF.'
+                            : 'Это основной вариант. Он дает простой вход, привязку устройства и Auto ON/OFF.' }}
+                    </p>
+
+                    <div class="znet-shell-link-row">
+                        <a class="btn btn-primary" href="{{ android_apk_url }}" download>{{ is_en ? 'Download APK' : 'Скачать APK' }}</a>
+                        <span class="text-secondary small">v{{ android_apk_version }} · build {{ android_apk_build }} · {{ android_apk_size }}</span>
+                    </div>
+
+                    <details class="znet-app-install-guide mt-3" open>
+                        <summary>{{ is_en ? 'Short setup guide' : 'Короткая инструкция' }}</summary>
+                        {% if is_en %}
+                            <ol>
+                                <li>Open this page on your Android phone.</li>
+                                <li>Download and install the APK.</li>
+                                <li>Launch Znet.</li>
+                                <li>Create a device token below and paste it into the app.</li>
+                                <li>Allow VPN connection and notifications.</li>
+                                <li>For Auto ON/OFF, enable Activity access in Znet settings. If Android blocks restricted settings, open Znet app info, use the three-dot menu, allow restricted settings, then enable Activity access.</li>
+                            </ol>
+                        {% else %}
+                            <ol>
+                                <li>Откройте эту страницу на телефоне Android.</li>
+                                <li>Скачайте и установите APK.</li>
+                                <li>Запустите Znet.</li>
+                                <li>Создайте токен устройства ниже и вставьте его в приложение.</li>
+                                <li>Разрешите VPN-подключение и уведомления.</li>
+                                <li>Для Auto ON/OFF включите доступ к активности в настройках Znet. Если Android блокирует ограниченные настройки, откройте карточку приложения Znet, нажмите меню с тремя точками, разрешите ограниченные настройки и включите доступ к активности.</li>
+                            </ol>
+                        {% endif %}
+                    </details>
+
+                    {% if not appbridge.has_active_access %}
+                        <p class="znet-shell-inline-note mt-3 mb-0">
+                            {{ is_en
+                                ? 'Device tokens will become available after the service is fully activated.'
+                                : 'Токены устройств появятся после полной активации услуги.' }}
+                        </p>
+                    {% elseif order_appbridge_groups is empty %}
+                        <p class="znet-shell-inline-note mt-3 mb-0">
+                            {{ is_en
+                                ? 'Device activation for this service is being prepared.'
+                                : 'Активация устройств для этой услуги готовится.' }}
+                        </p>
+                    {% else %}
+                        {% for group in order_appbridge_groups %}
+                            <section class="mt-3" data-appbridge-order="{{ group.order_id }}">
+                                <div class="znet-appbridge-stats">
+                                    <article class="znet-appbridge-stat">
+                                        <span>{{ is_en ? 'Devices' : 'Устройства' }}</span>
+                                        <strong data-appbridge-order-device-ratio>{{ group.active }}/{{ appbridge_unlimited and group.eligible_for_app ? '∞' : group.device_limit }}</strong>
+                                    </article>
+                                    <article class="znet-appbridge-stat">
+                                        <span>{{ is_en ? 'Pending tokens' : 'Ожидают активации' }}</span>
+                                        <strong data-appbridge-order-pending>{{ group.pending_tokens }}</strong>
+                                    </article>
+                                </div>
+
+                                <div class="znet-shell-link-row mt-3">
+                                    <button
+                                        class="btn btn-primary"
+                                        type="button"
+                                        data-appbridge-add-device
+                                        data-order-id="{{ group.order_id }}"
+                                        {% if not group.eligible_for_app or (group.pending_tokens|default(0) < 1 and not appbridge_unlimited and group.available < 1) %}disabled{% endif %}
+                                    >
+                                        {{ is_en ? 'Get device token' : 'Получить токен' }}
+                                    </button>
+                                    <button
+                                        class="btn btn-outline-primary"
+                                        type="button"
+                                        data-appbridge-open-token
+                                        data-order-id="{{ group.order_id }}"
+                                        {% if group.pending_tokens|default(0) < 1 %}hidden{% endif %}
+                                        {% if not group.eligible_for_app or group.pending_tokens|default(0) < 1 %}disabled{% endif %}
+                                    >
+                                        {{ is_en ? 'Show token' : 'Показать токен' }}
+                                    </button>
+                                </div>
+
+                                <details class="znet-app-install-guide mt-3">
+                                    <summary>{{ is_en ? 'Connected devices' : 'Подключенные устройства' }}</summary>
+                                    <div class="znet-appbridge-device-list mt-3">
+                                        {% if group.devices is empty %}
+                                            <article class="znet-appbridge-device znet-appbridge-device-empty">
+                                                <div>
+                                                    <strong>{{ is_en ? 'No devices yet' : 'Устройств пока нет' }}</strong>
+                                                    <p class="mb-0 text-secondary small">
+                                                        {{ is_en
+                                                            ? 'Create a token and paste it into the Znet app.'
+                                                            : 'Создайте токен и вставьте его в приложение Znet.' }}
+                                                    </p>
+                                                </div>
+                                            </article>
+                                        {% else %}
+                                            {% for device in group.devices %}
+                                                {% set device_meta = [] %}
+                                                {% if device.platform %}{% set device_meta = device_meta|merge([device.platform]) %}{% endif %}
+                                                {% if device.last_seen_at %}{% set device_meta = device_meta|merge([(is_en ? 'Last seen' : 'Последний запрос') ~ ': ' ~ device.last_seen_at]) %}{% endif %}
+                                                <article class="znet-appbridge-device" data-appbridge-device-row data-device-id="{{ device.id }}">
+                                                    <div class="znet-appbridge-device-copy">
+                                                        <strong>{{ device.name ?: ((is_en ? 'Device' : 'Устройство') ~ ' #' ~ device.id) }}</strong>
+                                                        <p class="mb-0 text-secondary small">{{ device_meta|join(' • ') }}</p>
+                                                    </div>
+                                                    <div class="znet-appbridge-device-actions">
+                                                        <button class="btn btn-outline-primary" type="button" data-appbridge-revoke data-device-id="{{ device.id }}">
+                                                            {{ is_en ? 'Disconnect' : 'Отключить' }}
+                                                        </button>
+                                                    </div>
+                                                </article>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </details>
+                            </section>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-body">
+                    <span class="znet-app-download-kicker">{{ is_en ? 'iPhone' : 'iPhone' }}</span>
+                    <h3 class="h4 mb-2">{{ is_en ? 'Use subscription link' : 'Используйте ссылку подписки' }}</h3>
+                    <p class="text-secondary">
+                        {{ is_en
+                            ? 'The Znet iPhone app is not ready yet. For now, add the subscription link to a compatible VPN client. Auto ON/OFF is available only in the Android app.'
+                            : 'Приложения Znet для iPhone пока нет. Сейчас добавьте ссылку подписки в совместимый VPN-клиент. Auto ON/OFF доступен только в Android-приложении.' }}
+                    </p>
+
+                    {% if orchestrator_access.subscription_link %}
+                        <div class="znet-shell-checklist">
+                            <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Copy the subscription link above.' : 'Скопируйте ссылку подписки выше.' }}</span></div>
+                            <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Open a compatible VPN client on iPhone.' : 'Откройте совместимый VPN-клиент на iPhone.' }}</span></div>
+                            <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Import the link as a subscription.' : 'Импортируйте ссылку как подписку.' }}</span></div>
+                        </div>
+                    {% else %}
+                        <p class="znet-shell-inline-note mb-0">
+                            {{ is_en ? 'The link will appear after activation.' : 'Ссылка появится после активации.' }}
+                        </p>
+                    {% endif %}
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="znet-shell-section">
+        <details class="znet-app-install-guide">
+            <summary>{{ is_en ? 'Technical details' : 'Технические детали' }}</summary>
+            <div class="table-responsive mt-3">
+                <table class="table table-hover table-sm">
+                    <tbody>
                         <tr>
-                            <td><label>{{ 'Order'|trans }}</label></td>
+                            <td>{{ is_en ? 'Order' : 'Заказ' }}</td>
                             <td>#{{ order.id }}</td>
                         </tr>
-
                         <tr>
-                            <td><label>{{ 'Product name'|trans }}</label></td>
-                            <td><strong>{{ order.title }}</strong></td>
+                            <td>{{ is_en ? 'Billing cycle' : 'Период оплаты' }}</td>
+                            <td>{% if order.period %}{{ order.period|period_title }}{% else %}-{% endif %}</td>
                         </tr>
-
                         <tr>
-                            <td><label>{{ 'Payment amount'|trans }}</label></td>
-                            <td>{{ order.total|money(order.currency) }}</td>
-                        </tr>
-
-                        {% if order.period %}
-                            <tr>
-                                <td><label>{{ 'Billing cycle'|trans }}</label></td>
-                                <td>{{ order.period|period_title }}</td>
-                            </tr>
-                        {% endif %}
-
-                        <tr>
-                            <td><label>{{ 'Order status'|trans }}</label></td>
-                            <td>
-                                <span class="badge {% if order.status == 'active' %}text-bg-success{% elseif order.status == 'pending_setup' %}text-bg-warning{% elseif order.status == 'failed_setup' or order.status == 'suspended' or order.status == 'failed_renew' %}text-bg-danger{% elseif order.status == 'canceled' %}text-bg-secondary{% endif %}">{{ mf.status_name(order.status) }}</span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><label>{{ 'Order created'|trans }}</label></td>
+                            <td>{{ is_en ? 'Created' : 'Создан' }}</td>
                             <td>{{ order.created_at|format_date }}</td>
                         </tr>
-
                         <tr>
-                            <td><label>{{ 'Activated at'|trans }}</label></td>
+                            <td>{{ is_en ? 'Activated' : 'Активирован' }}</td>
                             <td>{% if order.activated_at %}{{ order.activated_at|format_date }}{% else %}-{% endif %}</td>
                         </tr>
-
-                        {% if order.period %}
+                        {% if orchestrator_access.last_sync_at %}
                             <tr>
-                                <td><label>{{ 'Renewal date'|trans }} {% if order.expires_at %} in {{ order.expires_at|daysleft }} day(s) {% endif %}</label></td>
-                                <td>{% if order.expires_at %}{{ order.expires_at|format_date }}{% else %}-{% endif %}</td>
+                                <td>{{ is_en ? 'Last access update' : 'Последнее обновление доступа' }}</td>
+                                <td>{{ orchestrator_access.last_sync_at|format_date }}</td>
                             </tr>
                         {% endif %}
-
+                        {% if orchestrator_access.access_email_sent_at %}
+                            <tr>
+                                <td>{{ is_en ? 'Access email sent' : 'Письмо с доступом отправлено' }}</td>
+                                <td>{{ orchestrator_access.access_email_sent_at|format_date }}</td>
+                            </tr>
+                        {% endif %}
                         {% if order.notes %}
                             <tr>
-                                <td><label>{{ 'Order notes'|trans }}</label></td>
+                                <td>{{ is_en ? 'Notes' : 'Заметки' }}</td>
                                 <td>{{ order.notes|markdown }}</td>
                             </tr>
                         {% endif %}
+                    </tbody>
+                </table>
+            </div>
 
-                        {% if order.active_tickets > 0 %}
+            {% if order.group_master == 1 and addons|length > 0 %}
+                <div class="table-responsive mt-3">
+                    <table class="table table-hover table-sm">
+                        <thead>
+                        <tr>
+                            <th>{{ 'Product/Service'|trans }}</th>
+                            <th>{{ 'Price'|trans }}</th>
+                            <th>{{ 'Status'|trans }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for i, addon in addons %}
                             <tr>
-                                <td><label>{{ 'Support'|trans }}</label></td>
-                                <td>
-                                    <a href="{{ '/contacts'|link }}">{{ 'Contact support'|trans }}</a>
-                                </td>
+                                <td>{{ addon.title }}</td>
+                                <td>{{ addon.total|money(addon.currency) }}</td>
+                                <td>{{ mf.status_name(addon.status) }}</td>
                             </tr>
-                        {% endif %}
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer">
-                    {% if order.period and order.status != 'failed_renew' %}
-                        <button class="btn btn-primary btn-sm" type="button" id="renewal-button">{{ 'Renew now'|trans }}</button>
-                    {% endif %}
-                    <a class="btn btn-outline-primary btn-sm" href="{{ '/contacts'|link }}">{{ 'Contact support'|trans }}</a>
-                </div>
-            </div>
-
-            {% if orchestrator_access.subscription_link or orchestrator_access.status or orchestrator_access.error %}
-                <div class="card mb-4">
-                    <div class="card-header py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h1 class="mb-1">Доступ к подключению</h1>
-                                <span class="small text-secondary">Ссылка подписки для вашего приложения</span>
-                            </div>
-                            {% if orchestrator_access.status == 'active' %}
-                                <span class="badge text-bg-success text-uppercase">{{ orchestrator_access.status }}</span>
-                            {% elseif orchestrator_access.status == 'failed' %}
-                                <span class="badge text-bg-danger text-uppercase">{{ orchestrator_access.status }}</span>
-                            {% elseif orchestrator_access.status == 'pending' or orchestrator_access.status == 'provisioning' %}
-                                <span class="badge text-bg-warning text-uppercase">{{ orchestrator_access.status }}</span>
-                            {% elseif orchestrator_access.status %}
-                                <span class="badge text-bg-secondary text-uppercase">{{ orchestrator_access.status }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        {% if orchestrator_access.status == 'pending' or orchestrator_access.status == 'provisioning' %}
-                            <p class="mb-3">{{ 'Your access is being prepared. This usually takes a moment.'|trans }}</p>
-                        {% elseif orchestrator_access.status == 'failed' %}
-                            <div class="alert alert-danger mb-3">
-                                {{ 'Provisioning failed. Please contact support if this status does not change soon.'|trans }}
-                            </div>
-                        {% endif %}
-                        {% if orchestrator_access.error %}
-                            <div class="alert alert-warning mb-3">
-                                <strong>{{ 'Last error'|trans }}:</strong> {{ orchestrator_access.error }}
-                            </div>
-                        {% endif %}
-                        <p class="mb-3">Используйте эту ссылку, чтобы импортировать или обновить подписку в вашем VPN-приложении.</p>
-                        {% if orchestrator_access.subscription_link %}
-                        <div class="input-group">
-                            <input class="form-control" type="text" value="{{ orchestrator_access.subscription_link }}" readonly onclick="this.select();">
-                            <a class="btn btn-primary" href="{{ orchestrator_access.subscription_link }}" target="_blank" rel="noopener noreferrer">Открыть ссылку</a>
-                        </div>
-                        {% endif %}
-                        <div class="small text-secondary mt-3">
-                            {% if orchestrator_access.last_sync_at %}
-                                <div>Последнее обновление: {{ orchestrator_access.last_sync_at|format_date }}</div>
-                            {% endif %}
-                            {% if orchestrator_access.access_email_sent_at %}
-                                <div>Письмо с доступом отправлено: {{ orchestrator_access.access_email_sent_at|format_date }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
             {% endif %}
 
-            {# Service management #}
             {% if guest.system_template_exists({ 'file': service_partial }) %}
                 {% set service = client.order_service({ 'id': order.id }) %}
-                {{ include(service_partial, { 'order': order, 'service': service }) }}
-            {% endif %}
-
-            {# Order addons #}
-            {% if order.group_master == 1 and addons|length > 0 %}
-            <div class="card mb-4">
-                <div class="card-header py-3 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h1 class="mb-1">{{ 'Addons'|trans }}</h1>
-                            <span class="small text-secondary">{{ 'Addons you have ordered with this service'|trans }}</span>
-                        </div>
-                    </div>
+                <div class="mt-3">
+                    {{ include(service_partial, { 'order': order, 'service': service }) }}
                 </div>
+            {% endif %}
+        </details>
+    </section>
+
+    <div class="znet-appbridge-modal" hidden data-appbridge-modal>
+        <div class="znet-appbridge-modal-backdrop" data-appbridge-close></div>
+        <div class="znet-appbridge-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="appbridge-modal-title">
+            <div class="card">
                 <div class="card-body">
-                        <table class="table table-hover table-bordered table-sm">
-                            <thead>
-                            <tr>
-                                <th>{{ 'Product/Service'|trans }}</th>
-                                <th>{{ 'Price'|trans }}</th>
-                                <th>{{ 'Billing Cycle'|trans }}</th>
-                                <th>{{ 'Next due date'|trans }}</th>
-                                <th>{{ 'Status'|trans }}</th>
-                                <th>{{ 'Actions'|trans }}</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for i, addon in addons %}
-                                <tr>
-                                    <td>{{ addon.title }}</td>
-                                    <td>{{ addon.total|money(addon.currency) }}</td>
-                                    <td>{{ addon.period|period_title }}</td>
-                                    <td>{% if addon.expires_at %}{{ addon.expires_at|format_date }}{% else %}-{% endif %}</td>
-                                    <td>
-                                        <span class="badge {% if addon.status == 'active' %}text-bg-success{% elseif addon.status == 'pending_setup' %}text-bg-warning{% endif %}">{{ mf.status_name(addon.status) }}</span>
-                                    </td>
-                                    <td class="actions">
-                                        <a class="btn btn-outline-primary btn-sm" href="{{ '/order/service/manage'|link }}/{{ addon.id }}">{{ 'Manage'|trans }}</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endif %}
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1" id="appbridge-modal-title">{{ is_en ? 'Device token' : 'Токен устройства' }}</h2>
+                            <p class="text-secondary mb-0">
+                                {{ is_en
+                                    ? 'Copy this token and paste it into the Znet app.'
+                                    : 'Скопируйте токен и вставьте его в приложение Znet.' }}
+                            </p>
+                        </div>
 
+                        <button class="znet-btn znet-btn-ghost znet-btn-icon-only" type="button" data-appbridge-close aria-label="{{ is_en ? 'Close' : 'Закрыть' }}">
+                            <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 6l12 12"></path>
+                                <path d="M18 6L6 18"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <button class="znet-appbridge-token-field" type="button" data-appbridge-token-copy>
+                        <span data-appbridge-token>••••••••••••••••••••••••••••••••</span>
+                    </button>
+
+                    <div class="znet-shell-link-row mt-3">
+                        <button class="btn btn-primary" type="button" data-appbridge-copy-btn>{{ is_en ? 'Copy token' : 'Скопировать токен' }}</button>
+                        <button class="btn btn-outline-primary" type="button" data-appbridge-rotate-btn>{{ is_en ? 'Create new token' : 'Создать новый токен' }}</button>
+                        <button class="btn btn-outline-primary" type="button" data-appbridge-close>{{ is_en ? 'Close' : 'Закрыть' }}</button>
+                    </div>
+
+                    <p class="text-secondary small mt-3 mb-0" data-appbridge-meta>
+                        {{ is_en ? 'A new token will appear here after generation.' : 'После создания токен появится здесь.' }}
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-
 {% endblock %}
+
 {% block js %}
 {% autoescape "js" %}
     <script>
@@ -220,7 +397,7 @@
                 renewalButton.addEventListener('click', function (event) {
                     event.preventDefault();
 
-                    if (confirm("This will generate new invoice. Are you sure you want to continue?")) {
+                    if (confirm("{{ is_en ? 'This will create a renewal invoice. Continue?' : 'Будет создан счет на продление. Продолжить?' }}")) {
                         API.client.post('invoice/renewal_invoice', { order_id: {{ order.id }} },
                             (result) => {
                                 window.location = "{{ 'invoice'|link }}" + '/' + result;
@@ -228,7 +405,26 @@
                     }
                 });
             }
+
+            const copyButton = document.querySelector('[data-znet-copy-subscription]');
+            const subscriptionInput = document.getElementById('znet-subscription-link');
+            if (copyButton && subscriptionInput) {
+                copyButton.addEventListener('click', async function () {
+                    subscriptionInput.select();
+                    try {
+                        await navigator.clipboard.writeText(subscriptionInput.value);
+                        copyButton.textContent = "{{ is_en ? 'Copied' : 'Скопировано' }}";
+                    } catch (error) {
+                        document.execCommand('copy');
+                        copyButton.textContent = "{{ is_en ? 'Copied' : 'Скопировано' }}";
+                    }
+                    window.setTimeout(() => {
+                        copyButton.textContent = "{{ is_en ? 'Copy' : 'Скопировать' }}";
+                    }, 1800);
+                });
+            }
         });
     </script>
 {% endautoescape %}
+{% include 'partial_appbridge_client_area_js.html.twig' %}
 {% endblock %}

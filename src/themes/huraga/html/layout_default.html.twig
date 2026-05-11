@@ -253,9 +253,8 @@
                     {% if client %}
                         <div class="znet-shell-mobile-links">
                             <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
-                            <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
-                            <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
-                            <a href="{{ '/client/balance'|link }}" data-znet-nav>{{ is_en ? 'Wallet' : 'Баланс' }}</a>
+                            <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Connection' : 'Подключение' }}</a>
+                            <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
                             <a href="{{ 'client/profile'|link }}" data-znet-nav>{{ is_en ? 'Profile' : 'Профиль' }}</a>
                         </div>
                     {% endif %}
@@ -267,29 +266,10 @@
                                     <p class="znet-shell-side-label">{{ is_en ? 'Sections' : 'Разделы' }}</p>
                                     <nav class="znet-shell-side-nav">
                                         <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
-                                        <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Services' : 'Услуги' }}</a>
-                                        <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Invoices' : 'Счета' }}</a>
-                                        <a href="{{ '/client/balance'|link }}" data-znet-nav>{{ is_en ? 'Wallet' : 'Баланс' }}</a>
-                                        <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                                        <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Connection' : 'Подключение' }}</a>
+                                        <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                                        <a href="{{ '/client/profile'|link }}" data-znet-nav>{{ is_en ? 'Profile' : 'Профиль' }}</a>
                                     </nav>
-                                </div>
-
-                                <div class="znet-shell-sidebar-block">
-                                    <p class="znet-shell-side-label">{{ is_en ? 'Account' : 'Аккаунт' }}</p>
-                                    <div class="znet-shell-account-list">
-                                        <div class="znet-shell-account-item">
-                                            <span>Email</span>
-                                            <strong>{{ profile.email }}</strong>
-                                        </div>
-                                        <div class="znet-shell-account-item">
-                                            <span>{{ is_en ? 'Name' : 'Имя' }}</span>
-                                            <strong>{{ profile.first_name }} {{ profile.last_name }}</strong>
-                                        </div>
-                                        <div class="znet-shell-account-item">
-                                            <span>{{ is_en ? 'Balance' : 'Баланс' }}</span>
-                                            <strong>{{ profile.balance | money(profile.currency) }}</strong>
-                                        </div>
-                                    </div>
                                 </div>
                             </aside>
                         {% endif %}

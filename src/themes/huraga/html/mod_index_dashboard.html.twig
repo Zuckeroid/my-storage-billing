@@ -5,12 +5,6 @@
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
 {% set company = guest.system_company %}
-{% set storage_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false, 'type': 'custom' }).list|default([]) %}
-{% if client %}
-    {% set appbridge = client.appbridge_bundle %}
-    {% set appbridge_unlimited = appbridge.devices.is_unlimited_test_mode|default(false) %}
-    {% set appbridge_groups = appbridge.devices.groups|default([]) %}
-{% endif %}
 
 {% block meta_title %}
     {% if client %}
@@ -31,7 +25,7 @@
 {% block page_header %}{{ is_en ? 'VPN access' : 'VPN-доступ' }}{% endblock %}
 {% block body_class %}{% if client %}dashboard storage-dashboard{% else %}public-homepage znet-homepage{% endif %}{% endblock %}
 {% block shell_eyebrow %}{% if not client %}{{ parent() }}{% endif %}{% endblock %}
-{% block shell_title %}{% if client %}{{ is_en ? 'Your workspace' : 'Ваше рабочее пространство' }}{% endif %}{% endblock %}
+{% block shell_title %}{% if client %}{{ is_en ? 'Your Znet' : 'Ваш Znet' }}{% endif %}{% endblock %}
 {% block shell_description %}{% endblock %}
 {% block shell_head_actions %}{% endblock %}
 
@@ -48,118 +42,111 @@
     {% if client %}
         {% set dashboard = client.index_get_dashboard %}
         {% set profile = dashboard.profile %}
-        <section class="znet-shell-section" aria-label="Account summary">
-            <div class="znet-shell-stat-grid">
-                <article class="znet-shell-stat">
-                    <div class="znet-shell-stat-line">
-                        <span>{{ is_en ? 'Active services' : 'Активные услуги' }}</span>
-                        <strong>{{ dashboard.orders.active }}</strong>
-                    </div>
-                </article>
-                <article class="znet-shell-stat">
-                    <div class="znet-shell-stat-line">
-                        <span>{{ is_en ? 'Unpaid invoices' : 'Неоплаченные счета' }}</span>
-                        <strong>{{ dashboard.invoices.unpaid }}</strong>
-                    </div>
-                </article>
-                <article class="znet-shell-stat">
-                    <div class="znet-shell-stat-line">
-                        <span>{{ is_en ? 'Balance' : 'Баланс' }}</span>
-                        <strong>{{ profile.balance | money(profile.currency) }}</strong>
-                    </div>
-                </article>
-                <article class="znet-shell-stat">
-                    <div class="znet-shell-stat-line">
-                        <span>{{ is_en ? 'Available plans' : 'Тарифов доступно' }}</span>
-                        <strong>{{ storage_products|length }}</strong>
-                    </div>
-                </article>
-            </div>
-        </section>
+        {% set recent_orders = dashboard.recent_orders|default([]) %}
+        {% set active_orders = recent_orders|filter(order => order.status == 'active') %}
+        {% set primary_order = active_orders|first ?: recent_orders|first %}
 
         <section class="znet-shell-section">
-            <div class="znet-shell-section-head">
-                <div>
-                    <h2>{{ is_en ? 'Plans and upgrades' : 'Тарифы и продление' }}</h2>
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div>
+                            <h2 class="h4 mb-2">{{ is_en ? 'Connection' : 'Подключение' }}</h2>
+                            {% if dashboard.orders.active > 0 %}
+                                <p class="text-secondary mb-0">
+                                    {{ is_en
+                                        ? 'Your VPN access is ready. Open the service page to install the app, get a token, or copy the subscription link.'
+                                        : 'VPN-доступ готов. Откройте страницу услуги, чтобы установить приложение, получить токен или скопировать ссылку подписки.' }}
+                                </p>
+                            {% else %}
+                                <p class="text-secondary mb-0">
+                                    {{ is_en
+                                        ? 'Choose a plan and pay the invoice. Access will appear here after activation.'
+                                        : 'Выберите тариф и оплатите счет. Доступ появится здесь после активации.' }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        {% if dashboard.orders.active > 0 and primary_order %}
+                            <a class="btn btn-primary" href="{{ 'order/service/manage'|link }}/{{ primary_order.id }}">
+                                {{ is_en ? 'Open connection' : 'Открыть подключение' }}
+                            </a>
+                        {% elseif dashboard.orders.active > 0 %}
+                            <a class="btn btn-primary" href="{{ 'order/service'|link }}">
+                                {{ is_en ? 'Open services' : 'Открыть услуги' }}
+                            </a>
+                        {% else %}
+                            <a class="btn btn-primary" href="{{ '/order'|link }}">
+                                {{ is_en ? 'Choose plan' : 'Выбрать тариф' }}
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="znet-shell-stat-grid mt-4">
+                        <article class="znet-shell-stat">
+                            <div class="znet-shell-stat-line">
+                                <span>{{ is_en ? 'Active services' : 'Активные услуги' }}</span>
+                                <strong>{{ dashboard.orders.active }}</strong>
+                            </div>
+                        </article>
+                        <article class="znet-shell-stat">
+                            <div class="znet-shell-stat-line">
+                                <span>{{ is_en ? 'Unpaid invoices' : 'Неоплаченные счета' }}</span>
+                                <strong>{{ dashboard.invoices.unpaid }}</strong>
+                            </div>
+                        </article>
+                        <article class="znet-shell-stat">
+                            <div class="znet-shell-stat-line">
+                                <span>{{ is_en ? 'Balance' : 'Баланс' }}</span>
+                                <strong>{{ profile.balance | money(profile.currency) }}</strong>
+                            </div>
+                        </article>
+                    </div>
                 </div>
             </div>
-
-            <div class="znet-shell-plan-grid">
-                {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'dashboard_cards', is_en: is_en } %}
-            </div>
         </section>
 
         <section class="znet-shell-section">
-            <div class="znet-shell-card-grid">
+            <div class="znet-shell-card-grid znet-shell-card-grid-2">
                 <article class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                             <div>
-                                <h2 class="h5 mb-1">{{ is_en ? 'My services' : 'Мои услуги' }}</h2>
-                                <p class="text-secondary mb-0">{{ is_en ? 'Current access and active products.' : 'Текущий доступ и активные продукты.' }}</p>
+                                <h2 class="h5 mb-1">{{ is_en ? 'Payment' : 'Оплата' }}</h2>
+                                <p class="text-secondary mb-0">
+                                    {{ is_en
+                                        ? 'Invoices and balance are here.'
+                                        : 'Счета и баланс находятся здесь.' }}
+                                </p>
                             </div>
-                            <a class="btn btn-sm btn-outline-primary" href="{{ 'order/service'|link }}">{{ is_en ? 'Open' : 'Открыть' }}</a>
                         </div>
-                        <p class="mb-2">{{ is_en ? 'Active services:' : 'Активные услуги:' }} <strong>{{ dashboard.orders.active }}</strong></p>
+                        <p class="mb-2">{{ is_en ? 'Unpaid invoices:' : 'Неоплаченные счета:' }} <strong>{{ dashboard.invoices.unpaid }}</strong></p>
+                        <p class="mb-0 text-secondary">{{ is_en ? 'Balance:' : 'Баланс:' }} <strong>{{ profile.balance | money(profile.currency) }}</strong></p>
+                        <div class="znet-shell-link-row mt-3">
+                            <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                            <a class="btn btn-sm btn-outline-primary" href="{{ 'client/balance'|link }}">{{ is_en ? 'Balance' : 'Баланс' }}</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div>
+                                <h2 class="h5 mb-1">{{ is_en ? 'Help' : 'Помощь' }}</h2>
+                                <p class="text-secondary mb-0">
+                                    {{ is_en
+                                        ? 'Write to us if payment, connection, or the app needs attention.'
+                                        : 'Напишите нам, если нужно помочь с оплатой, подключением или приложением.' }}
+                                </p>
+                            </div>
+                            <a class="btn btn-sm btn-outline-primary" href="{{ '/contacts'|link }}">{{ is_en ? 'Contact' : 'Написать' }}</a>
+                        </div>
                         <p class="mb-0 text-secondary">{{ profile.email }}</p>
                     </div>
                 </article>
-
-                <article class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-                            <div>
-                                <h2 class="h5 mb-1">{{ is_en ? 'Invoices' : 'Счета' }}</h2>
-                                <p class="text-secondary mb-0">{{ is_en ? 'Everything related to payment and renewal.' : 'Все, что связано с оплатой и продлением.' }}</p>
-                            </div>
-                            <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ is_en ? 'Open' : 'Открыть' }}</a>
-                        </div>
-                        <p class="mb-2">{{ is_en ? 'Unpaid invoices:' : 'Неоплаченные счета:' }} <strong>{{ dashboard.invoices.unpaid }}</strong></p>
-                        <p class="mb-0 text-secondary">{{ is_en ? 'Review and pay invoices in one place.' : 'Проверяйте и оплачивайте счета в одном месте.' }}</p>
-                    </div>
-                </article>
-
-                <article class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-                            <div>
-                                <h2 class="h5 mb-1">{{ is_en ? 'Wallet' : 'Баланс' }}</h2>
-                                <p class="text-secondary mb-0">{{ is_en ? 'Top up in advance or use funds for invoices.' : 'Пополняйте заранее или оплачивайте счета с баланса.' }}</p>
-                            </div>
-                            <a class="btn btn-sm btn-outline-primary" href="{{ 'client/balance'|link }}">{{ is_en ? 'Open' : 'Открыть' }}</a>
-                        </div>
-                        <p class="mb-2">{{ is_en ? 'Current balance:' : 'Текущий баланс:' }} <strong>{{ profile.balance | money(profile.currency) }}</strong></p>
-                        <p class="mb-0 text-secondary">{{ is_en ? 'A top-up creates an invoice and then goes through the payment gateway.' : 'Пополнение создает счет и проходит через платежный шлюз.' }}</p>
-                    </div>
-                </article>
             </div>
         </section>
-
-        {% include 'partial_appbridge_client_area.html.twig' %}
-
-        {% if dashboard.recent_orders %}
-            <section class="znet-shell-section">
-                <div class="znet-shell-section-head">
-                    <div>
-                        <h2>{{ is_en ? 'Recent services' : 'Последние услуги' }}</h2>
-                        <p>{{ is_en ? 'A short feed of the latest orders and statuses.' : 'Короткая лента последних заказов и их текущих статусов.' }}</p>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="list-group list-group-flush">
-                        {% for order in dashboard.recent_orders %}
-                            <a href="{{ 'order/service/manage'|link }}/{{ order.id }}" class="list-group-item d-flex justify-content-between align-items-center gap-3">
-                                <span>#{{ order.id }} {{ order.title|truncate(45) }}</span>
-                                <span class="badge {% if order.status == 'active' %}text-bg-success{% elseif order.status == 'pending_setup' %}text-bg-warning{% elseif order.status == 'failed_setup' or order.status == 'suspended' or order.status == 'failed_renew' %}text-bg-danger{% elseif order.status == 'canceled' %}text-bg-secondary{% endif %}">
-                                    {{ mf.status_name(order.status) }}
-                                </span>
-                            </a>
-                        {% endfor %}
-                    </div>
-                </div>
-            </section>
-        {% endif %}
     {% endif %}
 {% endblock %}
 
@@ -171,9 +158,4 @@
     {% endif %}
 {% endblock %}
 
-{% block js %}
-    {{ parent() }}
-    {% if client %}
-        {% include 'partial_appbridge_client_area_js.html.twig' %}
-    {% endif %}
-{% endblock %}
+{% block js %}{{ parent() }}{% endblock %}

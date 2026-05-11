@@ -1,43 +1,36 @@
-# My Storage UX
+# Znet UX Notes
 
-The FOSSBilling client area is intentionally minimal.
+The FOSSBilling client area is intentionally minimal. Znet should feel like a friendly service, not like a billing control panel.
 
 ## Public Positioning
 
-My Storage is positioned as personal cloud storage for regular customers:
+Znet is positioned as simple personal VPN access for regular customers:
 
-- documents;
-- photos;
-- important personal files;
-- protected file access for a limited number of devices.
+- one account;
+- clear subscription payment;
+- quick connection from the client area;
+- Android app for the full experience;
+- iPhone connection through a compatible VPN client until a native app exists.
 
-Public pages must not mention internal infrastructure details.
+Public and client pages must not expose infrastructure details, internal provider names, or node-level language unless the user needs it for setup.
 
 ## Primary Flow
 
 1. Customer opens the site.
 2. Customer signs in or creates an account.
-3. Customer chooses one of three storage plans.
+3. Customer chooses a VPN plan.
 4. Customer pays the invoice.
-5. Access instructions are sent to the registered email address.
-
-## Plans
-
-| Product | Devices | Price |
-| --- | ---: | ---: |
-| Storage Start | 1 | 290 RUB/month |
-| Storage Plus | 3 | 790 RUB/month |
-| Storage Family | 5 | TBD |
+5. Customer opens the service page and connects:
+   - Android: download Znet APK, create device token, paste it into the app.
+   - iPhone: copy subscription link into a compatible VPN client.
 
 ## Client Area
 
 Keep only the essentials visible:
 
-- dashboard;
-- plan selection/order;
-- services;
-- invoices;
-- profile/login/logout.
+- overview;
+- connection;
+- payment;
+- profile.
 
-Support, knowledge base, wallet, emails, news, and other secondary sections are
-hidden from the default theme preset unless explicitly enabled later.
+Support goes through `/contacts`. Technical order details stay collapsed unless the user opens them.

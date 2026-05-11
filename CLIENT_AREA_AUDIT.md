@@ -37,6 +37,16 @@ These are not in the visible Znet navigation, but still exist if a logged-in use
 
 Support tickets, cancellation requests, and upgrade requests are not exposed as self-service flows. Users are sent to `/contacts` instead.
 
+## Current Simplification Pass
+
+- Dashboard now acts as a calm start screen: connection status, payment summary, and support entry.
+- Global client navigation is reduced to four primary areas: overview, connection, payment, profile.
+- Device/app setup moved from the dashboard to `/order/service/manage/:id`, so users configure the exact service they paid for.
+- Service page now separates the two real connection paths:
+  - Android: Znet APK, short setup guide, device token, Auto ON/OFF note.
+  - iPhone: compatible VPN client through the subscription link; no Znet iPhone app yet.
+- Order numbers, sync timestamps, addons, and service internals are hidden under "Technical details".
+
 ## Billing Interactions
 
 ### Checkout
@@ -73,7 +83,7 @@ Flow:
 4. Paid invoice credits the user balance.
 5. Future invoices can use available balance/credits.
 
-Current change: wallet is visible in the client sidebar/mobile links and dashboard, and the balance page is restyled for Znet.
+Current change: wallet is available from the dashboard payment card and the balance page is restyled for Znet.
 
 ## Open Product Questions
 
@@ -81,6 +91,7 @@ Current change: wallet is visible in the client sidebar/mobile links and dashboa
 - Do we want email history available to users?
 - Should balance be an optional advanced feature or a primary payment option?
 - Service cancellation/upgrade: support-only process through `/contacts`.
+- iPhone path: temporary manual setup through the subscription link; decide later whether to build a native iOS app or keep iPhone as bring-your-own-client.
 
 ## Next Audit Pass
 
@@ -90,7 +101,9 @@ Current change: wallet is visible in the client sidebar/mobile links and dashboa
   - invoice payment selection
   - wallet top-up invoice
   - service page/subscription link
+  - Android APK/token activation
+  - iPhone manual subscription-link path
   - profile update
-- Review `/order/service/manage/:id` actions: renew, support ticket, cancellation, upgrade.
+- Review `/order/service/manage/:id` actions: renew, app token, subscription copy, support handoff.
 - Live-check support redirects: `/support`, `/support/ticket/:id`, `/support/kb`.
 - Review payment gateway copy once Antilopay test credentials are installed.
