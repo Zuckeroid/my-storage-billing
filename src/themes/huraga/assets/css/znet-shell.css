@@ -1584,10 +1584,11 @@ html {
   .znet-shell-page .znet-shell-panel {
     min-height: auto;
     padding: 22px 20px;
+    background: var(--znet-flyout-bg);
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-panel {
-    background: rgba(1, 4, 9, 0.78);
+    background: var(--znet-flyout-bg);
   }
 
   .znet-shell-page .znet-shell-panel-head,
@@ -1597,7 +1598,12 @@ html {
   }
 
   .znet-shell-page .znet-shell-panel-head {
-    min-height: 82px;
+    min-height: auto;
+    padding-bottom: 12px;
+  }
+
+  .znet-shell-page .znet-shell-layout {
+    padding-top: 12px;
   }
 
   .znet-shell-page .znet-shell-layout-client,
@@ -1664,6 +1670,10 @@ html {
     --znet-header-offset: 72px;
   }
 
+  .znet-shell-page-shell {
+    padding-top: 30px;
+  }
+
   .znet-shell-page .znet-container {
     width: min(var(--znet-container), calc(100% - 20px));
   }
@@ -1703,7 +1713,12 @@ html {
   }
 
   .znet-shell-page .znet-shell-panel-head {
-    min-height: 74px;
+    min-height: auto;
+    padding-bottom: 8px;
+  }
+
+  .znet-shell-page .znet-shell-layout {
+    padding-top: 8px;
   }
 
   .znet-shell-page .znet-shell-panel-head h1 {
