@@ -1553,6 +1553,10 @@ html {
     padding: 18px 0 36px;
   }
 
+  .znet-shell-page.znet-shell-client .znet-shell-stage {
+    padding-top: 0;
+  }
+
   .znet-shell-page .znet-shell-stage-inner {
     min-height: auto;
   }
@@ -1563,12 +1567,18 @@ html {
     opacity: 0.9;
   }
 
+  .znet-shell-page.znet-shell-client .znet-shell-globe {
+    top: 14px;
+    width: min(78vw, 430px);
+    opacity: 0.68;
+  }
+
   .znet-shell-page .znet-shell-panel-shell {
     padding-top: min(46vw, 280px);
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
-    padding-top: 22px;
+    padding-top: 14px;
   }
 
   .znet-shell-page .znet-shell-panel {
@@ -1666,8 +1676,18 @@ html {
     padding: 12px 0 28px;
   }
 
+  .znet-shell-page.znet-shell-client .znet-shell-stage {
+    padding-top: 0;
+  }
+
   .znet-shell-page .znet-shell-globe {
     width: min(108vw, 520px);
+  }
+
+  .znet-shell-page.znet-shell-client .znet-shell-globe {
+    top: 12px;
+    width: min(82vw, 360px);
+    opacity: 0.62;
   }
 
   .znet-shell-page .znet-shell-panel-shell {
@@ -1675,7 +1695,7 @@ html {
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
-    padding-top: 12px;
+    padding-top: 14px;
   }
 
   .znet-shell-page .znet-shell-panel {
