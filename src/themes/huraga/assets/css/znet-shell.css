@@ -887,6 +887,42 @@ html {
   min-width: min(100%, 240px);
 }
 
+.znet-shell-page #orderManager .znet-order-plan-list {
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page #orderManager .znet-order-plan-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.znet-shell-page #orderManager .znet-order-plan-list-head h3 {
+  margin: 0;
+  color: var(--znet-text);
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.znet-shell-page #orderManager .znet-order-plan-category + .znet-order-plan-category {
+  margin-top: 16px;
+}
+
+.znet-shell-page #orderManager .znet-order-plan-description {
+  margin-bottom: 10px;
+  color: var(--znet-text-soft);
+}
+
+.znet-shell-page #orderManager .znet-order-plan-description > :last-child {
+  margin-bottom: 0;
+}
+
 .znet-shell-page .znet-cart-summary-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
@@ -1608,7 +1644,7 @@ html {
   }
 
   .znet-shell-page .znet-shell-layout {
-    padding-top: 6px;
+    padding-top: 12px;
   }
 
   .znet-shell-page .znet-shell-content {
@@ -1733,7 +1769,7 @@ html {
   }
 
   .znet-shell-page .znet-shell-layout {
-    padding-top: 4px;
+    padding-top: 8px;
   }
 
   .znet-shell-page .znet-shell-content {

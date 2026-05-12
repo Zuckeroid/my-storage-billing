@@ -5,9 +5,9 @@
 {% block meta_title %}{{ is_en ? 'Checkout' : 'Оформление заказа' }}{% endblock %}
 {% block meta_description %}{% endblock %}
 {% block body_class %}mod_orderbutton znet-orderbutton{% endblock %}
-{% block shell_eyebrow %}{{ is_en ? 'Billing' : 'Оплата' }}{% endblock %}
+{% block shell_eyebrow %}{% endblock %}
 {% block shell_title %}{{ is_en ? 'Checkout' : 'Оформление заказа' }}{% endblock %}
-{% block shell_description %}{{ is_en ? 'Check the selected plan, sign in if needed, and continue to payment.' : 'Проверьте выбранный тариф, войдите в аккаунт и перейдите к оплате.' }}{% endblock %}
+{% block shell_description %}{% endblock %}
 
 {% block content %}
     {{ include('mod_orderbutton_content.html.twig') }}
