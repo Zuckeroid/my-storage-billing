@@ -18,7 +18,7 @@
     <link rel="icon" type="image/png" sizes="256x256" href="{{ 'img/znet/favicon.png' | asset_url }}?v=znet-20260512a">
     <link rel="shortcut icon" href="{{ 'favicon.ico' | asset_url }}?v=znet-20260512a">
 
-    {{ "Api/API.js" | library_url | script_tag }}
+    <script src="{{ 'Api/API.js' | library_url }}?v=znet-api-20260512a"></script>
     <script src="{{ 'build/js/huraga.js' | asset_url }}?v=my-storage-20260418d"></script>
     {% block head %}{% endblock %}
     {% block js %}{% endblock %}

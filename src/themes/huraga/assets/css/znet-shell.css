@@ -838,6 +838,32 @@ html {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.znet-shell-page #orderManager h4 {
+  color: var(--znet-text);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.znet-shell-page #orderManager .list-group {
+  display: grid;
+  gap: 8px;
+}
+
+.znet-shell-page #orderManager .list-group-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.znet-shell-page #orderManager .btn-link {
+  color: var(--znet-accent-soft);
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .znet-shell-page #orderManager .radio {
   display: flex;
   gap: 10px;
@@ -855,6 +881,45 @@ html {
 
 .znet-shell-page #orderManager .input-append .span8 {
   min-width: min(100%, 240px);
+}
+
+.znet-shell-page .znet-cart-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 16px;
+  align-items: start;
+}
+
+.znet-shell-page .znet-cart-promo,
+.znet-shell-page .znet-cart-checkout {
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page .znet-cart-promo > a {
+  color: var(--znet-accent-soft);
+  font-weight: 700;
+}
+
+.znet-shell-page .znet-cart-total-table {
+  margin-bottom: 16px;
+}
+
+.znet-shell-page .znet-cart-total-table td:last-child {
+  text-align: right;
+}
+
+.znet-shell-page .znet-cart-gateways {
+  display: grid;
+  gap: 10px;
+}
+
+.znet-shell-page .znet-cart-checkout .btn-primary {
+  min-height: 44px;
+  border-radius: 8px;
+  font-weight: 700;
 }
 
 .znet-shell-page .znet-shell-auth-wrap {
@@ -1502,6 +1567,10 @@ html {
     padding-top: min(46vw, 280px);
   }
 
+  .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
+    padding-top: min(24vw, 150px);
+  }
+
   .znet-shell-page .znet-shell-panel {
     min-height: auto;
     padding: 22px 20px;
@@ -1601,6 +1670,10 @@ html {
     padding-top: min(52vw, 250px);
   }
 
+  .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
+    padding-top: min(28vw, 128px);
+  }
+
   .znet-shell-page .znet-shell-panel {
     padding: 18px 16px;
   }
@@ -1653,5 +1726,13 @@ html {
 
   .znet-shell-page .znet-wallet-topup-row .btn {
     width: 100%;
+  }
+
+  .znet-shell-page .znet-cart-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page #orderManager .accordion-body {
+    padding: 14px;
   }
 }

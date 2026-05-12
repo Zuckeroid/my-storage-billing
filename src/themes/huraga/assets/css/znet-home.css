@@ -1007,20 +1007,15 @@ html {
     --znet-mobile-hero-copy-gap: 18px;
     --znet-mobile-hero-actions-gap: 12px;
     --znet-mobile-hero-bottom: 20px;
-    overflow: hidden;
     padding: 0 0 var(--znet-mobile-hero-bottom);
   }
 
   .znet-homepage .znet-hero-mobile .znet-hero-grid {
-    position: relative;
-    display: block;
-    min-height: min(760px, calc(100svh - var(--znet-header-offset)));
-    padding-top: 6px;
+    grid-template-columns: 1fr;
+    gap: var(--znet-mobile-hero-gap);
   }
 
   .znet-homepage .znet-hero-mobile .znet-hero-content {
-    position: relative;
-    z-index: 1;
     max-width: none;
   }
 
@@ -1043,19 +1038,11 @@ html {
   }
 
   .znet-homepage .znet-hero-mobile .znet-hero-visual {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
     min-height: auto;
-    overflow: hidden;
-    pointer-events: none;
   }
 
   .znet-homepage .znet-hero-mobile .znet-hero-globe {
-    width: min(132vw, 620px);
     max-width: 620px;
-    margin-top: 56px;
-    opacity: 0.96;
   }
 
   .znet-homepage .znet-hero-mobile .znet-hero-actions {
@@ -1121,16 +1108,6 @@ html {
     --znet-mobile-hero-copy-gap: 14px;
     --znet-mobile-hero-actions-gap: 10px;
     --znet-mobile-hero-bottom: 0;
-  }
-
-  .znet-homepage .znet-hero-mobile .znet-hero-grid {
-    min-height: min(680px, calc(100svh - var(--znet-header-offset)));
-    padding-top: 0;
-  }
-
-  .znet-homepage .znet-hero-mobile .znet-hero-globe {
-    width: min(146vw, 560px);
-    margin-top: 48px;
   }
 
   .znet-homepage .znet-hero-mobile .znet-hero-copy h1 {

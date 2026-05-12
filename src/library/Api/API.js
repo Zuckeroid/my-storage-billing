@@ -25,7 +25,23 @@ const Tools = {
     }
 
     if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
+      const absoluteUrl = new URL(url);
+      const routedApiPath = absoluteUrl.searchParams.get('_url');
+      const isInternalApiUrl = absoluteUrl.pathname.startsWith('/api/') || (routedApiPath && routedApiPath.startsWith('/api/'));
+
+      if (isInternalApiUrl && absoluteUrl.origin !== window.location.origin) {
+        const currentOriginUrl = new URL(routedApiPath && routedApiPath.startsWith('/api/') ? routedApiPath : absoluteUrl.pathname, window.location.origin);
+        absoluteUrl.searchParams.forEach((value, key) => {
+          if (key !== '_url') {
+            currentOriginUrl.searchParams.append(key, value);
+          }
+        });
+        currentOriginUrl.hash = absoluteUrl.hash;
+
+        return currentOriginUrl.toString();
+      }
+
+      return absoluteUrl.toString();
     }
 
     if (url.includes('index.php?_url=/api/') || url.includes('?_url=/api/')) {
