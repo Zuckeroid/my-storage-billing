@@ -13,8 +13,9 @@
     {% block opengraph %}{% endblock %}
     <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
-    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260511a">
-    <link rel="shortcut icon" href="{{ guest.system_company.favicon_url }}">
+    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260512a">
+    <link rel="icon" type="image/png" sizes="256x256" href="{{ 'img/znet/favicon.png' | asset_url }}?v=znet-20260512a">
+    <link rel="shortcut icon" href="{{ 'favicon.ico' | asset_url }}?v=znet-20260512a">
 
     {{ "Api/API.js" | library_url | script_tag }}
     <script src="{{ 'build/js/huraga.js' | asset_url }}?v=my-storage-20260418d"></script>
@@ -370,6 +371,48 @@
                 window.location.reload();
             });
         });
+
+        const enhancePasswordFields = function (root) {
+            const showLabel = '{{ is_en ? 'Show password' : 'Показать пароль' }}';
+            const hideLabel = '{{ is_en ? 'Hide password' : 'Скрыть пароль' }}';
+
+            (root || document).querySelectorAll('input[type="password"]').forEach(function (input) {
+                if (input.dataset.znetPasswordToggleReady === '1' || input.closest('.znet-password-field')) {
+                    return;
+                }
+
+                const field = document.createElement('div');
+                field.className = 'znet-password-field';
+                input.parentNode.insertBefore(field, input);
+                field.appendChild(input);
+                input.classList.add('znet-password-input');
+                input.dataset.znetPasswordToggleReady = '1';
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'znet-password-toggle';
+                button.setAttribute('aria-label', showLabel);
+                button.setAttribute('aria-pressed', 'false');
+                button.innerHTML = '<svg class="znet-eye-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg class="znet-eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"></path><path d="M6.6 6.8C3.9 8.6 2.5 12 2.5 12s3.5 6 9.5 6c1.8 0 3.4-.5 4.7-1.2"></path><path d="M10.8 6.1c.4-.1.8-.1 1.2-.1 6 0 9.5 6 9.5 6a14.6 14.6 0 0 1-2.4 3.1"></path></svg>';
+
+                button.addEventListener('click', function () {
+                    const willShow = input.type === 'password';
+                    input.type = willShow ? 'text' : 'password';
+                    button.classList.toggle('is-visible', willShow);
+                    button.setAttribute('aria-pressed', willShow ? 'true' : 'false');
+                    button.setAttribute('aria-label', willShow ? hideLabel : showLabel);
+                    try {
+                        input.focus({ preventScroll: true });
+                    } catch (error) {
+                        input.focus();
+                    }
+                });
+
+                field.appendChild(button);
+            });
+        };
+
+        enhancePasswordFields(document);
 
         const mobileHeader = document.querySelector('.znet-shell-header-mobile');
         const toggle = mobileHeader?.querySelector('.znet-shell-menu-toggle');

@@ -367,6 +367,57 @@ html {
   box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.08);
 }
 
+.znet-homepage .znet-password-field {
+  position: relative;
+}
+
+.znet-homepage .znet-password-field .znet-password-input {
+  padding-right: 54px;
+}
+
+.znet-homepage .znet-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.znet-homepage .znet-password-toggle:hover,
+.znet-homepage .znet-password-toggle:focus-visible {
+  border-color: rgba(134, 239, 172, 0.34);
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--znet-text);
+}
+
+.znet-homepage .znet-password-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.znet-homepage .znet-password-toggle .znet-eye-off,
+.znet-homepage .znet-password-toggle.is-visible .znet-eye-on {
+  display: none;
+}
+
+.znet-homepage .znet-password-toggle.is-visible .znet-eye-off {
+  display: block;
+}
+
 .znet-homepage .znet-auth-form .form-text,
 .znet-homepage .znet-auth-legal {
   color: rgba(255, 255, 255, 0.52);
