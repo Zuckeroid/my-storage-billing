@@ -41,16 +41,16 @@
                                 <input type="text" class="form-control" name="first_name" id="first_name" value="{{ profile.first_name }}" required>
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label class="form-label" for="phone">{{ is_en ? 'Phone number' : 'Номер телефона' }}</label>
-                                <input type="hidden" name="phone_cc" value="{{ profile.phone_cc }}">
-                                <input type="text" class="form-control" name="phone" id="phone" value="{{ profile.phone }}" {% if "phone" in required %} required {% endif %}>
+                                <label class="form-label" for="email">{{ is_en ? 'Email address' : 'Адрес электронной почты' }}</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ profile.email }}" required>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="mb-3 col-md-6">
-                                <label class="form-label" for="email">{{ is_en ? 'Email address' : 'Адрес электронной почты' }}</label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ profile.email }}" required>
+                                <label class="form-label" for="phone">{{ is_en ? 'Phone number' : 'Номер телефона' }}</label>
+                                <input type="hidden" name="phone_cc" value="{{ profile.phone_cc }}">
+                                <input type="text" class="form-control" name="phone" id="phone" value="{{ profile.phone }}" {% if "phone" in required %} required {% endif %}>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label class="form-label" for="country">{{ is_en ? 'Country' : 'Страна' }}</label>
