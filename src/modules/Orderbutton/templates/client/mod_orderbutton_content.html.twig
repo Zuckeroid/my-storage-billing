@@ -1,45 +1,25 @@
 {% set loader_nr = request.loader | default("8") %}
 {% set loader_url = ('img/assets/loaders/loader'~loader_nr~'.gif') %}
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card znet-orderbutton-card" id="orderbutton">
-            <div class="card-body">
-                <div id="orderManager" class="accordion">
+<div class="znet-order-flow" id="orderbutton">
+    {{ include('mod_orderbutton_choose_product.html.twig') }}
 
-                    {{ include('mod_orderbutton_choose_product.html.twig') }}
+    {% if not client %}
+        {{ include('mod_orderbutton_client.html.twig') }}
+    {% endif %}
 
-                    {{ include('mod_orderbutton_product_configuration.html.twig') }}
+    {{ include('mod_orderbutton_checkout.html.twig') }}
 
-                    {% if not client %}
-                        {{ include('mod_orderbutton_client.html.twig') }}
-                    {% endif %}
-
-                    {{ include('mod_orderbutton_checkout.html.twig') }}
-
-                    <div class="accordion-item">
-                        <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#payment-html" aria-expanded="false" aria-controls="payment-html">
-                                <svg class="svg-icon me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                    <path
-                                        d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"/>
-                                </svg>
-                                {{ 'Payment'|trans }}
-                            </button>
-                        </h3>
-                        <div id="payment-html" class="accordion-collapse collapse" data-bs-parent="#orderManager">
-                            <div class="accordion-body">
-                                <div class="accordion-inner" id="payment-html-inner"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+    <section id="payment-html" class="znet-order-panel znet-order-payment-panel" hidden>
+        <div class="znet-order-panel-head">
+            <div>
+                <h3>{{ 'Payment'|trans }}</h3>
             </div>
         </div>
-    </div>
+        <div class="znet-order-panel-body" id="payment-html-inner"></div>
+    </section>
 </div>
+
 <div class="loading"
      style="display: none; background: rgba(0,0,0,.5) no-repeat; width:100%; height:100%; position:fixed; top:0; left:0; z-index:999;">
     <img src="{{ loader_url | mod_asset_url('orderbutton') }}"

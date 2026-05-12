@@ -1,26 +1,106 @@
-{% set products = guest.product_get_list %}
-<div class="znet-order-plan-list">
-    <div class="znet-order-plan-list-head">
-        <div>
-            <h3>{{ 'Select Product'|trans }}</h3>
-        </div>
-        <span class="badge bg-info">{{ products.list|length }} {{ 'Items'|trans }}</span>
-    </div>
+{% set is_en = is_en|default(guest.system_locale|default(settings.locale|default('ru_RU')) starts with 'en') %}
+{% set storage_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false, 'type': 'custom' }).list|default([]) %}
+{% set checkout_url = ('orderbutton'|link({ 'checkout': 1 }) ~ '#checkout') %}
 
-    {% for i, category in guest.product_category_get_list.list %}
-        <div class="znet-order-plan-category">
-            <h4>{{ category.title }}</h4>
-            {% if category.description %}
-                <div class="znet-order-plan-description">{{ category.description|markdown }}</div>
+<section class="znet-order-plans">
+    <div class="znet-shell-plan-grid znet-order-plan-grid">
+        {% for product in storage_products %}
+            {% set price = '' %}
+            {% set period = '' %}
+            {% set selected_period = request.period|default('1M') %}
+            {% if product.pricing.type == 'recurrent' %}
+                {% set recurrent_prices = product.pricing.recurrent[selected_period]|default(null) %}
+                {% if not recurrent_prices or not recurrent_prices.enabled %}
+                    {% set selected_period = product.pricing.recurrent|keys|first %}
+                    {% set recurrent_prices = product.pricing.recurrent[selected_period]|default(null) %}
+                {% endif %}
+                {% if recurrent_prices and recurrent_prices.enabled %}
+                    {% set price = recurrent_prices.price|money_convert|replace({'.00': ''}) %}
+                    {% set period = selected_period == '1M' ? (is_en ? 'per month' : 'в месяц') : guest.system_periods[selected_period]|default(selected_period) %}
+                {% endif %}
+            {% elseif product.pricing.type == 'once' %}
+                {% set price = product.pricing.once.price|money_convert|replace({'.00': ''}) %}
+            {% elseif product.pricing.type == 'free' %}
+                {% set price = 0|money_convert %}
             {% endif %}
-            <div class="list-group">
-                {% for i, product in category.products|sort((a, b) => a.priority <=> b.priority) %}
-                    <a class="list-group-item" href="{{ 'orderbutton'|link({ 'product': product.id, 'show_custom_form_values': request.show_custom_form_values }) }}">
-                        {{ product.title }}
-                        <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" /></svg>
-                    </a>
-                {% endfor %}
+            {% set description = product.description ? product.description|striptags|trim : '' %}
+
+            <article class="znet-plan-card znet-order-plan-card{% if loop.index == 2 %} znet-plan-card-featured{% endif %}">
+                {% if loop.index == 2 %}
+                    <div class="znet-plan-badge">{{ is_en ? 'Popular' : 'Оптимальный' }}</div>
+                {% endif %}
+
+                <form method="post" action="{{ 'api/guest/cart/add_item'|link }}" class="znet-order-plan-form" {{ fb_api_form({message: is_en ? 'Plan added to cart' : 'Тариф добавлен в корзину', redirect: checkout_url}) }}>
+                    <input type="hidden" name="id" value="{{ product.id }}" />
+
+                    <div class="znet-plan-top">
+                        <div class="znet-plan-summary">
+                            <span class="znet-plan-name">{{ product.title }}</span>
+                            {% if price %}
+                                <strong class="znet-plan-price" data-plan-price>{{ price }}</strong>
+                            {% endif %}
+                            {% if product.pricing.type == 'recurrent' %}
+                                <label class="znet-plan-period-control">
+                                    <span class="visually-hidden">{{ is_en ? 'Billing period' : 'Период оплаты' }}</span>
+                                    <select class="znet-plan-period-select" name="period" data-plan-period>
+                                        {% for code, prices in product.pricing.recurrent %}
+                                            {% if prices.enabled %}
+                                                <option
+                                                    value="{{ code }}"
+                                                    data-price="{{ prices.price|money_convert|replace({'.00': ''}) }}"
+                                                    {% if code == selected_period %}selected="selected"{% endif %}
+                                                >
+                                                    {% if code == '1M' %}
+                                                        {{ is_en ? '1 month' : '1 месяц' }}
+                                                    {% elseif code == '3M' %}
+                                                        {{ is_en ? '3 months' : '3 месяца' }}
+                                                    {% else %}
+                                                        {{ guest.system_periods[code]|default(code) }}
+                                                    {% endif %}
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            {% elseif period %}
+                                <span class="znet-plan-period">{{ period }}</span>
+                            {% endif %}
+                            <div class="znet-plan-highlight">
+                                <span class="znet-check">✓</span>
+                                <span>{{ description ?: (is_en ? 'VPN access for everyday private use.' : 'VPN-доступ для повседневного личного использования.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="znet-plan-list">
+                        <li>
+                            <span class="znet-check">✓</span>
+                            <span>{{ is_en ? 'Access instructions by email' : 'Доступ и инструкции на email' }}</span>
+                        </li>
+                        <li>
+                            <span class="znet-check">✓</span>
+                            <span>{{ is_en ? 'Manage everything in one account' : 'Управление в одном кабинете' }}</span>
+                        </li>
+                    </ul>
+
+                    <div class="znet-order-plan-actions">
+                        <button class="znet-btn znet-btn-outline znet-btn-with-icon znet-order-plan-cart-btn" type="submit">
+                            <svg class="znet-btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h6.9a2 2 0 0 0 1.9-1.4L20 7H6.1" />
+                                <path d="M9 20h.01M17 20h.01" />
+                            </svg>
+                            {{ is_en ? 'Cart' : 'В корзину' }}
+                        </button>
+                        <button class="znet-btn znet-btn-accent znet-order-plan-pay-btn" type="submit">
+                            {{ is_en ? 'Pay' : 'Оплатить' }}
+                        </button>
+                    </div>
+                </form>
+            </article>
+        {% else %}
+            <div class="znet-order-panel znet-order-plans-empty">
+                {{ is_en ? 'Plans are being updated.' : 'Тарифы обновляются.' }}
             </div>
-        </div>
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
+</section>

@@ -1,12 +1,9 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll('.accordion-body').forEach(accordionBody => {
-            accordionBody.addEventListener('shown.bs.collapse', function() {
-                document.getElementById('popup-iframe').height = document.body.clientHeight;
-            });
-        });
+        syncPopupIframeHeight();
 
-        document.getElementById('show-promo-field')?.addEventListener('click', function() {
+        document.getElementById('show-promo-field')?.addEventListener('click', function(event) {
+            event.preventDefault();
             document.getElementById('apply-promo').style.display = 'block';
             this.style.display = 'none';
             document.getElementById('promocode')?.focus();
@@ -15,11 +12,29 @@
         document.querySelectorAll('.register-login a').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
-                const tabId = this.getAttribute('href');
-                const tabElement = document.querySelector(tabId);
                 const bsTab = new bootstrap.Tab(this);
                 bsTab.show();
             });
+        });
+
+        document.querySelectorAll('.znet-order-plan-card').forEach((card) => {
+            const select = card.querySelector('[data-plan-period]');
+            const price = card.querySelector('[data-plan-price]');
+
+            if (!select || !price) {
+                return;
+            }
+
+            const syncPlanCard = () => {
+                const option = select.options[select.selectedIndex];
+
+                if (option?.dataset.price) {
+                    price.textContent = option.dataset.price;
+                }
+            };
+
+            select.addEventListener('change', syncPlanCard);
+            syncPlanCard();
         });
 
         document.querySelectorAll('.remove-cart-item').forEach(function(button) {
@@ -39,24 +54,48 @@
         });
     });
 
+    function syncPopupIframeHeight() {
+        const iframe = document.getElementById('popup-iframe');
+
+        if (iframe) {
+            iframe.height = document.body.clientHeight;
+        }
+    }
+
+    function showPaymentHtml() {
+        const paymentHtmlEl = document.getElementById('payment-html');
+
+        if (!paymentHtmlEl) {
+            return;
+        }
+
+        paymentHtmlEl.hidden = false;
+        paymentHtmlEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        syncPopupIframeHeight();
+    }
+
     function onOrderCheckout(result){
         if (result.invoice_hash) {
             API.guest.post('invoice/payment', { hash: result.invoice_hash, gateway_id: result.gateway_id, auto_redirect: true },
                 (r) => {
-                    let checkoutEl = document.getElementById('checkout');
-                    let paymentHtmlEl = document.getElementById('payment-html');
+                    const checkoutEl = document.getElementById('checkout');
+                    const checkoutInnerEl = document.getElementById('checkout-inner');
+                    const paymentHtmlInnerEl = document.getElementById('payment-html-inner');
+
+                    if (!paymentHtmlInnerEl) {
+                        return;
+                    }
+
                     if (r.iframe) {
-                        document.getElementById('payment-html-inner').innerHTML = r.result;
-                        bootstrap.Collapse.getOrCreateInstance(checkoutEl).hide();
-                        document.getElementById('checkout').remove();
-                        bootstrap.Collapse.getOrCreateInstance(paymentHtmlEl).show();
+                        paymentHtmlInnerEl.innerHTML = r.result;
+                        checkoutEl?.remove();
+                        showPaymentHtml();
                     } else {
                         const link = '{{ "invoice/banklink"|link }}' + '/' + result.invoice_hash + '/' + result.gateway_id;
-                        document.getElementById('payment-html-inner').innerHTML = '<a href="' + link + '" target="_parent" id="redirect-to-gateway">Redirect to payment gateway</a>';
-                        bootstrap.Collapse.getOrCreateInstance(checkoutEl).hide();
-                        document.getElementById('checkout-inner').remove();
-                        bootstrap.Collapse.getOrCreateInstance(paymentHtmlEl).show();
-                        document.getElementById('redirect-to-gateway').click();
+                        paymentHtmlInnerEl.innerHTML = '<a href="' + link + '" target="_parent" id="redirect-to-gateway">Redirect to payment gateway</a>';
+                        checkoutInnerEl?.remove();
+                        showPaymentHtml();
+                        document.getElementById('redirect-to-gateway')?.click();
                     }
                 });
         } else {
@@ -64,16 +103,28 @@
         }
     }
 
+    function unlockCheckoutAfterAuth() {
+        const registerEl = document.getElementById('register');
+        const checkoutButton = document.querySelector("#checkoutButton");
+        const loginMessage = document.querySelector("#loginMessage");
+        const checkoutEl = document.getElementById('checkout');
+
+        registerEl?.remove();
+
+        if (checkoutButton) {
+            checkoutButton.hidden = false;
+        }
+
+        if (loginMessage) {
+            loginMessage.hidden = true;
+        }
+
+        checkoutEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     function onLogin(result){
         MyStorage.message("{{ 'You logged in successfully'|trans }}");
-        let registerEl = document.getElementById('register');
-        new bootstrap.Collapse('#register').hide();
-        document.querySelector("#checkoutButton").hidden = false;
-        document.querySelector("#loginMessage").hidden = true;
-        setTimeout(() => {
-            registerEl.parentElement.remove();
-            new bootstrap.Collapse('#checkout').show();
-        }, 500);
+        unlockCheckoutAfterAuth();
     }
 
     function onAccountCreate(result){
@@ -84,14 +135,7 @@
         API.guest.post('client/login', login_details,
             () => {
                 MyStorage.message("{{ 'You logged in successfully'|trans }}");
-                let registerEl = document.getElementById('register');
-                new bootstrap.Collapse('#register').hide();
-                document.querySelector("#checkoutButton").hidden = false;
-                document.querySelector("#loginMessage").hidden = true;
-                setTimeout(() => {
-                    registerEl.parentElement.remove();
-                    new bootstrap.Collapse('#checkout').show();
-                    }, 500);
+                unlockCheckoutAfterAuth();
             });
     }
 </script>
