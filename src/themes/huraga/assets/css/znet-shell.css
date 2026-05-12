@@ -1568,12 +1568,16 @@ html {
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
-    padding-top: min(24vw, 150px);
+    padding-top: 22px;
   }
 
   .znet-shell-page .znet-shell-panel {
     min-height: auto;
     padding: 22px 20px;
+  }
+
+  .znet-shell-page.znet-shell-client .znet-shell-panel {
+    background: rgba(1, 4, 9, 0.78);
   }
 
   .znet-shell-page .znet-shell-panel-head,
@@ -1671,7 +1675,7 @@ html {
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
-    padding-top: min(28vw, 128px);
+    padding-top: 12px;
   }
 
   .znet-shell-page .znet-shell-panel {

@@ -79,7 +79,7 @@
                                 {{ is_en ? 'Open services' : 'Открыть услуги' }}
                             </a>
                         {% else %}
-                            <a class="btn btn-primary" href="{{ '/order'|link }}">
+                            <a class="btn btn-primary" href="{{ 'orderbutton'|link({ select: 1 }) }}">
                                 {{ is_en ? 'Choose plan' : 'Выбрать тариф' }}
                             </a>
                         {% endif %}
