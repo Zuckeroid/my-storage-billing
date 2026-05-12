@@ -5,9 +5,8 @@
 
 {% block meta_title %}{{ is_en ? 'Wallet' : 'Баланс' }}{% endblock %}
 {% block meta_description %}{% endblock %}
-{% block shell_eyebrow %}{{ is_en ? 'Billing' : 'Оплата' }}{% endblock %}
 {% block shell_title %}{{ is_en ? 'Wallet' : 'Баланс' }}{% endblock %}
-{% block shell_description %}{{ is_en ? 'Top up your account and track balance movements.' : 'Пополняйте счет заранее и отслеживайте движения баланса.' }}{% endblock %}
+{% block shell_description %}{% endblock %}
 {% block breadcrumb %} <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Wallet' : 'Баланс' }}</li>{% endblock %}
 
 {% set profile = client.profile_get %}
