@@ -286,6 +286,15 @@ html {
   border-radius: 8px;
 }
 
+.znet-shell-page .znet-shell-menu-label {
+  padding: 2px 12px 6px;
+  color: var(--znet-text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .znet-shell-page .znet-shell-menu a:hover,
 .znet-shell-page .znet-shell-menu a.is-active {
   background: rgba(255, 255, 255, 0.05);
@@ -1392,22 +1401,29 @@ html {
   right: 8px;
   width: 38px;
   height: 38px;
-  border: 1px solid rgba(23, 43, 35, 0.14);
+  border: 1px solid rgba(22, 163, 74, 0.46);
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(27, 46, 37, 0.05);
-  color: rgba(17, 38, 30, 0.7);
+  background: rgba(34, 197, 94, 0.14);
+  color: #14532d;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85) inset;
   transform: translateY(-50%);
   cursor: pointer;
 }
 
 .znet-password-toggle:hover,
 .znet-password-toggle:focus-visible {
-  border-color: rgba(34, 197, 94, 0.35);
-  background: rgba(34, 197, 94, 0.1);
-  color: rgba(17, 38, 30, 0.92);
+  border-color: rgba(22, 163, 74, 0.7);
+  background: rgba(34, 197, 94, 0.24);
+  color: #052e16;
+}
+
+.znet-password-toggle.is-visible {
+  border-color: #16a34a;
+  background: #22c55e;
+  color: #052e16;
 }
 
 .znet-password-toggle svg {

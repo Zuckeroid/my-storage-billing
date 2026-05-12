@@ -381,22 +381,28 @@ html {
   right: 8px;
   width: 38px;
   height: 38px;
-  border: 1px solid rgba(134, 239, 172, 0.14);
+  border: 1px solid rgba(134, 239, 172, 0.42);
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(74, 222, 128, 0.14);
+  color: var(--znet-accent-soft);
   transform: translateY(-50%);
   cursor: pointer;
 }
 
 .znet-homepage .znet-password-toggle:hover,
 .znet-homepage .znet-password-toggle:focus-visible {
-  border-color: rgba(134, 239, 172, 0.34);
-  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(134, 239, 172, 0.72);
+  background: rgba(74, 222, 128, 0.24);
   color: var(--znet-text);
+}
+
+.znet-homepage .znet-password-toggle.is-visible {
+  border-color: var(--znet-accent);
+  background: var(--znet-accent);
+  color: #04130a;
 }
 
 .znet-homepage .znet-password-toggle svg {
