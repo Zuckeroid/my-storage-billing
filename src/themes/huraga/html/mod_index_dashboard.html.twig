@@ -91,18 +91,27 @@
                                 <span>{{ is_en ? 'Active services' : 'Активные услуги' }}</span>
                                 <strong>{{ dashboard.orders.active }}</strong>
                             </div>
+                            <a class="btn btn-sm btn-outline-primary znet-shell-stat-action" href="{{ 'order/service'|link }}">
+                                {{ is_en ? 'Open' : 'Открыть' }}
+                            </a>
                         </article>
                         <article class="znet-shell-stat">
                             <div class="znet-shell-stat-line">
                                 <span>{{ is_en ? 'Unpaid invoices' : 'Неоплаченные счета' }}</span>
                                 <strong>{{ dashboard.invoices.unpaid }}</strong>
                             </div>
+                            <a class="btn btn-sm btn-outline-primary znet-shell-stat-action" href="{{ 'invoice'|link({ tab: 'unpaid' }) }}">
+                                {{ is_en ? 'Pay' : 'Оплатить' }}
+                            </a>
                         </article>
                         <article class="znet-shell-stat">
                             <div class="znet-shell-stat-line">
                                 <span>{{ is_en ? 'Balance' : 'Баланс' }}</span>
                                 <strong>{{ profile.balance | money(profile.currency) }}</strong>
                             </div>
+                            <a class="btn btn-sm btn-outline-primary znet-shell-stat-action" href="{{ 'client/balance'|link }}#wallet-topup">
+                                {{ is_en ? 'Top up' : 'Пополнить' }}
+                            </a>
                         </article>
                     </div>
                 </div>

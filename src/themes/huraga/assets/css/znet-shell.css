@@ -606,6 +606,12 @@ html {
   line-height: 1.55;
 }
 
+.znet-shell-page .znet-shell-stat-action {
+  justify-self: start;
+  align-self: end;
+  margin-top: 16px;
+}
+
 .znet-shell-page .znet-shell-plan-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
