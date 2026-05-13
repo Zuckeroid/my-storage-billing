@@ -3,7 +3,7 @@
 {% set checkout_url = znet_checkout_url|default('orderbutton'|link({ 'checkout': 1 }) ~ '#checkout') %}
 
 <section class="znet-order-plans">
-    <div class="znet-order-plan-list">
+    <div class="znet-shell-plan-grid znet-order-plan-grid">
         {% for product in storage_products %}
             {% set price = '' %}
             {% set period = '' %}
@@ -27,21 +27,19 @@
             {% set description = product.description ? product.description|striptags|trim : '' %}
             {% set device_line = description ?: (is_en ? '3 devices' : '3 устройства') %}
 
-            <article class="znet-order-plan-row{% if loop.index == 2 %} znet-order-plan-row-featured{% endif %}">
+            <article class="znet-plan-card znet-order-plan-card{% if loop.index == 2 %} znet-plan-card-featured{% endif %}">
                 {% if loop.index == 2 %}
                     <div class="znet-plan-badge">{{ is_en ? 'Popular' : 'Оптимальный' }}</div>
                 {% endif %}
 
-                <form method="post" action="{{ 'api/guest/cart/add_item'|link }}" class="znet-order-plan-row-form" {{ fb_api_form({message: is_en ? 'Plan selected' : 'Тариф выбран', redirect: plan_checkout_url}) }}>
+                <form method="post" action="{{ 'api/guest/cart/add_item'|link }}" class="znet-order-plan-form znet-order-plan-card-form" {{ fb_api_form({message: is_en ? 'Plan selected' : 'Тариф выбран', redirect: plan_checkout_url}) }}>
                     <input type="hidden" name="id" value="{{ product.id }}" />
 
-                    <span class="znet-order-plan-row-index">{{ loop.index }}</span>
-
-                    <div class="znet-order-plan-row-name">
-                        <span>{{ product.title }}</span>
+                    <div class="znet-order-plan-card-name">
+                        {{ product.title }}
                     </div>
 
-                    <div class="znet-order-plan-row-price">
+                    <div class="znet-order-plan-card-price">
                         {% if price %}
                             <strong data-plan-price>{{ price }}</strong>
                         {% endif %}
@@ -73,16 +71,17 @@
                         {% endif %}
                     </div>
 
-                    <div class="znet-order-plan-row-devices">
+                    <div class="znet-order-plan-card-devices">
                         <span class="znet-check">✓</span>
                         <span>{{ device_line }}</span>
                     </div>
 
                     <div class="znet-order-plan-actions">
                         <button class="znet-btn znet-btn-ghost znet-btn-icon-only znet-order-plan-cart-btn" type="submit" aria-label="{{ is_en ? 'Select plan' : 'Выбрать тариф' }}">
-                            <svg class="znet-btn-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h6.9a2 2 0 0 0 1.9-1.4L20 7H6.1" />
-                                <path d="M9 20h.01M17 20h.01" />
+                            <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="9" cy="20" r="1.5"></circle>
+                                <circle cx="18" cy="20" r="1.5"></circle>
+                                <path d="M3 4h2.5l2.1 9.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L20 7H7.2"></path>
                             </svg>
                         </button>
                         <button class="znet-btn znet-btn-accent znet-order-plan-pay-btn" type="submit">
