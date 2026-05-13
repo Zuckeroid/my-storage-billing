@@ -55,6 +55,19 @@
     {{ period | period_title }}
 {% endmacro %}
 
+{% macro compact_datetime(value, show_time = true) %}
+    {% if value %}
+        <span class="znet-date-stack">
+            <span class="znet-date-stack-date">{{ value|date('d.m.Y') }}г.</span>
+            {% if show_time %}
+                <span class="znet-date-stack-time">{{ value|date('H:i') }}</span>
+            {% endif %}
+        </span>
+    {% else %}
+        -
+    {% endif %}
+{% endmacro %}
+
 {% macro markdown_quote(text) %}
 
 

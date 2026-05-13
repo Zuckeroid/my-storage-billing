@@ -1,4 +1,5 @@
 {% set android_apk_url = 'downloads/znet-android-0.1.0-399ee74.apk' | asset_url %}
+{% import "macro_functions.html.twig" as mf %}
 {% set android_apk_version = '0.1.0' %}
 {% set android_apk_build = '399ee74' %}
 {% set android_apk_size = '54.1 MB' %}
@@ -106,7 +107,7 @@
                                     {% endif %}
                                     {% if group.expires_at %}
                                         <p class="mb-0 text-secondary small">
-                                            {{ is_en ? 'Paid through' : 'Оплачен до' }} {{ group.expires_at|format_date }}
+                                            {{ is_en ? 'Paid through' : 'Оплачен до' }} {{ mf.compact_datetime(group.expires_at) }}
                                         </p>
                                     {% endif %}
                                     {% if group.can_renew %}
@@ -172,11 +173,13 @@
                                         {% set device_meta = [] %}
                                         {% if device.platform %}{% set device_meta = device_meta|merge([device.platform]) %}{% endif %}
                                         {% if device.install_id %}{% set device_meta = device_meta|merge([device.install_id]) %}{% endif %}
-                                        {% if device.last_seen_at %}{% set device_meta = device_meta|merge([(is_en ? 'Last seen' : 'Последний запрос') ~ ': ' ~ device.last_seen_at]) %}{% endif %}
                                         <article class="znet-appbridge-device" data-appbridge-device-row data-device-id="{{ device.id }}">
                                             <div class="znet-appbridge-device-copy">
                                                 <strong>{{ device.name ?: ((is_en ? 'Device' : 'Устройство') ~ ' #' ~ device.id) }}</strong>
                                                 <p class="mb-0 text-secondary small">{{ device_meta|join(' • ') }}</p>
+                                                {% if device.last_seen_at %}
+                                                    <p class="mb-0 text-secondary small">{{ is_en ? 'Last seen' : 'Последний запрос' }}: {{ mf.compact_datetime(device.last_seen_at) }}</p>
+                                                {% endif %}
                                             </div>
                                             <div class="znet-appbridge-device-actions">
                                                 <button

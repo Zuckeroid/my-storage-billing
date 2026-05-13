@@ -804,6 +804,11 @@ html {
   gap: 16px;
 }
 
+.znet-shell-page .znet-order-plans > .znet-order-plan-list {
+  display: grid;
+  gap: 12px;
+}
+
 .znet-shell-page .znet-order-plan-card {
   display: grid;
   min-height: 100%;
@@ -813,6 +818,88 @@ html {
   display: grid;
   grid-template-rows: auto auto 1fr;
   min-height: 100%;
+}
+
+.znet-shell-page .znet-order-plan-row {
+  position: relative;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.znet-shell-page .znet-order-plan-row-featured {
+  border-color: rgba(134, 239, 172, 0.28);
+  background: rgba(134, 239, 172, 0.06);
+}
+
+.znet-shell-page .znet-order-plan-row .znet-plan-badge {
+  top: 10px;
+  right: 12px;
+  left: auto;
+  transform: none;
+  border-radius: 8px;
+  padding: 5px 8px;
+}
+
+.znet-shell-page .znet-order-plan-row-form {
+  display: grid;
+  grid-template-columns: 34px minmax(150px, 1.2fr) minmax(180px, 0.9fr) minmax(150px, 0.9fr) auto;
+  gap: 14px;
+  align-items: center;
+  min-height: 92px;
+  padding: 18px;
+}
+
+.znet-shell-page .znet-order-plan-row-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(134, 239, 172, 0.18);
+  border-radius: 8px;
+  color: var(--znet-text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.znet-shell-page .znet-order-plan-row-name {
+  min-width: 0;
+  color: var(--znet-text);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.znet-shell-page .znet-order-plan-row-price {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.znet-shell-page .znet-order-plan-row-price strong {
+  color: var(--znet-text);
+  font-size: 22px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.znet-shell-page .znet-order-plan-row-devices {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--znet-text-soft);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.znet-shell-page .znet-order-plan-row-devices span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .znet-shell-page .znet-plan-period-control {
@@ -891,6 +978,14 @@ html {
   gap: 10px;
   margin-top: 24px;
   align-self: end;
+}
+
+.znet-shell-page .znet-order-plan-row .znet-order-plan-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0;
+  align-self: center;
 }
 
 .znet-shell-page .znet-order-panel {
@@ -1457,6 +1552,89 @@ html {
   margin-top: 8px;
 }
 
+.znet-shell-page .znet-platform-list {
+  display: grid;
+  gap: 12px;
+}
+
+.znet-shell-page .znet-platform-card {
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.znet-shell-page .znet-platform-summary {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto 16px;
+  gap: 12px;
+  align-items: center;
+  min-height: 66px;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.znet-shell-page .znet-platform-summary::-webkit-details-marker {
+  display: none;
+}
+
+.znet-shell-page .znet-platform-summary::after {
+  content: "";
+  grid-column: 4;
+  justify-self: center;
+  width: 9px;
+  height: 9px;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.62);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.62);
+  transform: rotate(45deg);
+  transition: transform 0.18s ease;
+}
+
+.znet-shell-page .znet-platform-card[open] .znet-platform-summary::after {
+  transform: rotate(225deg);
+}
+
+.znet-shell-page .znet-platform-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(134, 239, 172, 0.16);
+  border-radius: 8px;
+  color: var(--znet-accent);
+  background: rgba(134, 239, 172, 0.06);
+}
+
+.znet-shell-page .znet-platform-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.znet-shell-page .znet-platform-title {
+  min-width: 0;
+  color: var(--znet-text);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.znet-shell-page .znet-platform-summary-note {
+  grid-column: 3;
+  color: var(--znet-text-soft);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.znet-shell-page .znet-platform-body {
+  padding: 0 18px 18px;
+}
+
 .znet-shell-page .znet-appbridge-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1803,6 +1981,78 @@ html {
   color: var(--znet-text-soft);
 }
 
+.znet-shell-page .znet-date-stack {
+  display: inline-grid;
+  gap: 2px;
+  white-space: nowrap;
+  line-height: 1.12;
+}
+
+.znet-shell-page .znet-date-stack-date {
+  color: var(--znet-text);
+  font-weight: 600;
+}
+
+.znet-shell-page .znet-date-stack-time {
+  color: var(--znet-text-soft);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.znet-shell-page .znet-payment-history-details {
+  display: grid;
+  gap: 14px;
+}
+
+.znet-shell-page .znet-payment-history-summary {
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.znet-shell-page .znet-payment-history-summary::-webkit-details-marker {
+  display: none;
+}
+
+.znet-shell-page .znet-payment-history-summary > span:first-child {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.znet-shell-page .znet-payment-history-summary-meta {
+  color: var(--znet-accent-soft);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.znet-shell-page .znet-payment-history-details[open] .znet-payment-history-summary-meta [data-history-open],
+.znet-shell-page .znet-payment-history-summary-meta [data-history-close] {
+  display: none;
+}
+
+.znet-shell-page .znet-payment-history-details[open] .znet-payment-history-summary-meta [data-history-close] {
+  display: inline;
+}
+
+.znet-shell-page .znet-payment-history-body {
+  display: grid;
+  gap: 14px;
+}
+
+.znet-shell-page .znet-payment-history-details:not([open]) .znet-payment-history-body {
+  display: none;
+}
+
 .znet-shell-page .znet-shell-inline-tabs {
   display: flex;
   align-items: flex-start;
@@ -2080,6 +2330,51 @@ html {
   .znet-shell-page .znet-invoice-summary {
     width: 100%;
     justify-self: stretch;
+  }
+
+  .znet-shell-page .znet-order-plan-row-form {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    gap: 12px;
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .znet-shell-page .znet-order-plan-row-price,
+  .znet-shell-page .znet-order-plan-row-devices {
+    grid-column: 2 / 4;
+  }
+
+  .znet-shell-page .znet-order-plan-row .znet-order-plan-actions {
+    grid-column: 1 / 4;
+    justify-content: stretch;
+  }
+
+  .znet-shell-page .znet-order-plan-row .znet-order-plan-actions .znet-order-plan-pay-btn {
+    flex: 1 1 auto;
+  }
+
+  .znet-shell-page .znet-order-plan-row-devices span:last-child {
+    white-space: normal;
+  }
+
+  .znet-shell-page .znet-platform-summary {
+    grid-template-columns: 42px minmax(0, 1fr) 16px;
+    gap: 10px;
+  }
+
+  .znet-shell-page .znet-platform-summary::after {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    justify-self: center;
+  }
+
+  .znet-shell-page .znet-platform-title {
+    grid-column: 2;
+  }
+
+  .znet-shell-page .znet-platform-summary-note {
+    grid-column: 2;
+    grid-row: 2;
   }
 
   .znet-shell-page .znet-app-download {

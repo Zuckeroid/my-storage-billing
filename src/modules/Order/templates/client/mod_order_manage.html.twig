@@ -53,7 +53,7 @@
                     </article>
                     <article class="znet-shell-stat">
                         <span>{{ is_en ? 'Paid through' : 'Оплачен до' }}</span>
-                        <strong>{% if order.expires_at %}{{ order.expires_at|format_date }}{% else %}-{% endif %}</strong>
+                        <strong>{% if order.expires_at %}{{ mf.compact_datetime(order.expires_at) }}{% else %}-{% endif %}</strong>
                     </article>
                     <article class="znet-shell-stat">
                         <span>{{ is_en ? 'Plan price' : 'Стоимость' }}</span>
@@ -117,10 +117,20 @@
             </div>
         </div>
 
-        <div class="znet-shell-card-grid znet-shell-card-grid-2">
-            <article class="card">
-                <div class="card-body">
-                    <span class="znet-app-download-kicker">{{ is_en ? 'Android' : 'Android' }}</span>
+        <div class="znet-platform-list">
+            <details class="znet-platform-card">
+                <summary class="znet-platform-summary">
+                    <span class="znet-platform-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M8 5 6.4 2.8M16 5l1.6-2.2" />
+                            <path d="M7 9h10v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V9Z" />
+                            <path d="M6 11H4v5h2M18 11h2v5h-2M10 12h.01M14 12h.01" />
+                        </svg>
+                    </span>
+                    <span class="znet-platform-title">Android</span>
+                    <span class="znet-platform-summary-note">{{ is_en ? 'Znet app' : 'Приложение Znet' }}</span>
+                </summary>
+                <div class="znet-platform-body">
                     <h3 class="h4 mb-2">{{ is_en ? 'Install Znet app' : 'Установите приложение Znet' }}</h3>
                     <p class="text-secondary">
                         {{ is_en
@@ -133,7 +143,7 @@
                         <span class="text-secondary small">v{{ android_apk_version }} · build {{ android_apk_build }} · {{ android_apk_size }}</span>
                     </div>
 
-                    <details class="znet-app-install-guide mt-3" open>
+                    <details class="znet-app-install-guide mt-3">
                         <summary>{{ is_en ? 'Short setup guide' : 'Короткая инструкция' }}</summary>
                         {% if is_en %}
                             <ol>
@@ -222,11 +232,13 @@
                                             {% for device in group.devices %}
                                                 {% set device_meta = [] %}
                                                 {% if device.platform %}{% set device_meta = device_meta|merge([device.platform]) %}{% endif %}
-                                                {% if device.last_seen_at %}{% set device_meta = device_meta|merge([(is_en ? 'Last seen' : 'Последний запрос') ~ ': ' ~ device.last_seen_at]) %}{% endif %}
                                                 <article class="znet-appbridge-device" data-appbridge-device-row data-device-id="{{ device.id }}">
                                                     <div class="znet-appbridge-device-copy">
                                                         <strong>{{ device.name ?: ((is_en ? 'Device' : 'Устройство') ~ ' #' ~ device.id) }}</strong>
                                                         <p class="mb-0 text-secondary small">{{ device_meta|join(' • ') }}</p>
+                                                        {% if device.last_seen_at %}
+                                                            <p class="mb-0 text-secondary small">{{ is_en ? 'Last seen' : 'Последний запрос' }}: {{ mf.compact_datetime(device.last_seen_at) }}</p>
+                                                        {% endif %}
                                                     </div>
                                                     <div class="znet-appbridge-device-actions">
                                                         <button class="btn btn-outline-primary" type="button" data-appbridge-revoke data-device-id="{{ device.id }}">
@@ -242,11 +254,20 @@
                         {% endfor %}
                     {% endif %}
                 </div>
-            </article>
+            </details>
 
-            <article class="card">
-                <div class="card-body">
-                    <span class="znet-app-download-kicker">{{ is_en ? 'iPhone' : 'iPhone' }}</span>
+            <details class="znet-platform-card">
+                <summary class="znet-platform-summary">
+                    <span class="znet-platform-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+                            <path d="M11 6h2M11.5 18h1" />
+                        </svg>
+                    </span>
+                    <span class="znet-platform-title">iPhone</span>
+                    <span class="znet-platform-summary-note">{{ is_en ? 'Subscription link' : 'Ссылка подписки' }}</span>
+                </summary>
+                <div class="znet-platform-body">
                     <h3 class="h4 mb-2">{{ is_en ? 'Use subscription link' : 'Используйте ссылку подписки' }}</h3>
                     <p class="text-secondary">
                         {{ is_en
@@ -266,7 +287,45 @@
                         </p>
                     {% endif %}
                 </div>
-            </article>
+            </details>
+
+            <details class="znet-platform-card">
+                <summary class="znet-platform-summary">
+                    <span class="znet-platform-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 5.5 10.5 4v7H3V5.5ZM13.5 3.5 21 2v9h-7.5V3.5ZM3 13h7.5v7L3 18.5V13ZM13.5 13H21v9l-7.5-1.5V13Z" />
+                        </svg>
+                    </span>
+                    <span class="znet-platform-title">Windows</span>
+                    <span class="znet-platform-summary-note">{{ is_en ? 'In development' : 'В разработке' }}</span>
+                </summary>
+                <div class="znet-platform-body">
+                    <p class="znet-shell-inline-note mb-0">
+                        {{ is_en ? 'In development.' : 'В разработке.' }}
+                    </p>
+                </div>
+            </details>
+
+            <details class="znet-platform-card">
+                <summary class="znet-platform-summary">
+                    <span class="znet-platform-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M5 16h14v4H5v-4Z" />
+                            <path d="M8 16v-2a4 4 0 0 1 8 0v2M8 9a8 8 0 0 1 8 0M5 6a12 12 0 0 1 14 0" />
+                            <path d="M8 18h.01M11 18h.01" />
+                        </svg>
+                    </span>
+                    <span class="znet-platform-title">Router</span>
+                    <span class="znet-platform-summary-note">{{ is_en ? 'OpenWRT + Podkop' : 'OpenWRT + Podkop' }}</span>
+                </summary>
+                <div class="znet-platform-body">
+                    <p class="text-secondary mb-0">
+                        {{ is_en
+                            ? 'In development. For OpenWRT, install Podkop, add your Znet subscription link, choose the needed apps or domains, then apply the routing rules.'
+                            : 'В разработке. Для OpenWRT установите Podkop, добавьте ссылку подписки Znet, выберите нужные приложения или домены и примените правила маршрутизации.' }}
+                    </p>
+                </div>
+            </details>
         </div>
     </section>
 
@@ -286,22 +345,22 @@
                         </tr>
                         <tr>
                             <td>{{ is_en ? 'Created' : 'Создан' }}</td>
-                            <td>{{ order.created_at|format_date }}</td>
+                            <td>{{ mf.compact_datetime(order.created_at) }}</td>
                         </tr>
                         <tr>
                             <td>{{ is_en ? 'Activated' : 'Активирован' }}</td>
-                            <td>{% if order.activated_at %}{{ order.activated_at|format_date }}{% else %}-{% endif %}</td>
+                            <td>{% if order.activated_at %}{{ mf.compact_datetime(order.activated_at) }}{% else %}-{% endif %}</td>
                         </tr>
                         {% if orchestrator_access.last_sync_at %}
                             <tr>
                                 <td>{{ is_en ? 'Last access update' : 'Последнее обновление доступа' }}</td>
-                                <td>{{ orchestrator_access.last_sync_at|format_date }}</td>
+                                <td>{{ mf.compact_datetime(orchestrator_access.last_sync_at) }}</td>
                             </tr>
                         {% endif %}
                         {% if orchestrator_access.access_email_sent_at %}
                             <tr>
                                 <td>{{ is_en ? 'Access email sent' : 'Письмо с доступом отправлено' }}</td>
-                                <td>{{ orchestrator_access.access_email_sent_at|format_date }}</td>
+                                <td>{{ mf.compact_datetime(orchestrator_access.access_email_sent_at) }}</td>
                             </tr>
                         {% endif %}
                         {% if order.notes %}

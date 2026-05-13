@@ -35,7 +35,7 @@
                             <td><a href="{{ '/order/service/manage'|link }}/{{ order.id }}">#{{ order.id }}</a></td>
                             <td>{{ order.title }}</td>
                             <td>{{ order.total | money(order.currency) }}{% if order.period %} {{ order.period | period_title }}{% endif %}</td>
-                            <td>{% if order.expires_at %}{{ order.expires_at|format_date }}{% else %}-{% endif %}</td>
+                            <td>{% if order.expires_at %}{{ mf.compact_datetime(order.expires_at) }}{% else %}-{% endif %}</td>
                             <td>
                                 <span class="badge {% if order.status == 'active' %}text-bg-success{% elseif order.status == 'pending_setup' %}text-bg-warning{% elseif order.status == 'failed_setup' or order.status == 'suspended' or order.status == 'failed_renew' %}text-bg-danger{% elseif order.status == 'canceled' %}text-bg-secondary{% else %}text-bg-secondary{% endif %}">
                                     {{ mf.status_name(order.status) }}

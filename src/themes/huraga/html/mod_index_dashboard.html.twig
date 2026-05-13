@@ -97,15 +97,6 @@
                         </article>
                         <article class="znet-shell-stat">
                             <div class="znet-shell-stat-line">
-                                <span>{{ is_en ? 'To pay' : 'К оплате' }}</span>
-                                <strong>{{ dashboard.invoices.unpaid }}</strong>
-                            </div>
-                            <a class="btn btn-sm btn-outline-primary znet-shell-stat-action" href="{{ 'invoice'|link({ tab: 'unpaid' }) }}">
-                                {{ is_en ? 'Pay' : 'Оплатить' }}
-                            </a>
-                        </article>
-                        <article class="znet-shell-stat">
-                            <div class="znet-shell-stat-line">
                                 <span>{{ is_en ? 'Balance' : 'Баланс' }}</span>
                                 <strong>{{ profile.balance | money(profile.currency) }}</strong>
                             </div>
@@ -132,7 +123,6 @@
                                 </p>
                             </div>
                         </div>
-                        <p class="mb-2">{{ is_en ? 'To pay:' : 'К оплате:' }} <strong>{{ dashboard.invoices.unpaid }}</strong></p>
                         <p class="mb-0 text-secondary">{{ is_en ? 'Balance:' : 'Баланс:' }} <strong>{{ profile.balance | money(profile.currency) }}</strong></p>
                         <div class="znet-shell-link-row mt-3">
                             <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>

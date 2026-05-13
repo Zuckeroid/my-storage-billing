@@ -46,7 +46,7 @@
                     <span>{{ is_en ? 'Created' : 'Создан' }}</span>
                     <strong>
                         {% if invoice.created_at|trim %}
-                            {{ invoice.created_at|format_date }}
+                            {{ mf.compact_datetime(invoice.created_at) }}
                         {% else %}
                             -
                         {% endif %}
@@ -64,9 +64,9 @@
                     </span>
                     <strong>
                         {% if invoice.paid_at|trim %}
-                            {{ invoice.paid_at|format_date }}
+                            {{ mf.compact_datetime(invoice.paid_at) }}
                         {% elseif invoice.due_at|trim %}
-                            {{ invoice.due_at|format_date }}
+                            {{ mf.compact_datetime(invoice.due_at) }}
                         {% else %}
                             -
                         {% endif %}

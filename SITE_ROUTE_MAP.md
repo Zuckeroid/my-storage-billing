@@ -31,7 +31,7 @@ Service exceptions:
 | --- | --- | --- | --- | --- |
 | `/` guest | Home | `Index` override in `src/themes/huraga/html/mod_index_dashboard.html.twig` -> `znet_homepage.html.twig` | Main public page with plans | Canonical. Keep as the only marketing home. |
 | `/` logged in, `/client` | Client | `mod_index_dashboard.html.twig` + `layout_default` | "Ваш Znet" dashboard | Canonical. Keep simple: services, payments due, balance, support. |
-| `/orderbutton` | Public / Client | `Orderbutton` | Technical order/checkout fallback | Keep as a fallback route. Primary client plan choice now lives inside `/invoice` as the user-facing payment hub. |
+| `/orderbutton` | Public / Client | `Orderbutton` | Technical order/checkout fallback | Keep as a public fallback route. Logged-in users redirect to `/invoice#plans`. Primary client plan choice lives inside `/invoice`. |
 | `/orderbutton/js` | Service | `Orderbutton` | Widget script endpoint | Keep only if core checkout needs it. No design work. |
 | `/login` | Public | `Page/mod_page_login.html.twig` | Full login fallback | Keep as fallback, but primary login UX is the header auth panel. |
 | `/signup` | Public | `Page/mod_page_signup.html.twig` | Full registration fallback | Keep as fallback, align with header auth panel. Check legal links. |

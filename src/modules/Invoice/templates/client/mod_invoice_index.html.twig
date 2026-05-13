@@ -6,6 +6,7 @@
 {% set unpaid_invoices = client.invoice_get_list({"status":"unpaid", "per_page":10, "page":request.page}) %}
 {% set paid_invoices = client.invoice_get_list({"status":"paid", "per_page":10, "page":request.page}) %}
 {% set active_tab = request.tab in ['paid', 'unpaid'] ? request.tab : 'all' %}
+{% import "macro_functions.html.twig" as mf %}
 
 {% block meta_title %}{{ is_en ? 'Payments' : 'Платежи' }}{% endblock %}
 {% block meta_description %}{% endblock %}
@@ -63,11 +64,16 @@
     {{ include('mod_orderbutton_checkout.html.twig') }}
 
     <section class="znet-shell-section znet-payment-history-section">
-        <div class="znet-shell-section-head">
-            <div>
-                <h2>{{ is_en ? 'Payment history' : 'История платежей' }}</h2>
-            </div>
-        </div>
+        <details class="znet-payment-history-details" {% if request.tab %}open{% endif %}>
+            <summary class="znet-payment-history-summary">
+                <span>{{ is_en ? 'Payment history' : 'История платежей' }}</span>
+                <span class="znet-payment-history-summary-meta">
+                    <span data-history-open>{{ is_en ? 'Open' : 'Открыть' }}</span>
+                    <span data-history-close>{{ is_en ? 'Hide' : 'Скрыть' }}</span>
+                </span>
+            </summary>
+
+            <div class="znet-payment-history-body">
 
         <nav class="znet-shell-inline-tabs" aria-label="{{ is_en ? 'Payment filters' : 'Фильтры платежей' }}">
             <a class="znet-shell-inline-tab{% if active_tab == 'all' %} is-active{% endif %}" href="{{ 'invoice'|link }}">
@@ -124,8 +130,8 @@
                     {% for invoice in paid_invoices.list %}
                         <tr>
                             <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Payment' : 'Платеж' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
-                            <td>{{ invoice.created_at|format_date }}</td>
-                            <td>{{ invoice.paid_at|format_date }}</td>
+                            <td>{{ mf.compact_datetime(invoice.created_at) }}</td>
+                            <td>{{ mf.compact_datetime(invoice.paid_at) }}</td>
                             <td>{{ invoice.total | money(invoice.currency) }}</td>
                             <td>{{ invoice_ui.invoice_actions(invoice, is_en) }}</td>
                         </tr>
@@ -139,7 +145,7 @@
                         {% set invoice_status_class = invoice.status == 'paid' ? 'text-bg-success' : (invoice.status == 'unpaid' ? 'text-bg-warning' : (invoice.status == 'canceled' ? 'text-bg-secondary' : 'text-bg-danger')) %}
                         <tr>
                             <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Payment' : 'Платеж' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
-                            <td>{{ invoice.created_at|format_date }}</td>
+                            <td>{{ mf.compact_datetime(invoice.created_at) }}</td>
                             <td><span class="badge {{ invoice_status_class }}">{{ invoice.status|trans }}</span></td>
                             <td>{{ invoice.total | money(invoice.currency) }}</td>
                             <td>{{ invoice_ui.invoice_actions(invoice, is_en) }}</td>
@@ -153,8 +159,8 @@
                     {% for invoice in unpaid_invoices.list %}
                         <tr>
                             <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Payment' : 'Платеж' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
-                            <td>{{ invoice.created_at|format_date }}</td>
-                            <td>{{ invoice.due_at|format_date }}</td>
+                            <td>{{ mf.compact_datetime(invoice.created_at) }}</td>
+                            <td>{{ mf.compact_datetime(invoice.due_at) }}</td>
                             <td>{{ invoice.total | money(invoice.currency) }}</td>
                             <td>{{ invoice_ui.invoice_actions(invoice, is_en) }}</td>
                         </tr>
@@ -169,6 +175,8 @@
         </div>
 
         {{ include('partial_pagination.html.twig', { 'list': active_tab == 'paid' ? paid_invoices : (active_tab == 'unpaid' ? unpaid_invoices : all_invoices) }) }}
+            </div>
+        </details>
     </section>
 
     {{ include('mod_orderbutton_js.html.twig') }}

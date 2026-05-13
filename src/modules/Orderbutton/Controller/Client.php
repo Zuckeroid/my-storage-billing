@@ -34,6 +34,11 @@ class Client implements \FOSSBilling\InjectionAwareInterface
 
     public function get_index(\Box_App $app): string
     {
+        if ($this->di['auth']->isClientLoggedIn()) {
+            header('Location: ' . $this->di['url']->link('invoice') . '#plans');
+            exit;
+        }
+
         return $app->render('mod_orderbutton_index');
     }
 
