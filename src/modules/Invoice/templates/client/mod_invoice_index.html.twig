@@ -50,7 +50,25 @@
 {% import _self as invoice_ui %}
 
 {% block content %}
-    <section class="znet-shell-section">
+    <section class="znet-shell-section znet-payment-plans-section" id="plans">
+        <div class="znet-shell-section-head">
+            <div>
+                <h2>{{ is_en ? 'Choose a plan' : 'Выберите тариф' }}</h2>
+            </div>
+        </div>
+
+        {{ include('mod_orderbutton_choose_product.html.twig', { znet_checkout_url: ('invoice'|link({ 'checkout': 1 }) ~ '#checkout') }) }}
+    </section>
+
+    {{ include('mod_orderbutton_checkout.html.twig') }}
+
+    <section class="znet-shell-section znet-payment-history-section">
+        <div class="znet-shell-section-head">
+            <div>
+                <h2>{{ is_en ? 'Payment history' : 'История платежей' }}</h2>
+            </div>
+        </div>
+
         <nav class="znet-shell-inline-tabs" aria-label="{{ is_en ? 'Payment filters' : 'Фильтры платежей' }}">
             <a class="znet-shell-inline-tab{% if active_tab == 'all' %} is-active{% endif %}" href="{{ 'invoice'|link }}">
                 <span>{{ is_en ? 'All' : 'Все' }}</span>
@@ -152,4 +170,6 @@
 
         {{ include('partial_pagination.html.twig', { 'list': active_tab == 'paid' ? paid_invoices : (active_tab == 'unpaid' ? unpaid_invoices : all_invoices) }) }}
     </section>
+
+    {{ include('mod_orderbutton_js.html.twig') }}
 {% endblock %}

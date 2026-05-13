@@ -4,7 +4,7 @@
 <section id="checkout" class="znet-order-panel znet-order-checkout-panel">
     <div class="znet-order-panel-head">
         <div>
-            <h3>{{ 'Cart'|trans }}</h3>
+            <h3>{{ is_en ? 'Selected plan' : 'Выбранный тариф' }}</h3>
         </div>
         <span class="badge text-bg-success">{{ cart.items | length }}</span>
     </div>
@@ -15,7 +15,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead>
                     <tr>
-                        <th>{{ 'Product'|trans }}</th>
+                        <th>{{ is_en ? 'Plan' : 'Тариф' }}</th>
                         <th>{{ 'Price'|trans }}</th>
                         <th class="text-end"><span class="visually-hidden">{{ 'Actions'|trans }}</span></th>
                     </tr>
@@ -42,7 +42,7 @@
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <button data-cart-item-id="{{ item.id }}" class="znet-btn znet-btn-outline znet-btn-icon-only remove-cart-item" title="{{ 'Remove item'|trans }}" type="button">
+                                <button data-cart-item-id="{{ item.id }}" class="znet-btn znet-btn-outline znet-btn-icon-only remove-cart-item" title="{{ is_en ? 'Remove plan' : 'Убрать тариф' }}" type="button">
                                     <svg class="znet-btn-svg-icon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                             </td>
@@ -207,7 +207,7 @@
     {% else %}
         <div class="znet-order-panel-body">
             <div class="znet-shell-empty-state">
-                {{ is_en ? 'Your cart is empty.' : 'Корзина пуста.' }}
+                {{ is_en ? 'No plan selected yet.' : 'Тариф пока не выбран.' }}
             </div>
         </div>
     {% endif %}

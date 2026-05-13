@@ -41,12 +41,12 @@
             button.addEventListener('click', function(event) {
                 event.preventDefault();
 
-                if (confirm("{{ 'Are you sure you want to remove this item from cart?'|trans }}")) {
+                if (confirm("{{ is_en ? 'Remove this selected plan?' : 'Убрать выбранный тариф?' }}")) {
                     var item_id = this.getAttribute('data-cart-item-id');
 
                     API.guest.post("cart/remove_item", { id: item_id },
                         () => {
-                            MyStorage.message("{{ 'Item was removed from cart'|trans }}");
+                            MyStorage.message("{{ is_en ? 'Selected plan was removed' : 'Выбранный тариф убран' }}");
                             window.location.reload();
                         });
                 }
@@ -91,7 +91,7 @@
                         checkoutEl?.remove();
                         showPaymentHtml();
                     } else {
-                        const link = '{{ "invoice/banklink"|link }}' + '/' + result.invoice_hash + '/' + result.gateway_id;
+                        const link = '{{ "invoice/banklink"|link }}' + '/' + result.invoice_hash + '/' + result.gateway_id + '?allow_subscription=0';
                         paymentHtmlInnerEl.innerHTML = '<a href="' + link + '" target="_parent" id="redirect-to-gateway">Redirect to payment gateway</a>';
                         checkoutInnerEl?.remove();
                         showPaymentHtml();

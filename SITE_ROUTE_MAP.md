@@ -31,7 +31,7 @@ Service exceptions:
 | --- | --- | --- | --- | --- |
 | `/` guest | Home | `Index` override in `src/themes/huraga/html/mod_index_dashboard.html.twig` -> `znet_homepage.html.twig` | Main public page with plans | Canonical. Keep as the only marketing home. |
 | `/` logged in, `/client` | Client | `mod_index_dashboard.html.twig` + `layout_default` | "Ваш Znet" dashboard | Canonical. Keep simple: services, payments due, balance, support. |
-| `/orderbutton` | Public / Client | `Orderbutton` | Cart, login/register, checkout | Canonical order/cart flow. Continue polishing here. |
+| `/orderbutton` | Public / Client | `Orderbutton` | Technical order/checkout fallback | Keep as a fallback route. Primary client plan choice now lives inside `/invoice` as the user-facing payment hub. |
 | `/orderbutton/js` | Service | `Orderbutton` | Widget script endpoint | Keep only if core checkout needs it. No design work. |
 | `/login` | Public | `Page/mod_page_login.html.twig` | Full login fallback | Keep as fallback, but primary login UX is the header auth panel. |
 | `/signup` | Public | `Page/mod_page_signup.html.twig` | Full registration fallback | Keep as fallback, align with header auth panel. Check legal links. |
@@ -46,7 +46,7 @@ Service exceptions:
 | `/refund-policy` | Public | `Page/mod_page_refund-policy.html.twig` | Refund policy | Keep. |
 | `/client/profile` | Client | `Client/mod_client_profile.html.twig` | Profile details | Canonical. Already close to the target shell. |
 | `/client/balance`, `/balance` | Client | `Client/mod_client_balance.html.twig`, redirect alias | Wallet/top-up | Keep if balance remains part of product. Final decision after Antilopay test flow. |
-| `/invoice` | Client | `Invoice/mod_invoice_index.html.twig` | Payment history, backed by invoices | Canonical. Invoices remain billing internals; UI should say payments/history. Canceled invoices stay hidden. |
+| `/invoice` | Client | `Invoice/mod_invoice_index.html.twig` | Payment hub: plan choice, selected plan checkout, payment history | Canonical. Invoices remain billing internals; UI should say plans/payments/history. Canceled invoices stay hidden. |
 | `/invoice/:hash` | Public-by-hash / Client | `Invoice/mod_invoice_invoice.html.twig` | Payment page, backed by an invoice | Redesigned into the Znet shell. Payment gateway links go directly to banklink with subscriptions disabled. |
 | `/invoice/thank-you/:hash` | Public-by-hash / Client | `Invoice/mod_invoice_thankyou.html.twig` | Payment result | Keep. Needs style check after invoice redesign. |
 | `/invoice/banklink/:hash/:id`, `/banklink/:hash/:id` | Service | `Invoice` | Payment gateway transition | Keep as service route. No decorative work unless visible to users. |
@@ -59,7 +59,7 @@ Service exceptions:
 | `/email`, `/emails` | Legacy client utility | `Email`, redirect alias | Transactional email history | Hide from navigation. Decide later whether client should see it. |
 | `/custompages/:slug` | Legacy dynamic pages | `Custompages` | DB-driven pages | Keep hidden. Redirect missing/broken pages to home. |
 | `/me` | Alias | `Redirect` | Profile shortcut | Keep redirect to `/client/profile`. |
-| `/pricing`, `/cart` | Alias / old UX | Redirect/admin redirects | Old plan/cart entry points | Route to current pricing block or `/orderbutton`. Avoid a second cart. |
+| `/pricing`, `/cart` | Alias / old UX | Redirect/admin redirects | Old plan/cart entry points | Route public users to the home pricing block and clients to `/invoice#plans`. Avoid a second cart. |
 
 ## Page Audit By Template Type
 
@@ -84,7 +84,8 @@ Risks:
 
 Canonical pages:
 
-- `/orderbutton`
+- `/invoice` as the client payment hub
+- `/orderbutton` as technical checkout fallback
 - `/login`
 - `/signup`
 - `/password-reset`
@@ -100,7 +101,7 @@ Current state:
 
 - Auth fallback pages exist separately from the header auth panel. That is acceptable as a fallback, but they must not feel like a second product.
 - Legal/moderation pages mostly exist, but need one consistent shell pass after real company details are filled.
-- Checkout is now moving toward plan tiles instead of accordions.
+- Checkout remains available as a fallback, but client-facing plan choice is shown on `/invoice`.
 
 Main mismatches to fix:
 
@@ -123,7 +124,7 @@ Canonical pages:
 Current state:
 
 - Dashboard, payment history, balance, profile, services list, and service detail are already in the Znet shell.
-- User-facing copy should say payment/history, not invoice/accounting terms.
+- User-facing copy should say plans/payment/history, not invoice/accounting terms.
 - The client navigation is intentionally small: overview, connection, payment, profile.
 - Support is routed through `/contacts`, not through old ticket/KB pages.
 
@@ -147,7 +148,7 @@ Rule: these pages should be redirected, hidden from navigation, or left as techn
 ## Recommended Work Order
 
 1. Freeze mobile-only fixes unless a page is unusable.
-2. Confirm canonical route decisions: `/orderbutton` as cart, `/contacts` as support, no old `/order` funnel.
+2. Confirm canonical route decisions: `/invoice` as the client payment hub, `/contacts` as support, no old `/order` funnel.
 3. Finish the desktop public shell pass: `/payment`, `/about-us`, legal pages, auth fallback pages.
 4. Live-check the redesigned payment page `/invoice/:hash`, then align `/invoice/thank-you/:hash` with the same payment flow.
 5. Finish the client shell pass: dashboard, services, service detail, profile, balance.
@@ -156,7 +157,7 @@ Rule: these pages should be redirected, hidden from navigation, or left as techn
 
 ## Immediate Next Tasks
 
-- Decide whether `/order`, `/order/:id`, and `/order/:slug` should redirect to `/orderbutton` or only remain hidden technical routes.
+- Decide whether `/order`, `/order/:id`, and `/order/:slug` should redirect to the payment hub or only remain hidden technical routes.
 - Live-check `/invoice/:hash` with unpaid and paid payments before touching more mobile spacing.
 - Compare `/login`, `/signup`, and the header auth panel as one auth system.
 - Keep `/contacts` as the only visible support route.

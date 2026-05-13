@@ -1,6 +1,6 @@
 {% set is_en = is_en|default(guest.system_locale|default(settings.locale|default('ru_RU')) starts with 'en') %}
 {% set storage_products = guest.product_get_list({ 'per_page': 100, 'show_hidden': false, 'type': 'custom' }).list|default([]) %}
-{% set checkout_url = ('orderbutton'|link({ 'checkout': 1 }) ~ '#checkout') %}
+{% set checkout_url = znet_checkout_url|default('orderbutton'|link({ 'checkout': 1 }) ~ '#checkout') %}
 
 <section class="znet-order-plans">
     <div class="znet-shell-plan-grid znet-order-plan-grid">
@@ -30,7 +30,7 @@
                     <div class="znet-plan-badge">{{ is_en ? 'Popular' : 'Оптимальный' }}</div>
                 {% endif %}
 
-                <form method="post" action="{{ 'api/guest/cart/add_item'|link }}" class="znet-order-plan-form" {{ fb_api_form({message: is_en ? 'Plan added to cart' : 'Тариф добавлен в корзину', redirect: checkout_url}) }}>
+                <form method="post" action="{{ 'api/guest/cart/add_item'|link }}" class="znet-order-plan-form" {{ fb_api_form({message: is_en ? 'Plan selected' : 'Тариф выбран', redirect: checkout_url}) }}>
                     <input type="hidden" name="id" value="{{ product.id }}" />
 
                     <div class="znet-plan-top">
@@ -78,7 +78,7 @@
                                 <path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h6.9a2 2 0 0 0 1.9-1.4L20 7H6.1" />
                                 <path d="M9 20h.01M17 20h.01" />
                             </svg>
-                            {{ is_en ? 'Cart' : 'В корзину' }}
+                            {{ is_en ? 'Add' : 'Добавить' }}
                         </button>
                         <button class="znet-btn znet-btn-accent znet-order-plan-pay-btn" type="submit">
                             {{ is_en ? 'Pay' : 'Оплатить' }}

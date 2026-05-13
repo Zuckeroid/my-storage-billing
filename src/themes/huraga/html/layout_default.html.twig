@@ -101,7 +101,7 @@
 
             <div class="znet-shell-header-actions">
                 {% if client %}
-                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'orderbutton'|link({ 'checkout': 1 }) }}" aria-label="{{ is_en ? 'Cart' : 'Корзина' }}">
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'invoice'|link({ 'checkout': 1 }) }}#checkout" aria-label="{{ is_en ? 'Selected plan' : 'Выбранный тариф' }}">
                         <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="9" cy="20" r="1.5"></circle>
                             <circle cx="18" cy="20" r="1.5"></circle>
@@ -155,7 +155,7 @@
 
             <div class="znet-shell-header-actions">
                 {% if client %}
-                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'orderbutton'|link({ 'checkout': 1 }) }}" aria-label="{{ is_en ? 'Cart' : 'Корзина' }}">
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'invoice'|link({ 'checkout': 1 }) }}#checkout" aria-label="{{ is_en ? 'Selected plan' : 'Выбранный тариф' }}">
                         <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="9" cy="20" r="1.5"></circle>
                             <circle cx="18" cy="20" r="1.5"></circle>

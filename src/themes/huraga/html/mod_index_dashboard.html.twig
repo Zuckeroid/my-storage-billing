@@ -64,8 +64,8 @@
                             {% else %}
                                 <p class="text-secondary mb-0">
                                     {{ is_en
-                                        ? 'Choose a plan and pay the invoice. Access will appear here after activation.'
-                                        : 'Выберите тариф и оплатите счет. Доступ появится здесь после активации.' }}
+                                        ? 'Choose a plan and complete payment. Access will appear here after activation.'
+                                        : 'Выберите тариф и завершите оплату. Доступ появится здесь после активации.' }}
                                 </p>
                             {% endif %}
                         </div>
@@ -79,7 +79,7 @@
                                 {{ is_en ? 'Open services' : 'Открыть услуги' }}
                             </a>
                         {% else %}
-                            <a class="btn btn-primary" href="{{ 'orderbutton'|link({ select: 1 }) }}">
+                            <a class="btn btn-primary" href="{{ 'invoice'|link }}#plans">
                                 {{ is_en ? 'Choose plan' : 'Выбрать тариф' }}
                             </a>
                         {% endif %}
@@ -97,7 +97,7 @@
                         </article>
                         <article class="znet-shell-stat">
                             <div class="znet-shell-stat-line">
-                                <span>{{ is_en ? 'Unpaid invoices' : 'Неоплаченные счета' }}</span>
+                                <span>{{ is_en ? 'To pay' : 'К оплате' }}</span>
                                 <strong>{{ dashboard.invoices.unpaid }}</strong>
                             </div>
                             <a class="btn btn-sm btn-outline-primary znet-shell-stat-action" href="{{ 'invoice'|link({ tab: 'unpaid' }) }}">
@@ -127,15 +127,15 @@
                                 <h2 class="h5 mb-1">{{ is_en ? 'Payment' : 'Оплата' }}</h2>
                                 <p class="text-secondary mb-0">
                                     {{ is_en
-                                        ? 'Invoices and balance are here.'
-                                        : 'Счета и баланс находятся здесь.' }}
+                                        ? 'Plans, payments, and balance are here.'
+                                        : 'Тарифы, платежи и баланс находятся здесь.' }}
                                 </p>
                             </div>
                         </div>
-                        <p class="mb-2">{{ is_en ? 'Unpaid invoices:' : 'Неоплаченные счета:' }} <strong>{{ dashboard.invoices.unpaid }}</strong></p>
+                        <p class="mb-2">{{ is_en ? 'To pay:' : 'К оплате:' }} <strong>{{ dashboard.invoices.unpaid }}</strong></p>
                         <p class="mb-0 text-secondary">{{ is_en ? 'Balance:' : 'Баланс:' }} <strong>{{ profile.balance | money(profile.currency) }}</strong></p>
                         <div class="znet-shell-link-row mt-3">
-                            <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ is_en ? 'Invoices' : 'Счета' }}</a>
+                            <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>
                             <a class="btn btn-sm btn-outline-primary" href="{{ 'client/balance'|link }}">{{ is_en ? 'Balance' : 'Баланс' }}</a>
                         </div>
                     </div>
