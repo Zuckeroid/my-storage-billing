@@ -1049,6 +1049,259 @@ html {
   min-width: min(100%, 240px);
 }
 
+.znet-shell-page .znet-invoice-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: stretch;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.znet-shell-page .znet-invoice-hero-main {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.znet-shell-page .znet-invoice-hero h2 {
+  margin: 0;
+  color: var(--znet-text);
+  font-size: 28px;
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.znet-shell-page .znet-invoice-hero p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--znet-text-soft);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.znet-shell-page .znet-invoice-hero .badge {
+  justify-self: start;
+}
+
+.znet-shell-page .znet-invoice-hero-total {
+  min-width: 220px;
+  padding: 18px;
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  justify-items: end;
+  background: rgba(134, 239, 172, 0.08);
+}
+
+.znet-shell-page .znet-invoice-hero-total span {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.znet-shell-page .znet-invoice-hero-total strong {
+  color: var(--znet-text);
+  font-size: 32px;
+  line-height: 1;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.znet-shell-page .znet-invoice-gateway-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.znet-shell-page .znet-invoice-gateway {
+  width: 100%;
+  min-height: 92px;
+  padding: 16px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--znet-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.znet-shell-page .znet-invoice-gateway:hover,
+.znet-shell-page .znet-invoice-gateway:focus-visible {
+  outline: none;
+  border-color: rgba(134, 239, 172, 0.32);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 14px 30px rgba(74, 222, 128, 0.12);
+}
+
+.znet-shell-page .znet-invoice-gateway-logo {
+  width: 64px;
+  height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.znet-shell-page .znet-invoice-gateway-logo-img {
+  width: 52px;
+  height: 34px;
+  display: block;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.znet-shell-page .znet-invoice-gateway-logo-fallback {
+  color: var(--znet-accent-soft);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.znet-shell-page .znet-invoice-gateway-copy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.znet-shell-page .znet-invoice-gateway-copy strong {
+  color: var(--znet-text);
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.znet-shell-page .znet-invoice-gateway-copy small {
+  color: var(--znet-text-soft);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.znet-shell-page .znet-invoice-section-head {
+  align-items: center;
+}
+
+.znet-shell-page .znet-invoice-actions,
+.znet-shell-page .znet-invoice-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.znet-shell-page .znet-invoice-actions .znet-btn {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.znet-shell-page .znet-invoice-summary {
+  width: min(100%, 360px);
+  justify-self: end;
+  display: grid;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page .znet-invoice-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--znet-text-soft);
+}
+
+.znet-shell-page .znet-invoice-summary-row:last-child {
+  border-bottom: 0;
+}
+
+.znet-shell-page .znet-invoice-summary-row strong {
+  color: var(--znet-text);
+  white-space: nowrap;
+}
+
+.znet-shell-page .znet-invoice-summary-total {
+  background: rgba(134, 239, 172, 0.08);
+  color: var(--znet-text);
+  font-size: 16px;
+}
+
+.znet-shell-page .znet-invoice-party-card .card-body {
+  display: grid;
+  gap: 16px;
+}
+
+.znet-shell-page .znet-invoice-party-card h2 {
+  margin: 0;
+  color: var(--znet-text);
+  font-size: 20px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.znet-shell-page .znet-invoice-dl {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) minmax(0, 1fr);
+  gap: 10px 16px;
+  margin: 0;
+  color: var(--znet-text-soft);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.znet-shell-page .znet-invoice-dl dt {
+  color: rgba(255, 255, 255, 0.54);
+  font-weight: 600;
+}
+
+.znet-shell-page .znet-invoice-dl dd {
+  margin: 0;
+  color: var(--znet-text);
+  overflow-wrap: anywhere;
+}
+
+.znet-shell-page .znet-invoice-modal .modal-content {
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  border-radius: 8px;
+  background: rgba(1, 4, 9, 0.96);
+  color: var(--znet-text);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+.znet-shell-page .znet-invoice-modal .modal-header,
+.znet-shell-page .znet-invoice-modal .modal-body {
+  border-color: rgba(255, 255, 255, 0.08);
+  padding: 18px;
+}
+
+.znet-shell-page .znet-invoice-modal .modal-title {
+  color: var(--znet-text);
+  font-weight: 800;
+}
+
+.znet-shell-page .znet-invoice-modal p {
+  color: var(--znet-text-soft);
+}
+
+.znet-shell-page .znet-invoice-modal .btn-close {
+  filter: invert(1) grayscale(1);
+  opacity: 0.72;
+}
+
 .znet-shell-page #orderManager .znet-order-plan-list {
   padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1843,6 +2096,21 @@ html {
     grid-template-columns: 1fr;
   }
 
+  .znet-shell-page .znet-invoice-hero {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .znet-shell-page .znet-invoice-hero-total {
+    min-width: 0;
+    justify-items: start;
+  }
+
+  .znet-shell-page .znet-invoice-summary {
+    width: 100%;
+    justify-self: stretch;
+  }
+
   .znet-shell-page .znet-app-download {
     grid-template-columns: 1fr;
   }
@@ -1991,6 +2259,38 @@ html {
 
   .znet-shell-page .znet-cart-summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-invoice-gateway {
+    grid-template-columns: 52px minmax(0, 1fr);
+    min-height: 78px;
+    padding: 14px;
+  }
+
+  .znet-shell-page .znet-invoice-gateway-logo {
+    width: 52px;
+    height: 42px;
+  }
+
+  .znet-shell-page .znet-invoice-gateway-logo-img {
+    width: 42px;
+    height: 28px;
+  }
+
+  .znet-shell-page .znet-invoice-dl {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .znet-shell-page .znet-invoice-dl dd {
+    margin-bottom: 8px;
+  }
+
+  .znet-shell-page .znet-invoice-actions,
+  .znet-shell-page .znet-invoice-actions .znet-btn,
+  .znet-shell-page .znet-invoice-modal-actions,
+  .znet-shell-page .znet-invoice-modal-actions .znet-btn {
+    width: 100%;
   }
 
   .znet-shell-page #orderManager .accordion-body {
