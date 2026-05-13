@@ -17,96 +17,78 @@
     {% set transactions = client.client_balance_get_list({ "per_page": 10, "page": request.page }) %}
 
     <section class="znet-shell-section">
-        <div class="znet-shell-stat-grid">
+        <div class="znet-shell-stat-grid znet-shell-stat-grid-compact">
             <article class="znet-shell-stat">
                 <div class="znet-shell-stat-line">
                     <span>{{ is_en ? 'Current balance' : 'Текущий баланс' }}</span>
                     <strong>{{ profile.balance | money(profile.currency) }}</strong>
                 </div>
             </article>
-            <article class="znet-shell-stat">
-                <div class="znet-shell-stat-line">
-                    <span>{{ is_en ? 'Currency' : 'Валюта' }}</span>
-                    <strong>{{ profile.currency }}</strong>
-                </div>
-            </article>
         </div>
     </section>
 
     <section class="znet-shell-section" id="wallet-topup">
-        <div class="znet-shell-card-grid znet-shell-card-grid-2">
-            <article class="card">
-                <div class="card-body">
-                    <div class="znet-shell-section-head mb-3">
-                        <div>
-                            <h2>{{ is_en ? 'Top up balance' : 'Пополнить баланс' }}</h2>
-                            <p>{{ is_en ? 'A top-up creates an invoice. After payment, funds are credited to your account.' : 'Пополнение создает счет. После оплаты деньги зачисляются на ваш аккаунт.' }}</p>
-                        </div>
+        <article class="card">
+            <div class="card-body">
+                <div class="znet-shell-section-head mb-3">
+                    <div>
+                        <h2>{{ is_en ? 'Top up balance' : 'Пополнить баланс' }}</h2>
+                        <p>{{ is_en ? 'Enter the amount and continue to payment. Funds will be credited after successful payment.' : 'Укажите сумму и перейдите к оплате. Средства зачислятся после успешного платежа.' }}</p>
                     </div>
-
-                    <form method="post" class="znet-wallet-topup-form" action="{{ 'api/client/invoice/funds_invoice'|link }}" {{ fb_api_form({callback: 'onAfterInvoiceCreated'}) }}>
-                        <label class="form-label" for="wallet-topup-amount">{{ is_en ? 'Amount' : 'Сумма' }}</label>
-                        <div class="znet-wallet-topup-row">
-                            <input id="wallet-topup-amount" class="form-control" type="text" inputmode="decimal" name="amount" placeholder="0" required="required">
-                            <button class="btn btn-primary" type="submit">{{ is_en ? 'Create invoice' : 'Создать счет' }}</button>
-                        </div>
-                    </form>
                 </div>
-            </article>
 
-            <article class="card">
-                <div class="card-body">
-                    <div class="znet-shell-section-head mb-3">
-                        <div>
-                            <h2>{{ is_en ? 'How it works' : 'Как это работает' }}</h2>
-                            <p>{{ is_en ? 'Balance is optional. You can pay invoices directly through the payment gateway too.' : 'Баланс необязателен. Счета можно оплачивать напрямую через платежный шлюз.' }}</p>
-                        </div>
+                <form method="post" class="znet-wallet-topup-form" action="{{ 'api/client/invoice/funds_invoice'|link }}" {{ fb_api_form({callback: 'onAfterInvoiceCreated'}) }}>
+                    <label class="form-label" for="wallet-topup-amount">{{ is_en ? 'Amount' : 'Сумма' }}</label>
+                    <div class="znet-wallet-topup-row">
+                        <input id="wallet-topup-amount" class="form-control" type="text" inputmode="decimal" name="amount" placeholder="0" required="required">
+                        <button class="btn btn-primary" type="submit">{{ is_en ? 'Top up' : 'Пополнить' }}</button>
                     </div>
-                    <ul class="znet-shell-checklist">
-                        <li class="znet-shell-check-item"><span class="znet-check"></span><span>{{ is_en ? 'Enter the top-up amount.' : 'Укажите сумму пополнения.' }}</span></li>
-                        <li class="znet-shell-check-item"><span class="znet-check"></span><span>{{ is_en ? 'Pay the generated invoice.' : 'Оплатите созданный счет.' }}</span></li>
-                        <li class="znet-shell-check-item"><span class="znet-check"></span><span>{{ is_en ? 'Use funds for future renewals.' : 'Используйте средства для будущих продлений.' }}</span></li>
-                    </ul>
-                </div>
-            </article>
-        </div>
+                </form>
+            </div>
+        </article>
     </section>
 
     <section class="znet-shell-section">
-        <div class="znet-shell-section-head">
-            <div>
-                <h2>{{ is_en ? 'Balance history' : 'История баланса' }}</h2>
-            </div>
-        </div>
+        <details class="znet-payment-history-details">
+            <summary class="znet-payment-history-summary">
+                <span>{{ is_en ? 'Balance history' : 'История баланса' }}</span>
+                <span class="znet-payment-history-summary-meta">
+                    <span data-history-open>{{ is_en ? 'Open' : 'Открыть' }}</span>
+                    <span data-history-close>{{ is_en ? 'Hide' : 'Скрыть' }}</span>
+                </span>
+            </summary>
 
-        <div class="table-responsive znet-shell-table-wrap">
-            {% if transactions.list %}
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>{{ is_en ? 'Description' : 'Описание' }}</th>
-                            <th>{{ is_en ? 'Date' : 'Дата' }}</th>
-                            <th>{{ is_en ? 'Amount' : 'Сумма' }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for i, tx in transactions.list %}
-                        <tr>
-                            <td>{{ tx.description }}</td>
-                            <td>{{ mf.compact_datetime(tx.created_at) }}</td>
-                            <td><strong>{{ tx.amount|money(tx.currency) }}</strong></td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="znet-shell-empty-state">
-                    <span>{{ is_en ? 'No balance operations yet' : 'Операций по балансу пока нет' }}</span>
+            <div class="znet-payment-history-body">
+                <div class="table-responsive znet-shell-table-wrap">
+                    {% if transactions.list %}
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{{ is_en ? 'Description' : 'Описание' }}</th>
+                                    <th>{{ is_en ? 'Date' : 'Дата' }}</th>
+                                    <th>{{ is_en ? 'Amount' : 'Сумма' }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for i, tx in transactions.list %}
+                                <tr>
+                                    <td>{{ tx.description }}</td>
+                                    <td>{{ mf.compact_datetime(tx.created_at) }}</td>
+                                    <td><strong>{{ tx.amount|money(tx.currency) }}</strong></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="znet-shell-empty-state">
+                            <span>{{ is_en ? 'No balance operations yet' : 'Операций по балансу пока нет' }}</span>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
-        </div>
 
-        {{ include('partial_pagination.html.twig', { 'list': transactions }) }}
+                {{ include('partial_pagination.html.twig', { 'list': transactions }) }}
+            </div>
+        </details>
     </section>
 {% endblock %}
 

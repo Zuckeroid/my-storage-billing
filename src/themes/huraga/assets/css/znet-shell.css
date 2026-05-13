@@ -574,6 +574,10 @@ html {
   gap: 14px;
 }
 
+.znet-shell-page .znet-shell-stat-grid-compact {
+  grid-template-columns: minmax(0, 360px);
+}
+
 .znet-shell-page .znet-shell-stat {
   display: grid;
   min-height: 92px;
@@ -966,6 +970,49 @@ html {
 .znet-shell-page .znet-order-panel-body {
   padding: 18px;
   color: var(--znet-text-soft);
+}
+
+.znet-shell-page .znet-service-card-list {
+  display: grid;
+  gap: 14px;
+}
+
+.znet-shell-page .znet-service-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.znet-shell-page .znet-service-card-main {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+.znet-shell-page .znet-service-card h2 {
+  margin: 0;
+  color: var(--znet-text);
+  font-size: 24px;
+  line-height: 1.16;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.znet-shell-page .znet-service-card p {
+  margin: 0;
+  color: var(--znet-text-soft);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.znet-shell-page .znet-service-card-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .znet-shell-page .znet-order-panel .well {
@@ -1803,10 +1850,15 @@ html {
 .znet-shell-page .znet-shell-empty-state {
   min-height: 220px;
   display: grid;
+  gap: 16px;
   place-items: center;
   color: var(--znet-text-soft);
   font-size: 15px;
   text-align: center;
+}
+
+.znet-shell-page .znet-service-empty {
+  justify-content: center;
 }
 
 .znet-shell-page .pagination {
@@ -2001,6 +2053,35 @@ html {
   display: none;
 }
 
+.znet-shell-page .znet-payment-state-card {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.znet-shell-page .znet-payment-state-card h2 {
+  margin: 8px 0 10px;
+  color: var(--znet-text);
+  font-size: 32px;
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.znet-shell-page .znet-payment-progress {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.znet-shell-page .znet-payment-redirect-form {
+  margin-top: 22px;
+}
+
+.znet-shell-page .znet-payment-embedded {
+  margin-top: 22px;
+}
+
 .znet-shell-page .znet-shell-inline-tabs {
   display: flex;
   align-items: flex-start;
@@ -2177,10 +2258,6 @@ html {
     padding: 18px 0 36px;
   }
 
-  .znet-shell-page.znet-shell-client .znet-shell-stage {
-    padding-top: 0;
-  }
-
   .znet-shell-page .znet-shell-stage-inner {
     min-height: auto;
   }
@@ -2191,27 +2268,13 @@ html {
     opacity: 0.9;
   }
 
-  .znet-shell-page.znet-shell-client .znet-shell-globe {
-    top: 14px;
-    width: min(78vw, 430px);
-    opacity: 0.68;
-  }
-
   .znet-shell-page .znet-shell-panel-shell {
     padding-top: min(46vw, 280px);
-  }
-
-  .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
-    padding-top: 14px;
   }
 
   .znet-shell-page .znet-shell-panel {
     min-height: auto;
     padding: 22px 20px;
-    background: var(--znet-flyout-bg);
-  }
-
-  .znet-shell-page.znet-shell-client .znet-shell-panel {
     background: var(--znet-flyout-bg);
   }
 
@@ -2263,6 +2326,16 @@ html {
   .znet-shell-page .znet-shell-card-grid-2,
   .znet-shell-page .znet-appbridge-stats {
     grid-template-columns: 1fr;
+  }
+
+  .znet-shell-page .znet-service-card {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .znet-shell-page .znet-service-card-actions,
+  .znet-shell-page .znet-service-card-actions .znet-btn {
+    width: 100%;
   }
 
   .znet-shell-page .znet-invoice-hero {
@@ -2344,10 +2417,6 @@ html {
     --znet-header-offset: 72px;
   }
 
-  .znet-shell-page-shell {
-    padding-top: 30px;
-  }
-
   .znet-shell-page .znet-container {
     width: min(var(--znet-container), calc(100% - 20px));
   }
@@ -2360,26 +2429,12 @@ html {
     padding: 12px 0 28px;
   }
 
-  .znet-shell-page.znet-shell-client .znet-shell-stage {
-    padding-top: 0;
-  }
-
   .znet-shell-page .znet-shell-globe {
     width: min(108vw, 520px);
   }
 
-  .znet-shell-page.znet-shell-client .znet-shell-globe {
-    top: 12px;
-    width: min(82vw, 360px);
-    opacity: 0.62;
-  }
-
   .znet-shell-page .znet-shell-panel-shell {
     padding-top: min(52vw, 250px);
-  }
-
-  .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
-    padding-top: 14px;
   }
 
   .znet-shell-page .znet-shell-panel {

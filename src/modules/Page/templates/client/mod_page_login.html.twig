@@ -3,12 +3,12 @@
 {% set company = guest.system_company %}
 
 {% block meta_title %}{{ 'Login'|trans }}{% endblock %}
-{% block meta_description %}{{ 'Sign in to manage your services, invoices, and access details.'|trans }}{% endblock %}
+{% block meta_description %}{{ 'Sign in to manage your connection, payments, and profile.'|trans }}{% endblock %}
 
 {% block body_class %}page-login{% endblock %}
 {% block shell_eyebrow %}{{ 'Access'|trans }}{% endblock %}
 {% block shell_title %}{{ 'Login'|trans }}{% endblock %}
-{% block shell_description %}{{ 'Sign in to manage your services, invoices, and access details.'|trans }}{% endblock %}
+{% block shell_description %}{{ 'Sign in to manage your connection, payments, and profile.'|trans }}{% endblock %}
 {% block shell_head_actions %}
     {% if settings.show_signup_link %}
         <a class="znet-btn znet-btn-accent" href="{{ 'signup'|link }}">{{ 'Register'|trans }}</a>

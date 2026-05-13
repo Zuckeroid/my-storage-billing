@@ -2,60 +2,54 @@
 
 {% import "macro_functions.html.twig" as mf %}
 
-{% block meta_title %}{{ 'My Products & Services'|trans }}{% endblock %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
+
+{% block meta_title %}{{ is_en ? 'Connection' : 'Подключение' }}{% endblock %}
 {% block meta_description %}{% endblock %}
-{% block shell_title %}{{ is_en ? 'Services' : 'Товары и услуги' }}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Connection' : 'Подключение' }}{% endblock %}
 {% block shell_description %}{% endblock %}
 
 {% block body_class %}order-list{% endblock %}
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">{{ 'Services'|trans }}</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Connection' : 'Подключение' }}</li>
 {% endblock %}
 
 {% block content %}
     {% set orders = client.order_get_list({"per_page":10, "page":request.page, "hide_addons":1}) %}
 
     <section class="znet-shell-section">
-        <div class="table-responsive znet-shell-table-wrap">
-            {% if orders.list %}
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                    <tr>
-                        <th>{{ 'Order ID'|trans }}</th>
-                        <th>{{ 'Product/Service'|trans }}</th>
-                        <th>{{ 'Price'|trans }}</th>
-                        <th>{{ 'Next due date'|trans }}</th>
-                        <th>{{ 'Status'|trans }}</th>
-                        <th>{{ 'Actions'|trans }}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for order in orders.list %}
-                        <tr>
-                            <td><a href="{{ '/order/service/manage'|link }}/{{ order.id }}">#{{ order.id }}</a></td>
-                            <td>{{ order.title }}</td>
-                            <td>{{ order.total | money(order.currency) }}{% if order.period %} {{ order.period | period_title }}{% endif %}</td>
-                            <td>{% if order.expires_at %}{{ mf.compact_datetime(order.expires_at) }}{% else %}-{% endif %}</td>
-                            <td>
-                                <span class="badge {% if order.status == 'active' %}text-bg-success{% elseif order.status == 'pending_setup' %}text-bg-warning{% elseif order.status == 'failed_setup' or order.status == 'suspended' or order.status == 'failed_renew' %}text-bg-danger{% elseif order.status == 'canceled' %}text-bg-secondary{% else %}text-bg-secondary{% endif %}">
-                                    {{ mf.status_name(order.status) }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="znet-shell-table-actions">
-                                    <a class="znet-btn znet-btn-outline" href="{{ '/order/service/manage'|link }}/{{ order.id }}">{{ 'Manage'|trans }}</a>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="znet-shell-empty-state">
-                    <span>{{ 'No orders yet'|trans }}</span>
-                </div>
-            {% endif %}
-        </div>
+        {% if orders.list %}
+            <div class="znet-service-card-list">
+                {% for order in orders.list %}
+                    <article class="znet-service-card">
+                        <div class="znet-service-card-main">
+                            <span class="badge {% if order.status == 'active' %}text-bg-success{% elseif order.status == 'pending_setup' %}text-bg-warning{% elseif order.status == 'failed_setup' or order.status == 'suspended' or order.status == 'failed_renew' %}text-bg-danger{% elseif order.status == 'canceled' %}text-bg-secondary{% else %}text-bg-secondary{% endif %}">
+                                {{ mf.status_name(order.status) }}
+                            </span>
+                            <h2>{{ order.title }}</h2>
+                            <p>
+                                {% if order.expires_at %}
+                                    {{ is_en ? 'Paid through' : 'Оплачен до' }} {{ mf.compact_datetime(order.expires_at) }}
+                                {% else %}
+                                    {{ is_en ? 'No expiration date yet' : 'Дата окончания пока не назначена' }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="znet-service-card-actions">
+                            <a class="znet-btn znet-btn-accent" href="{{ '/order/service/manage'|link }}/{{ order.id }}">
+                                {{ is_en ? 'Open connection' : 'Открыть подключение' }}
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="znet-shell-empty-state znet-service-empty">
+                <span>{{ is_en ? 'No active connection yet' : 'Подключение пока не оформлено' }}</span>
+                <a class="znet-btn znet-btn-accent" href="{{ 'invoice'|link }}#plans">{{ is_en ? 'Choose plan' : 'Выбрать тариф' }}</a>
+            </div>
+        {% endif %}
 
         {{ include('partial_pagination.html.twig', { 'list': orders }) }}
     </section>

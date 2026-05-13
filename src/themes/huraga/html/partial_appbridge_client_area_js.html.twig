@@ -260,7 +260,7 @@
                     return;
                 }
 
-                const confirmed = window.confirm('{{ is_en ? 'This will create a renewal invoice. Continue?' : 'Будет создан счет на продление. Продолжить?' }}');
+                const confirmed = window.confirm('{{ is_en ? 'Open renewal payment?' : 'Открыть оплату продления?' }}');
                 if (!confirmed) {
                     return;
                 }

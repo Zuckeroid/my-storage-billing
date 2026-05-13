@@ -110,44 +110,22 @@
         </section>
 
         <section class="znet-shell-section">
-            <div class="znet-shell-card-grid znet-shell-card-grid-2">
-                <article class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-                            <div>
-                                <h2 class="h5 mb-1">{{ is_en ? 'Payment' : 'Оплата' }}</h2>
-                                <p class="text-secondary mb-0">
-                                    {{ is_en
-                                        ? 'Plans, payments, and balance are here.'
-                                        : 'Тарифы, платежи и баланс находятся здесь.' }}
-                                </p>
-                            </div>
+            <article class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1">{{ is_en ? 'Help' : 'Помощь' }}</h2>
+                            <p class="text-secondary mb-0">
+                                {{ is_en
+                                    ? 'Write to us if payment, connection, or the app needs attention.'
+                                    : 'Напишите нам, если нужно помочь с оплатой, подключением или приложением.' }}
+                            </p>
                         </div>
-                        <p class="mb-0 text-secondary">{{ is_en ? 'Balance:' : 'Баланс:' }} <strong>{{ profile.balance | money(profile.currency) }}</strong></p>
-                        <div class="znet-shell-link-row mt-3">
-                            <a class="btn btn-sm btn-outline-primary" href="{{ 'invoice'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>
-                            <a class="btn btn-sm btn-outline-primary" href="{{ 'client/balance'|link }}">{{ is_en ? 'Balance' : 'Баланс' }}</a>
-                        </div>
+                        <a class="btn btn-sm btn-outline-primary" href="{{ '/contacts'|link }}">{{ is_en ? 'Contact' : 'Написать' }}</a>
                     </div>
-                </article>
-
-                <article class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-                            <div>
-                                <h2 class="h5 mb-1">{{ is_en ? 'Help' : 'Помощь' }}</h2>
-                                <p class="text-secondary mb-0">
-                                    {{ is_en
-                                        ? 'Write to us if payment, connection, or the app needs attention.'
-                                        : 'Напишите нам, если нужно помочь с оплатой, подключением или приложением.' }}
-                                </p>
-                            </div>
-                            <a class="btn btn-sm btn-outline-primary" href="{{ '/contacts'|link }}">{{ is_en ? 'Contact' : 'Написать' }}</a>
-                        </div>
-                        <p class="mb-0 text-secondary">{{ profile.email }}</p>
-                    </div>
-                </article>
-            </div>
+                    <p class="mb-0 text-secondary">{{ profile.email }}</p>
+                </div>
+            </article>
         </section>
     {% endif %}
 {% endblock %}

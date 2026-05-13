@@ -1,43 +1,56 @@
 {% extends request.ajax ? "layout_blank.html.twig" : "layout_default.html.twig" %}
 
-{% block meta_title %}{{ 'Processing Payment...'|trans }}{% endblock %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
-    {% block breadcrumb %}
-        <li class="breadcrumb-item"><a href="{{ '/invoice'|link }}">{{ 'Invoices'|trans }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Payment</li>
-    {% endblock %}
+{% block meta_title %}{{ is_en ? 'Opening payment' : 'Открываем оплату' }}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Opening payment' : 'Открываем оплату' }}{% endblock %}
+{% block shell_description %}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{{ '/invoice'|link }}">{{ is_en ? 'Payments' : 'Платежи' }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Opening payment' : 'Открываем оплату' }}</li>
+{% endblock %}
 
 {% block content %}
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h1>{{ 'Processing Payment...'|trans }}</h1>
-                <p>{{ 'Thank you for your patience.'|trans }}</p>
-            </div>
+    <section class="znet-shell-section">
+        <article class="card znet-payment-state-card">
             <div class="card-body">
+                <span class="znet-shell-eyebrow">{{ is_en ? 'Payment' : 'Оплата' }}</span>
+                <h2>{{ is_en ? 'Redirecting to the payment page' : 'Переходим на страницу оплаты' }}</h2>
+                <p class="text-secondary">
+                    {{ is_en
+                        ? 'If nothing happens automatically, press the button below.'
+                        : 'Если переход не начался автоматически, нажмите кнопку ниже.' }}
+                </p>
+
                 {% if payment.type == 'html' %}
-                    {{ payment.result|raw }}
+                    <div class="znet-payment-embedded">
+                        {{ payment.result|raw }}
+                    </div>
                 {% endif %}
+
                 {% if payment.type == 'form' %}
-                    <h2>{{ 'Redirecting to Payment Gateway...'|trans }}</h2>
-                    <form method="post" action="{{ payment.service_url }}" name="payment_form">
-                            {% for key, value in payment.result %}
-                                <input type="hidden" name="{{ key }}" value="{{ value }}" />
-                            {% endfor %}
-                        <input class="btn btn-primary" type="submit" value="{{ 'Please click here to continue if this page does not redirect automatically in 5 seconds'|trans }}" id="payment_button"/>
+                    <form method="post" action="{{ payment.service_url }}" name="payment_form" class="znet-payment-redirect-form">
+                        {% for key, value in payment.result %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}" />
+                        {% endfor %}
+                        <button class="btn btn-primary" type="submit" id="payment_button">
+                            {{ is_en ? 'Continue to payment' : 'Перейти к оплате' }}
+                        </button>
                     </form>
 
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            document.getElementById('payment_button').style.display = 'none';
+                            const button = document.getElementById('payment_button');
+                            if (button) {
+                                button.style.display = 'none';
+                            }
                             document.forms["payment_form"].submit();
                         });
                     </script>
                 {% endif %}
             </div>
-        </div>
-    </div>
-</div>
+        </article>
+    </section>
 {% endblock %}

@@ -23,7 +23,7 @@
 
 {% block body_class %}order-manage{% endblock %}
 {% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{{ 'order/service' | link}}">{{ 'Services'|trans }}</a></li>
+<li class="breadcrumb-item"><a href="{{ 'order/service' | link}}">{{ is_en ? 'Connection' : 'Подключение' }}</a></li>
 <li class="breadcrumb-item active" aria-current="page">{{ order.title }}</li>
 {% endblock %}
 
@@ -66,7 +66,7 @@
                         <button class="btn btn-primary" type="button" id="renewal-button">{{ is_en ? 'Renew' : 'Продлить' }}</button>
                     {% endif %}
                     <a class="btn btn-outline-primary" href="{{ '/contacts'|link }}">{{ is_en ? 'Contact support' : 'Написать в поддержку' }}</a>
-                    <a class="btn btn-outline-primary" href="{{ 'order/service'|link }}">{{ is_en ? 'All services' : 'Все услуги' }}</a>
+                    <a class="btn btn-outline-primary" href="{{ 'order/service'|link }}">{{ is_en ? 'Connection list' : 'Все подключения' }}</a>
                 </div>
             </div>
         </div>
@@ -101,6 +101,13 @@
                         <strong>{{ is_en ? 'Last error' : 'Последняя ошибка' }}:</strong> {{ orchestrator_access.error }}
                     </div>
                 {% endif %}
+
+                <div class="znet-shell-link-row mb-3">
+                    <a class="btn btn-primary" href="{{ android_apk_url }}" download>{{ is_en ? 'Download Android app' : 'Скачать Android' }}</a>
+                    {% if orchestrator_access.subscription_link %}
+                        <button class="btn btn-outline-primary" type="button" data-znet-copy-subscription>{{ is_en ? 'Copy subscription link' : 'Скопировать ссылку' }}</button>
+                    {% endif %}
+                </div>
 
                 {% if orchestrator_access.subscription_link %}
                     <label class="form-label" for="znet-subscription-link">{{ is_en ? 'Subscription link' : 'Ссылка подписки' }}</label>
@@ -456,7 +463,7 @@
                 renewalButton.addEventListener('click', function (event) {
                     event.preventDefault();
 
-                    if (confirm("{{ is_en ? 'This will create a renewal invoice. Continue?' : 'Будет создан счет на продление. Продолжить?' }}")) {
+                    if (confirm("{{ is_en ? 'Open renewal payment?' : 'Открыть оплату продления?' }}")) {
                         API.client.post('invoice/renewal_invoice', { order_id: {{ order.id }} },
                             (result) => {
                                 window.location = "{{ 'invoice'|link }}" + '/' + result;
@@ -465,10 +472,11 @@
                 });
             }
 
-            const copyButton = document.querySelector('[data-znet-copy-subscription]');
+            const copyButtons = document.querySelectorAll('[data-znet-copy-subscription]');
             const subscriptionInput = document.getElementById('znet-subscription-link');
-            if (copyButton && subscriptionInput) {
-                copyButton.addEventListener('click', async function () {
+            if (copyButtons.length && subscriptionInput) {
+                copyButtons.forEach((copyButton) => copyButton.addEventListener('click', async function () {
+                    const originalText = copyButton.textContent;
                     subscriptionInput.select();
                     try {
                         await navigator.clipboard.writeText(subscriptionInput.value);
@@ -478,9 +486,9 @@
                         copyButton.textContent = "{{ is_en ? 'Copied' : 'Скопировано' }}";
                     }
                     window.setTimeout(() => {
-                        copyButton.textContent = "{{ is_en ? 'Copy' : 'Скопировать' }}";
+                        copyButton.textContent = originalText;
                     }, 1800);
-                });
+                }));
             }
         });
     </script>
