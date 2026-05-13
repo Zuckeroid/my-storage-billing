@@ -1192,8 +1192,7 @@ html {
   align-items: center;
 }
 
-.znet-shell-page .znet-invoice-actions,
-.znet-shell-page .znet-invoice-modal-actions {
+.znet-shell-page .znet-invoice-actions {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1272,34 +1271,6 @@ html {
   margin: 0;
   color: var(--znet-text);
   overflow-wrap: anywhere;
-}
-
-.znet-shell-page .znet-invoice-modal .modal-content {
-  border: 1px solid rgba(134, 239, 172, 0.14);
-  border-radius: 8px;
-  background: rgba(1, 4, 9, 0.96);
-  color: var(--znet-text);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
-}
-
-.znet-shell-page .znet-invoice-modal .modal-header,
-.znet-shell-page .znet-invoice-modal .modal-body {
-  border-color: rgba(255, 255, 255, 0.08);
-  padding: 18px;
-}
-
-.znet-shell-page .znet-invoice-modal .modal-title {
-  color: var(--znet-text);
-  font-weight: 800;
-}
-
-.znet-shell-page .znet-invoice-modal p {
-  color: var(--znet-text-soft);
-}
-
-.znet-shell-page .znet-invoice-modal .btn-close {
-  filter: invert(1) grayscale(1);
-  opacity: 0.72;
 }
 
 .znet-shell-page #orderManager .znet-order-plan-list {
@@ -2287,9 +2258,7 @@ html {
   }
 
   .znet-shell-page .znet-invoice-actions,
-  .znet-shell-page .znet-invoice-actions .znet-btn,
-  .znet-shell-page .znet-invoice-modal-actions,
-  .znet-shell-page .znet-invoice-modal-actions .znet-btn {
+  .znet-shell-page .znet-invoice-actions .znet-btn {
     width: 100%;
   }
 

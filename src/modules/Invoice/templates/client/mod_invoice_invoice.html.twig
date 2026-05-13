@@ -9,14 +9,14 @@
 {% set buyer = invoice.buyer %}
 {% set invoice_status_class = invoice.status == 'paid' ? 'text-bg-success' : (invoice.status == 'unpaid' ? 'text-bg-warning' : (invoice.status == 'canceled' ? 'text-bg-secondary' : 'text-bg-danger')) %}
 
-{% block meta_title %}{{ is_en ? 'Invoice' : 'Счет' }} #{{ nr }}{% endblock %}
+{% block meta_title %}{{ is_en ? 'Payment' : 'Оплата' }} #{{ nr }}{% endblock %}
 {% block meta_description %}{% endblock %}
-{% block shell_title %}{{ is_en ? 'Invoice' : 'Счет' }} #{{ nr }}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Payment' : 'Оплата' }} #{{ nr }}{% endblock %}
 {% block shell_description %}{% endblock %}
 {% block body_class %}invoice-invoice{% endblock %}
 
 {% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{{ '/invoice'|link }}">{{ is_en ? 'Invoices' : 'Счета' }}</a></li>
+    <li class="breadcrumb-item"><a href="{{ '/invoice'|link }}">{{ is_en ? 'Payments' : 'Платежи' }}</a></li>
     <li class="breadcrumb-item active" aria-current="page">#{{ nr }}</li>
 {% endblock %}
 
@@ -25,13 +25,13 @@
         <div class="znet-invoice-hero">
             <div class="znet-invoice-hero-main">
                 <span class="badge {{ invoice_status_class }}">{{ mf.status_name(invoice.status) }}</span>
-                <h2>{{ is_en ? 'Invoice' : 'Счет' }} #{{ nr }}</h2>
+                <h2>{{ is_en ? 'Payment' : 'Оплата' }} #{{ nr }}</h2>
                 {% if invoice.status == 'unpaid' %}
                     <p>{{ is_en ? 'Choose a payment method below. After payment, the service status will update automatically.' : 'Выберите способ оплаты ниже. После оплаты статус услуги обновится автоматически.' }}</p>
                 {% elseif invoice.status == 'paid' %}
-                    <p>{{ is_en ? 'Payment has been received. You can return to your services or keep this invoice for your records.' : 'Оплата получена. Можно вернуться к услугам или сохранить счет для истории.' }}</p>
+                    <p>{{ is_en ? 'Payment has been received. You can return to your services or keep this record for history.' : 'Оплата получена. Можно вернуться к услугам или сохранить запись для истории.' }}</p>
                 {% else %}
-                    <p>{{ is_en ? 'This invoice is not waiting for payment.' : 'Этот счет сейчас не ожидает оплаты.' }}</p>
+                    <p>{{ is_en ? 'This payment is not waiting for action.' : 'Эта оплата сейчас не требует действий.' }}</p>
                 {% endif %}
             </div>
             <div class="znet-invoice-hero-total">
@@ -93,10 +93,9 @@
             <div class="znet-invoice-gateway-grid">
                 {% for gtw in guest.invoice_gateways %}
                     {% if invoice.currency in gtw.accepted_currencies %}
-                        <button
-                            type="button"
+                        <a
+                            href="{{ 'invoice/banklink'|link }}/{{ invoice.hash }}/{{ gtw.id }}?allow_subscription=0"
                             class="znet-invoice-gateway"
-                            onclick="paymentPrompt('{{ gtw.id }}', {{ gtw.allow_recurrent ? 'true' : 'false' }}, `{{ gtw.title|e('js') }}`)"
                         >
                             <span class="znet-invoice-gateway-logo">
                                 {% if gtw.logo.logo|default('') %}
@@ -113,11 +112,11 @@
                                 <strong>{{ gtw.title }}</strong>
                                 <small>{{ is_en ? 'Continue to payment' : 'Перейти к оплате' }}</small>
                             </span>
-                        </button>
+                        </a>
                     {% endif %}
                 {% else %}
                     <div class="znet-shell-empty-state">
-                        {{ is_en ? 'No payment methods are available for this invoice.' : 'Для этого счета нет доступных способов оплаты.' }}
+                        {{ is_en ? 'No payment methods are available right now.' : 'Сейчас нет доступных способов оплаты.' }}
                     </div>
                 {% endfor %}
             </div>
@@ -127,7 +126,7 @@
     <section class="znet-shell-section">
         <div class="znet-shell-section-head znet-invoice-section-head">
             <div>
-                <h2>{{ is_en ? 'Invoice details' : 'Состав счета' }}</h2>
+                <h2>{{ is_en ? 'Payment details' : 'Состав оплаты' }}</h2>
             </div>
             <div class="znet-invoice-actions">
                 <a href="{{ 'invoice/pdf'|link }}/{{ invoice.hash }}" target="_blank" class="znet-btn znet-btn-outline">{{ 'PDF'|trans }}</a>
@@ -226,7 +225,7 @@
                             <dd>{{ seller.email }}</dd>
                         {% endif %}
                         {% if seller.account_number|trim %}
-                            <dt>{{ is_en ? 'Account' : 'Счет' }}</dt>
+                            <dt>{{ is_en ? 'Account' : 'Расчетный счет' }}</dt>
                             <dd>{{ seller.account_number }}</dd>
                         {% endif %}
                         {% if seller.note|trim %}
@@ -271,78 +270,4 @@
         </div>
     </section>
 
-    <div class="modal modal-lg fade znet-invoice-modal" id="paymentPrompt" tabindex="-1" aria-labelledby="paymentPromptLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="paymentPromptLabel"></h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ is_en ? 'Close' : 'Закрыть' }}"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="bodyText"></p>
-                    <div class="znet-invoice-modal-actions">
-                        <a href="#" class="znet-btn znet-btn-accent" id="single">{{ is_en ? 'Pay once' : 'Оплатить один раз' }}</a>
-                        <a href="#" class="znet-btn znet-btn-accent" id="subscription" hidden="true">{{ is_en ? 'Pay and create subscription' : 'Оплатить и создать подписку' }}</a>
-                        <a href="#" class="znet-btn znet-btn-accent" id="pay-nondescript" hidden="true">{{ is_en ? 'Pay' : 'Оплатить' }}</a>
-                        <button type="button" class="znet-btn znet-btn-outline" data-bs-dismiss="modal">{{ is_en ? 'Cancel' : 'Отмена' }}</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endblock %}
-
-{% block js %}
-<script>
-    function paymentPrompt(id, supportsSubscription, title) {
-        const invoiceHash = "{{ invoice.hash }}";
-        const backLink = "{{ 'invoice/banklink'|link }}";
-        const paymentLink = new URL(backLink.concat('/', invoiceHash, '/', id), window.location.origin);
-        const invoiceSubscribable = {{ invoice.subscribable ? 'true' : 'false' }};
-
-        {% set anyGatewayDoesSubscriptions = false %}
-        {% for gtw in guest.invoice_gateways %}
-            {% if gtw.allow_recurrent %}
-                {% set anyGatewayDoesSubscriptions = true %}
-            {% endif %}
-        {% endfor %}
-
-        const canAnyGatewayDoSubs = {{ anyGatewayDoesSubscriptions ? 'true' : 'false' }};
-        const bodyText = document.getElementById('bodyText');
-        const subscription = document.getElementById('subscription');
-        const single = document.getElementById('single');
-        const payNondescript = document.getElementById('pay-nondescript');
-
-        {% if settings.prompt_subscription %}
-            single.hidden = false;
-            payNondescript.hidden = true;
-            if (supportsSubscription && invoiceSubscribable) {
-                bodyText.textContent = `{{ is_en ? 'This invoice and payment method support recurring payments. Choose how you want to continue.' : 'Этот счет и способ оплаты поддерживают регулярные платежи. Выберите, как продолжить.' }}`;
-                subscription.hidden = false;
-            } else if (!invoiceSubscribable) {
-                bodyText.textContent = `{{ is_en ? 'Continue with the selected payment method.' : 'Продолжите оплату выбранным способом.' }}`;
-                subscription.hidden = true;
-            } else {
-                bodyText.textContent = canAnyGatewayDoSubs
-                    ? `{{ is_en ? 'Continue with this method or choose another method if you need recurring payments.' : 'Продолжите этим способом или выберите другой, если нужна подписка.' }}`
-                    : `{{ is_en ? 'Continue with the selected payment method.' : 'Продолжите оплату выбранным способом.' }}`;
-                subscription.hidden = true;
-            }
-        {% else %}
-            bodyText.textContent = `{{ is_en ? 'Continue with the selected payment method.' : 'Продолжите оплату выбранным способом.' }}`;
-            subscription.hidden = true;
-            single.hidden = true;
-            payNondescript.hidden = false;
-        {% endif %}
-
-        document.getElementById('paymentPromptLabel').textContent = `{{ is_en ? 'Payment method' : 'Способ оплаты' }}: ${title}`;
-        subscription.href = paymentLink.href;
-        payNondescript.href = paymentLink.href;
-        paymentLink.searchParams.append('allow_subscription', 0);
-        single.href = paymentLink.href;
-
-        const modal = new bootstrap.Modal('#paymentPrompt');
-        modal.show();
-    }
-</script>
 {% endblock %}

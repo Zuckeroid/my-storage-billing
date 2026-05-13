@@ -7,14 +7,14 @@
 {% set paid_invoices = client.invoice_get_list({"status":"paid", "per_page":10, "page":request.page}) %}
 {% set active_tab = request.tab in ['paid', 'unpaid'] ? request.tab : 'all' %}
 
-{% block meta_title %}{{ is_en ? 'Invoices' : 'Счета' }}{% endblock %}
+{% block meta_title %}{{ is_en ? 'Payments' : 'Платежи' }}{% endblock %}
 {% block meta_description %}{% endblock %}
-{% block shell_title %}{{ is_en ? 'Invoices' : 'Счета' }}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Payments' : 'Платежи' }}{% endblock %}
 {% block shell_description %}{% endblock %}
 
 {% block body_class %}invoice-index{% endblock %}
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Invoices' : 'Счета' }}</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Payments' : 'Платежи' }}</li>
 {% endblock %}
 
 {% macro invoice_actions(invoice, is_en) %}
@@ -25,15 +25,15 @@
                 method="post"
                 action="{{ 'api/client/invoice/cancel'|link }}"
                 class="znet-shell-inline-form"
-                onsubmit="return confirm('{{ (is_en ? 'Cancel this invoice?' : 'Отменить этот счет?')|e('js') }}');"
+                onsubmit="return confirm('{{ (is_en ? 'Cancel this payment?' : 'Отменить эту оплату?')|e('js') }}');"
                 {{ fb_api_form({reload: true}) }}
             >
                 <input type="hidden" name="hash" value="{{ invoice.hash }}">
                 <button
                     type="submit"
                     class="znet-btn znet-btn-outline znet-btn-icon-only"
-                    aria-label="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
-                    title="{{ is_en ? 'Cancel invoice' : 'Отменить счет' }}"
+                    aria-label="{{ is_en ? 'Cancel payment' : 'Отменить оплату' }}"
+                    title="{{ is_en ? 'Cancel payment' : 'Отменить оплату' }}"
                 >
                     <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M6 6l12 12"></path>
@@ -51,7 +51,7 @@
 
 {% block content %}
     <section class="znet-shell-section">
-        <nav class="znet-shell-inline-tabs" aria-label="{{ is_en ? 'Invoice filters' : 'Фильтры счетов' }}">
+        <nav class="znet-shell-inline-tabs" aria-label="{{ is_en ? 'Payment filters' : 'Фильтры платежей' }}">
             <a class="znet-shell-inline-tab{% if active_tab == 'all' %} is-active{% endif %}" href="{{ 'invoice'|link }}">
                 <span>{{ is_en ? 'All' : 'Все' }}</span>
                 {% if visible_all_invoices|length %}
@@ -59,7 +59,7 @@
                 {% endif %}
             </a>
             <a class="znet-shell-inline-tab{% if active_tab == 'unpaid' %} is-active{% endif %}" href="{{ 'invoice'|link({ tab: 'unpaid' }) }}">
-                <span>{{ is_en ? 'Unpaid' : 'Неоплаченные' }}</span>
+                <span>{{ is_en ? 'To pay' : 'К оплате' }}</span>
                 {% if unpaid_invoices.total %}
                     <span class="znet-shell-inline-tab-count">{{ unpaid_invoices.total }}</span>
                 {% endif %}
@@ -77,7 +77,7 @@
                 <thead>
                 {% if active_tab == 'paid' %}
                     <tr>
-                        <th>{{ is_en ? 'Invoice' : 'Счет' }}</th>
+                        <th>{{ is_en ? 'Payment' : 'Платеж' }}</th>
                         <th>{{ is_en ? 'Created' : 'Создан' }}</th>
                         <th>{{ is_en ? 'Paid' : 'Оплачен' }}</th>
                         <th>{{ is_en ? 'Total' : 'Сумма' }}</th>
@@ -85,7 +85,7 @@
                     </tr>
                 {% elseif active_tab == 'all' %}
                     <tr>
-                        <th>{{ is_en ? 'Invoice' : 'Счет' }}</th>
+                        <th>{{ is_en ? 'Payment' : 'Платеж' }}</th>
                         <th>{{ is_en ? 'Created' : 'Создан' }}</th>
                         <th>{{ is_en ? 'Status' : 'Статус' }}</th>
                         <th>{{ is_en ? 'Total' : 'Сумма' }}</th>
@@ -93,7 +93,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <th>{{ is_en ? 'Invoice' : 'Счет' }}</th>
+                        <th>{{ is_en ? 'Payment' : 'Платеж' }}</th>
                         <th>{{ is_en ? 'Created' : 'Создан' }}</th>
                         <th>{{ is_en ? 'Due date' : 'Срок оплаты' }}</th>
                         <th>{{ is_en ? 'Total' : 'Сумма' }}</th>
@@ -105,7 +105,7 @@
                 {% if active_tab == 'paid' %}
                     {% for invoice in paid_invoices.list %}
                         <tr>
-                            <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Invoice' : 'Счет' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
+                            <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Payment' : 'Платеж' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
                             <td>{{ invoice.created_at|format_date }}</td>
                             <td>{{ invoice.paid_at|format_date }}</td>
                             <td>{{ invoice.total | money(invoice.currency) }}</td>
@@ -120,7 +120,7 @@
                     {% for invoice in visible_all_invoices %}
                         {% set invoice_status_class = invoice.status == 'paid' ? 'text-bg-success' : (invoice.status == 'unpaid' ? 'text-bg-warning' : (invoice.status == 'canceled' ? 'text-bg-secondary' : 'text-bg-danger')) %}
                         <tr>
-                            <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Invoice' : 'Счет' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
+                            <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Payment' : 'Платеж' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
                             <td>{{ invoice.created_at|format_date }}</td>
                             <td><span class="badge {{ invoice_status_class }}">{{ invoice.status|trans }}</span></td>
                             <td>{{ invoice.total | money(invoice.currency) }}</td>
@@ -134,7 +134,7 @@
                 {% else %}
                     {% for invoice in unpaid_invoices.list %}
                         <tr>
-                            <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Invoice' : 'Счет' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
+                            <td><a href="{{ 'invoice'|link }}/{{ invoice.hash }}">{{ is_en ? 'Payment' : 'Платеж' }} #{{ invoice.serie ~ "%05s"|format(invoice.nr) }}</a></td>
                             <td>{{ invoice.created_at|format_date }}</td>
                             <td>{{ invoice.due_at|format_date }}</td>
                             <td>{{ invoice.total | money(invoice.currency) }}</td>

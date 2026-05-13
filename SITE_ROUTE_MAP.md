@@ -18,7 +18,7 @@ Product-level templates:
 | --- | --- | --- | --- |
 | Home | `layout_public` + `znet_homepage.html.twig` | Guest `/` only | Immersive marketing/pricing page. Keep separate from billing shell. |
 | Public | `layout_default.html.twig` without logged-in client context | Auth, legal, checkout, contacts, payment info | One shared shell, one header, one card/panel language. |
-| Client | `layout_default.html.twig` with logged-in client context | Dashboard, services, invoices, balance, profile | Minimal dashboard. Hide billing internals unless they help the user. |
+| Client | `layout_default.html.twig` with logged-in client context | Dashboard, services, payments, balance, profile | Minimal dashboard. Hide billing internals unless they help the user. |
 
 Service exceptions:
 
@@ -30,7 +30,7 @@ Service exceptions:
 | Route | Type | Template / module | Current role | Decision |
 | --- | --- | --- | --- | --- |
 | `/` guest | Home | `Index` override in `src/themes/huraga/html/mod_index_dashboard.html.twig` -> `znet_homepage.html.twig` | Main public page with plans | Canonical. Keep as the only marketing home. |
-| `/` logged in, `/client` | Client | `mod_index_dashboard.html.twig` + `layout_default` | "Ваш Znet" dashboard | Canonical. Keep simple: services, unpaid invoices, balance, support. |
+| `/` logged in, `/client` | Client | `mod_index_dashboard.html.twig` + `layout_default` | "Ваш Znet" dashboard | Canonical. Keep simple: services, payments due, balance, support. |
 | `/orderbutton` | Public / Client | `Orderbutton` | Cart, login/register, checkout | Canonical order/cart flow. Continue polishing here. |
 | `/orderbutton/js` | Service | `Orderbutton` | Widget script endpoint | Keep only if core checkout needs it. No design work. |
 | `/login` | Public | `Page/mod_page_login.html.twig` | Full login fallback | Keep as fallback, but primary login UX is the header auth panel. |
@@ -46,8 +46,8 @@ Service exceptions:
 | `/refund-policy` | Public | `Page/mod_page_refund-policy.html.twig` | Refund policy | Keep. |
 | `/client/profile` | Client | `Client/mod_client_profile.html.twig` | Profile details | Canonical. Already close to the target shell. |
 | `/client/balance`, `/balance` | Client | `Client/mod_client_balance.html.twig`, redirect alias | Wallet/top-up | Keep if balance remains part of product. Final decision after Antilopay test flow. |
-| `/invoice` | Client | `Invoice/mod_invoice_index.html.twig` | Invoice list | Canonical. Canceled invoices should stay hidden in UI. |
-| `/invoice/:hash` | Public-by-hash / Client | `Invoice/mod_invoice_invoice.html.twig` | Invoice detail/payment | Redesigned into the Znet shell. Needs live check with an unpaid invoice and real gateway. |
+| `/invoice` | Client | `Invoice/mod_invoice_index.html.twig` | Payment history, backed by invoices | Canonical. Invoices remain billing internals; UI should say payments/history. Canceled invoices stay hidden. |
+| `/invoice/:hash` | Public-by-hash / Client | `Invoice/mod_invoice_invoice.html.twig` | Payment page, backed by an invoice | Redesigned into the Znet shell. Payment gateway links go directly to banklink with subscriptions disabled. |
 | `/invoice/thank-you/:hash` | Public-by-hash / Client | `Invoice/mod_invoice_thankyou.html.twig` | Payment result | Keep. Needs style check after invoice redesign. |
 | `/invoice/banklink/:hash/:id`, `/banklink/:hash/:id` | Service | `Invoice` | Payment gateway transition | Keep as service route. No decorative work unless visible to users. |
 | `/invoice/print/:hash`, `/invoice/pdf/:hash` | Service | `Invoice` | Print/PDF export | Keep as technical output. |
@@ -122,13 +122,14 @@ Canonical pages:
 
 Current state:
 
-- Dashboard, invoices list, balance, profile, services list, and service detail are already in the Znet shell.
+- Dashboard, payment history, balance, profile, services list, and service detail are already in the Znet shell.
+- User-facing copy should say payment/history, not invoice/accounting terms.
 - The client navigation is intentionally small: overview, connection, payment, profile.
 - Support is routed through `/contacts`, not through old ticket/KB pages.
 
 Main mismatches to fix:
 
-- Invoice detail/payment page now uses the Znet shell, but payment gateway and thank-you states still need a live pass.
+- Payment detail page now uses the Znet shell, but gateway and thank-you states still need a live pass.
 - Service detail has useful information, but it can still drift into "technical manual" territory. Keep technical data collapsed.
 - Balance should either be a clear first-class feature or hidden until Antilopay/wallet behavior is confirmed.
 
@@ -148,7 +149,7 @@ Rule: these pages should be redirected, hidden from navigation, or left as techn
 1. Freeze mobile-only fixes unless a page is unusable.
 2. Confirm canonical route decisions: `/orderbutton` as cart, `/contacts` as support, no old `/order` funnel.
 3. Finish the desktop public shell pass: `/payment`, `/about-us`, legal pages, auth fallback pages.
-4. Live-check the redesigned `/invoice/:hash`, then align `/invoice/thank-you/:hash` with the same payment flow.
+4. Live-check the redesigned payment page `/invoice/:hash`, then align `/invoice/thank-you/:hash` with the same payment flow.
 5. Finish the client shell pass: dashboard, services, service detail, profile, balance.
 6. Run one full mobile pass after the desktop flows stop moving.
 7. Re-check Antilopay moderation checklist with real company details and test payment routes.
@@ -156,7 +157,7 @@ Rule: these pages should be redirected, hidden from navigation, or left as techn
 ## Immediate Next Tasks
 
 - Decide whether `/order`, `/order/:id`, and `/order/:slug` should redirect to `/orderbutton` or only remain hidden technical routes.
-- Live-check `/invoice/:hash` with unpaid and paid invoices before touching more mobile spacing.
+- Live-check `/invoice/:hash` with unpaid and paid payments before touching more mobile spacing.
 - Compare `/login`, `/signup`, and the header auth panel as one auth system.
 - Keep `/contacts` as the only visible support route.
 - After desktop is stable, make a single mobile checklist per template type: home, public shell, client shell.
