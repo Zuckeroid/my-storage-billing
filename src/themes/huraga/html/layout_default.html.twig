@@ -13,7 +13,7 @@
     {% block opengraph %}{% endblock %}
     <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
-    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260514a">
+    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260514b">
     <link rel="icon" type="image/png" sizes="256x256" href="{{ 'img/znet/favicon.png' | asset_url }}?v=znet-20260512a">
     <link rel="shortcut icon" href="{{ 'favicon.ico' | asset_url }}?v=znet-20260512a">
 
@@ -273,6 +273,16 @@
                 <div class="znet-shell-footer-brand">
                     <img class="znet-shell-brand-logo znet-shell-footer-brand-logo" src="{{ 'img/znet/Logo.png' | asset_url }}" alt="Znet">
                 </div>
+
+                {% if client %}
+                    <nav class="znet-shell-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
+                        <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
+                        <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Connection' : 'Подключение' }}</a>
+                        <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                        <a href="{{ '/client/profile'|link }}" data-znet-nav>{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}</a>
+                        <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                    </nav>
+                {% endif %}
 
                 {% if not client %}
                     <nav class="znet-shell-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
