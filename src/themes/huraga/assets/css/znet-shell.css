@@ -126,28 +126,6 @@ html {
   flex-wrap: nowrap;
 }
 
-.znet-shell-page .znet-shell-cart-link {
-  position: relative;
-}
-
-.znet-shell-page .znet-shell-cart-count {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--znet-accent);
-  color: var(--znet-accent-dark);
-  font-size: 10px;
-  font-weight: 800;
-  line-height: 1;
-}
-
 .znet-shell-page .znet-btn {
   display: inline-flex;
   align-items: center;
@@ -936,7 +914,7 @@ html {
 }
 
 .znet-shell-page .znet-order-plan-card .znet-order-plan-actions {
-  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   margin-top: 8px;
 }
 
@@ -2286,12 +2264,12 @@ html {
 
   .znet-shell-page .znet-shell-panel-head {
     min-height: auto;
-    padding-bottom: 6px;
+    padding-bottom: 14px;
     gap: 8px;
   }
 
   .znet-shell-page .znet-shell-layout {
-    padding-top: 12px;
+    padding-top: 18px;
   }
 
   .znet-shell-page .znet-shell-content {
@@ -2443,12 +2421,12 @@ html {
 
   .znet-shell-page .znet-shell-panel-head {
     min-height: auto;
-    padding-bottom: 4px;
+    padding-bottom: 14px;
     gap: 6px;
   }
 
   .znet-shell-page .znet-shell-layout {
-    padding-top: 8px;
+    padding-top: 18px;
   }
 
   .znet-shell-page .znet-shell-content {

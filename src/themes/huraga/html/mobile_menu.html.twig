@@ -1,4 +1,11 @@
 {% set is_en = is_en|default(guest.system_locale|default(settings.locale|default('ru_RU')) starts with 'en') %}
+{% set profile_name = profile_name|default('') %}
+{% if client and profile_name is empty and profile is defined %}
+    {% set profile_name = profile.first_name|default('')|trim %}
+    {% if profile_name is empty and profile.email|default('') %}
+        {% set profile_name = profile.email|split('@')|first %}
+    {% endif %}
+{% endif %}
 
 <li class="nav-item">
     <a class="nav-link d-flex align-items-center gap-2" href="{{ '/payment'|link }}">
@@ -125,7 +132,7 @@
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item"
-                           href="{{ 'client/profile'|link }}">{{ 'Profile'|trans }}</a></li>
+                           href="{{ 'client/profile'|link }}">{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}</a></li>
                     <li><a class="dropdown-item"
                            href="{{ 'client/logout'|link }}">{{ 'Sign Out'|trans }}</a></li>
                 </ul>

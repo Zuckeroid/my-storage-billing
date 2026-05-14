@@ -13,7 +13,7 @@
     {% block opengraph %}{% endblock %}
     <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
     <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
-    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260513b">
+    <link rel="stylesheet" href="{{ 'css/znet-shell.css' | asset_url }}?v=znet-shell-20260514a">
     <link rel="icon" type="image/png" sizes="256x256" href="{{ 'img/znet/favicon.png' | asset_url }}?v=znet-20260512a">
     <link rel="shortcut icon" href="{{ 'favicon.ico' | asset_url }}?v=znet-20260512a">
 
@@ -37,10 +37,12 @@
 {% set next_locale_flag = is_en ? 'ru' : 'us' %}
 {% set next_locale_label = is_en ? 'RU' : 'US' %}
 {% set shell_context = client ? 'client' : 'public' %}
-{% set cart = client ? guest.cart_get : null %}
-{% set cart_count = 0 %}
-{% if cart and cart.items is defined %}
-    {% set cart_count = cart.items|length %}
+{% set profile_name = '' %}
+{% if client and profile is defined %}
+    {% set profile_name = profile.first_name|default('')|trim %}
+    {% if profile_name is empty and profile.email|default('') %}
+        {% set profile_name = profile.email|split('@')|first %}
+    {% endif %}
 {% endif %}
 {% block shell_eyebrow %}{{ client ? '' : (is_en ? 'Page' : 'Страница') }}{% endblock %}
 {% block shell_title %}{% endblock %}
@@ -101,22 +103,12 @@
 
             <div class="znet-shell-header-actions">
                 {% if client %}
-                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'invoice'|link({ 'checkout': 1 }) }}#checkout" aria-label="{{ is_en ? 'Selected plan' : 'Выбранный тариф' }}">
-                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="9" cy="20" r="1.5"></circle>
-                            <circle cx="18" cy="20" r="1.5"></circle>
-                            <path d="M3 4h2.5l2.1 9.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L20 7H7.2"></path>
-                        </svg>
-                        {% if cart_count %}
-                            <span class="znet-shell-cart-count">{{ cart_count > 9 ? '9+' : cart_count }}</span>
-                        {% endif %}
-                    </a>
-                    <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'client/profile'|link }}" aria-label="{{ is_en ? 'Profile' : 'Профиль' }}">
+                    <a class="znet-btn znet-btn-ghost znet-btn-with-icon" href="{{ 'client/profile'|link }}" aria-label="{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}">
                         <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="12" cy="8" r="4"></circle>
                             <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
                         </svg>
-                        <span>{{ is_en ? 'Profile' : 'Профиль' }}</span>
+                        <span>{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}</span>
                     </a>
                     <a class="znet-btn znet-btn-accent" href="{{ 'client/logout'|link }}">{{ is_en ? 'Logout' : 'Выйти' }}</a>
                 {% else %}
@@ -155,17 +147,7 @@
 
             <div class="znet-shell-header-actions">
                 {% if client %}
-                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only znet-shell-cart-link" href="{{ 'invoice'|link({ 'checkout': 1 }) }}#checkout" aria-label="{{ is_en ? 'Selected plan' : 'Выбранный тариф' }}">
-                        <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="9" cy="20" r="1.5"></circle>
-                            <circle cx="18" cy="20" r="1.5"></circle>
-                            <path d="M3 4h2.5l2.1 9.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L20 7H7.2"></path>
-                        </svg>
-                        {% if cart_count %}
-                            <span class="znet-shell-cart-count">{{ cart_count > 9 ? '9+' : cart_count }}</span>
-                        {% endif %}
-                    </a>
-                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only" href="{{ 'client/profile'|link }}" aria-label="{{ is_en ? 'Profile' : 'Профиль' }}">
+                    <a class="znet-btn znet-btn-ghost znet-btn-icon-only" href="{{ 'client/profile'|link }}" aria-label="{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}">
                         <svg class="znet-btn-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="12" cy="8" r="4"></circle>
                             <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
@@ -197,11 +179,10 @@
 
             <nav class="znet-shell-menu" id="znet-shell-mobile-menu" aria-label="{{ is_en ? 'Mobile navigation' : 'Мобильная навигация' }}">
                 {% if client %}
-                    <span class="znet-shell-menu-label">{{ is_en ? 'Sections' : 'Разделы' }}</span>
                     <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
                     <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Connection' : 'Подключение' }}</a>
                     <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
-                    <a href="{{ '/client/profile'|link }}" data-znet-nav>{{ is_en ? 'Profile' : 'Профиль' }}</a>
+                    <a href="{{ '/client/profile'|link }}" data-znet-nav>{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}</a>
                     <a href="{{ 'client/logout'|link }}">{{ is_en ? 'Logout' : 'Выйти' }}</a>
                 {% else %}
                     <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
@@ -260,12 +241,11 @@
                         {% if client %}
                             <aside class="znet-shell-sidebar" aria-label="{{ is_en ? 'Client sections' : 'Разделы клиента' }}">
                                 <div class="znet-shell-sidebar-block">
-                                    <p class="znet-shell-side-label">{{ is_en ? 'Sections' : 'Разделы' }}</p>
                                     <nav class="znet-shell-side-nav">
                                         <a href="{{ '/'|link }}" data-znet-nav>{{ is_en ? 'Overview' : 'Обзор' }}</a>
                                         <a href="{{ '/order/service'|link }}" data-znet-nav>{{ is_en ? 'Connection' : 'Подключение' }}</a>
                                         <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
-                                        <a href="{{ '/client/profile'|link }}" data-znet-nav>{{ is_en ? 'Profile' : 'Профиль' }}</a>
+                                        <a href="{{ '/client/profile'|link }}" data-znet-nav>{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}</a>
                                     </nav>
                                 </div>
                             </aside>

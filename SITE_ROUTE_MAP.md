@@ -1,6 +1,6 @@
 # Znet Site Route Map
 
-Date: 2026-05-13
+Date: 2026-05-14
 
 Purpose: freeze the site structure before the next design pass. This map separates canonical user routes from legacy FOSSBilling routes and keeps the work ordered: first desktop/public and client flows, then one clean mobile pass.
 
@@ -46,7 +46,7 @@ Service exceptions:
 | `/refund-policy` | Public | `Page/mod_page_refund-policy.html.twig` | Refund policy | Keep. |
 | `/client/profile` | Client | `Client/mod_client_profile.html.twig` | Profile details | Canonical. Already close to the target shell. |
 | `/client/balance`, `/balance` | Client | `Client/mod_client_balance.html.twig`, redirect alias | Wallet/top-up | Keep if balance remains part of product. Final decision after Antilopay test flow. |
-| `/invoice` | Client | `Invoice/mod_invoice_index.html.twig` | Payment hub: plan choice, selected plan checkout, payment history | Canonical. Invoices remain billing internals; UI should say plans/payments/history. Canceled invoices stay hidden. |
+| `/invoice` | Client | `Invoice/mod_invoice_index.html.twig` | Payment hub: plan choice, plan payment, payment history | Canonical. Invoices and cart remain billing internals; UI should say plans/payments/history. Canceled invoices stay hidden. |
 | `/invoice/:hash` | Public-by-hash / Client | `Invoice/mod_invoice_invoice.html.twig` | Payment page, backed by an invoice | Redesigned into the Znet shell. Payment gateway links go directly to banklink with subscriptions disabled. |
 | `/invoice/thank-you/:hash` | Public-by-hash / Client | `Invoice/mod_invoice_thankyou.html.twig` | Payment result | Keep. Needs style check after invoice redesign. |
 | `/invoice/banklink/:hash/:id`, `/banklink/:hash/:id` | Service | `Invoice` | Payment gateway transition | Keep as service route. No decorative work unless visible to users. |

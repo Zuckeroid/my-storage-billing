@@ -41,12 +41,12 @@
             button.addEventListener('click', function(event) {
                 event.preventDefault();
 
-                if (confirm("{{ is_en ? 'Remove this selected plan?' : 'Убрать выбранный тариф?' }}")) {
+                if (confirm("{{ is_en ? 'Remove this plan?' : 'Убрать этот тариф?' }}")) {
                     var item_id = this.getAttribute('data-cart-item-id');
 
                     API.guest.post("cart/remove_item", { id: item_id },
                         () => {
-                            MyStorage.message("{{ is_en ? 'Selected plan was removed' : 'Выбранный тариф убран' }}");
+                            MyStorage.message("{{ is_en ? 'Plan was removed' : 'Тариф убран' }}");
                             window.location.reload();
                         });
                 }

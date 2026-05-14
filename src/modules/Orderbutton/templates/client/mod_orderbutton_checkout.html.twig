@@ -4,9 +4,8 @@
 <section id="checkout" class="znet-order-panel znet-order-checkout-panel">
     <div class="znet-order-panel-head">
         <div>
-            <h3>{{ is_en ? 'Selected plan' : 'Выбранный тариф' }}</h3>
+            <h3>{{ is_en ? 'Plan payment' : 'Оплата тарифа' }}</h3>
         </div>
-        <span class="badge text-bg-success">{{ cart.items | length }}</span>
     </div>
 
     {% if cart.items %}
@@ -207,7 +206,7 @@
     {% else %}
         <div class="znet-order-panel-body">
             <div class="znet-shell-empty-state">
-                {{ is_en ? 'No plan selected yet.' : 'Тариф пока не выбран.' }}
+                {{ is_en ? 'Choose a plan above to continue.' : 'Выберите тариф выше, чтобы продолжить.' }}
             </div>
         </div>
     {% endif %}
