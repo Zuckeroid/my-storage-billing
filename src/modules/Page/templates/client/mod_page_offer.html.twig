@@ -1,11 +1,13 @@
 {% extends "layout_default.html.twig" %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
-{% block meta_title %}Публичная оферта{% endblock %}
-{% block meta_description %}Публичная оферта Znet на оказание услуг VPN-доступа.{% endblock %}
+{% block meta_title %}{{ is_en ? 'Public Offer' : 'Публичная оферта' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Znet public offer for VPN access services.' : 'Публичная оферта Znet на оказание услуг VPN-доступа.' }}{% endblock %}
 {% block body_class %}page-offer{% endblock %}
 
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">Публичная оферта</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Public Offer' : 'Публичная оферта' }}</li>
 {% endblock %}
 
 {% block content %}
@@ -14,78 +16,127 @@
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">1. Стороны</h2>
-            <p>
-                Исполнитель: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
-            </p>
-            <p class="mb-0">
-                Клиент: физическое лицо, зарегистрировавшее аккаунт на сайте Znet и оплатившее выбранный тариф.
-            </p>
+            <h2 class="h5">{{ is_en ? '1. Parties' : '1. Стороны' }}</h2>
+            {% if is_en %}
+                <p>
+                    Provider: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, Tax ID {{ company.vat_number }}{% endif %}{% if company.number %}, registration number {{ company.number }}{% endif %}.
+                </p>
+                <p class="mb-0">
+                    Client: an individual who registered an account on the Znet website and paid for the selected plan.
+                </p>
+            {% else %}
+                <p>
+                    Исполнитель: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
+                </p>
+                <p class="mb-0">
+                    Клиент: физическое лицо, зарегистрировавшее аккаунт на сайте Znet и оплатившее выбранный тариф.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">2. Предмет договора</h2>
-            <p class="mb-0">
-                Исполнитель предоставляет клиенту информационно-техническую услугу VPN-доступа для личного использования
-                в пределах выбранного тарифа. Доступ, приложение и инструкции направляются через личный кабинет
-                и на email, указанный клиентом при регистрации.
-            </p>
+            <h2 class="h5">{{ is_en ? '2. Subject' : '2. Предмет договора' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    The provider supplies the client with an information and technical VPN access service for personal use
+                    within the selected plan. Access, the app, and instructions are provided through the account area
+                    and the email specified by the client during registration.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Исполнитель предоставляет клиенту информационно-техническую услугу VPN-доступа для личного использования
+                    в пределах выбранного тарифа. Доступ, приложение и инструкции направляются через личный кабинет
+                    и на email, указанный клиентом при регистрации.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">3. Тарифы и оплата</h2>
-            <p>
-                Стоимость услуги указывается на странице тарифов и в счете перед оплатой.
-                Оплата означает согласие клиента с условиями настоящей оферты.
-            </p>
-            <p class="mb-0">
-                Актуальные тарифы: {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'inline', is_en: false } %}.
-            </p>
+            <h2 class="h5">{{ is_en ? '3. Plans and payment' : '3. Тарифы и оплата' }}</h2>
+            {% if is_en %}
+                <p>
+                    The service price is shown on the plans page and before payment.
+                    Payment means the client agrees to this public offer.
+                </p>
+                <p class="mb-0">
+                    Current plans: {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'inline', is_en: true } %}.
+                </p>
+            {% else %}
+                <p>
+                    Стоимость услуги указывается на странице тарифов и в счете перед оплатой.
+                    Оплата означает согласие клиента с условиями настоящей оферты.
+                </p>
+                <p class="mb-0">
+                    Актуальные тарифы: {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'inline', is_en: false } %}.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">4. Порядок оказания услуги</h2>
-            <p class="mb-0">
-                После оплаты Исполнитель направляет инструкции на зарегистрированный email клиента.
-                Клиент отвечает за корректность указанного email и сохранность данных доступа.
-                Услуга оказывается дистанционно, физическая доставка товара не осуществляется.
-            </p>
+            <h2 class="h5">{{ is_en ? '4. Service delivery' : '4. Порядок оказания услуги' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    After payment, the provider sends instructions to the client's registered email.
+                    The client is responsible for the accuracy of the email and for keeping access data secure.
+                    The service is delivered remotely; no physical goods are delivered.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    После оплаты Исполнитель направляет инструкции на зарегистрированный email клиента.
+                    Клиент отвечает за корректность указанного email и сохранность данных доступа.
+                    Услуга оказывается дистанционно, физическая доставка товара не осуществляется.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">5. Ограничения</h2>
-            <p class="mb-0">
-                Клиент обязуется использовать сервис только в законных целях, не нарушать права третьих лиц,
-                требования законодательства РФ и правила платежных систем. При нарушении условий доступ к услуге
-                может быть ограничен.
-            </p>
+            <h2 class="h5">{{ is_en ? '5. Restrictions' : '5. Ограничения' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    The client agrees to use the service only for lawful purposes and not to violate third-party rights,
+                    Russian law, or payment system rules. If these terms are violated, service access may be restricted.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Клиент обязуется использовать сервис только в законных целях, не нарушать права третьих лиц,
+                    требования законодательства РФ и правила платежных систем. При нарушении условий доступ к услуге
+                    может быть ограничен.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">6. Возврат средств</h2>
-            <p class="mb-0">
-                Порядок отмены услуги и возврата денежных средств указан на странице
-                <a href="{{ '/refund-policy'|link }}">"Возврат средств"</a>.
-            </p>
+            <h2 class="h5">{{ is_en ? '6. Refunds' : '6. Возврат средств' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    Service cancellation and refund rules are described on the
+                    <a href="{{ '/refund-policy'|link }}">Refund Policy</a> page.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Порядок отмены услуги и возврата денежных средств указан на странице
+                    <a href="{{ '/refund-policy'|link }}">"Возврат средств"</a>.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card">
         <div class="card-body">
-            <h2 class="h5">7. Контакты</h2>
-            <p class="mb-1">Email поддержки: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
-            {% if company.tel %}<p class="mb-1">Телефон: {{ company.tel }}</p>{% endif %}
-            {% if company.address_1 %}<p class="mb-0">Адрес: {{ company.address_1 }}</p>{% endif %}
+            <h2 class="h5">{{ is_en ? '7. Contacts' : '7. Контакты' }}</h2>
+            <p class="mb-1">{{ is_en ? 'Support email' : 'Email поддержки' }}: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            {% if company.tel %}<p class="mb-1">{{ is_en ? 'Phone' : 'Телефон' }}: {{ company.tel }}</p>{% endif %}
+            {% if company.address_1 %}<p class="mb-0">{{ is_en ? 'Address' : 'Адрес' }}: {{ company.address_1 }}</p>{% endif %}
         </div>
     </section>
 {% endblock %}

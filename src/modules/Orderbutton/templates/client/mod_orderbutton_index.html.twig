@@ -2,11 +2,11 @@
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
 
-{% block meta_title %}{{ is_en ? 'Checkout' : 'Оформление заказа' }}{% endblock %}
-{% block meta_description %}{% endblock %}
+{% block meta_title %}{{ is_en ? 'Choose and pay for a plan' : 'Выбор и оплата тарифа' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Choose a Znet plan, sign in, and continue to secure payment.' : 'Выберите тариф Znet, войдите в аккаунт и перейдите к безопасной оплате.' }}{% endblock %}
 {% block body_class %}mod_orderbutton znet-orderbutton{% endblock %}
 {% block shell_eyebrow %}{% endblock %}
-{% block shell_title %}{{ is_en ? 'Checkout' : 'Оформление заказа' }}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Choose and pay for a plan' : 'Выбор и оплата тарифа' }}{% endblock %}
 {% block shell_description %}{% endblock %}
 
 {% block content %}

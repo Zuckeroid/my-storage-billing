@@ -1,11 +1,13 @@
 {% extends "layout_default.html.twig" %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
-{% block meta_title %}Оплата{% endblock %}
-{% block meta_description %}Информация об оплате тарифов Znet и порядке получения доступа после оплаты.{% endblock %}
+{% block meta_title %}{{ is_en ? 'Payment' : 'Оплата' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Information about Znet plan payment and service activation after payment.' : 'Информация об оплате тарифов Znet и порядке получения доступа после оплаты.' }}{% endblock %}
 {% block body_class %}page-payment{% endblock %}
 
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">Оплата</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Payment' : 'Оплата' }}</li>
 {% endblock %}
 
 {% block content %}
@@ -14,50 +16,88 @@
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">Доступные тарифы</h2>
-            {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'list', is_en: false } %}
+            <h2 class="h5">{{ is_en ? 'Available plans' : 'Доступные тарифы' }}</h2>
+            {% include 'partial_storage_plans.html.twig' with { storage_plan_view: 'list', is_en: is_en } %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">Порядок оплаты</h2>
-            <ol>
-                <li>Зарегистрируйтесь на сайте.</li>
-                <li>Выберите тариф в разделе "Тарифы".</li>
-                <li>Проверьте сумму счета в рублях РФ и перейдите к оплате.</li>
-                <li>Оплатите счет доступным способом: банковской картой, СБП или другим способом, показанным на платежной странице.</li>
-                <li>После подтверждения оплаты доступ к услуге активируется, а инструкции отправляются на зарегистрированный email.</li>
-            </ol>
-            <p class="mb-0">
-                Если после оплаты доступ не появился, напишите в поддержку:
-                <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
-            </p>
+            <h2 class="h5">{{ is_en ? 'Payment flow' : 'Порядок оплаты' }}</h2>
+            {% if is_en %}
+                <ol>
+                    <li>Create an account on the website.</li>
+                    <li>Choose a plan in the plans section.</li>
+                    <li>Check the total in Russian rubles and continue to payment.</li>
+                    <li>Pay using an available method: bank card, SBP, or another method shown on the payment page.</li>
+                    <li>After payment confirmation, service access is activated and instructions are sent to the registered email.</li>
+                </ol>
+                <p class="mb-0">
+                    If access does not appear after payment, contact support:
+                    <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+                </p>
+            {% else %}
+                <ol>
+                    <li>Зарегистрируйтесь на сайте.</li>
+                    <li>Выберите тариф в разделе "Тарифы".</li>
+                    <li>Проверьте сумму счета в рублях РФ и перейдите к оплате.</li>
+                    <li>Оплатите счет доступным способом: банковской картой, СБП или другим способом, показанным на платежной странице.</li>
+                    <li>После подтверждения оплаты доступ к услуге активируется, а инструкции отправляются на зарегистрированный email.</li>
+                </ol>
+                <p class="mb-0">
+                    Если после оплаты доступ не появился, напишите в поддержку:
+                    <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">Безопасность платежей</h2>
-            <p>
-                Оплата проходит на защищенной платежной странице платежного провайдера. Данные банковской карты
-                вводятся на стороне платежного сервиса и не сохраняются на сайте Znet.
-            </p>
-            <p class="mb-0">
-                При оплате могут быть доступны банковские карты МИР, Visa, Mastercard, СБП и другие способы,
-                подключенные платежным провайдером.
-            </p>
+            <h2 class="h5">{{ is_en ? 'Payment security' : 'Безопасность платежей' }}</h2>
+            {% if is_en %}
+                <p>
+                    Payment is completed on the protected payment page of the payment provider. Bank card details
+                    are entered on the payment provider side and are not stored on the Znet website.
+                </p>
+                <p class="mb-0">
+                    MIR, Visa, Mastercard, SBP, and other methods connected by the payment provider may be available.
+                </p>
+            {% else %}
+                <p>
+                    Оплата проходит на защищенной платежной странице платежного провайдера. Данные банковской карты
+                    вводятся на стороне платежного сервиса и не сохраняются на сайте Znet.
+                </p>
+                <p class="mb-0">
+                    При оплате могут быть доступны банковские карты МИР, Visa, Mastercard, СБП и другие способы,
+                    подключенные платежным провайдером.
+                </p>
+            {% endif %}
+            <div class="znet-payment-logo-row" aria-label="{{ is_en ? 'Supported payment methods' : 'Поддерживаемые способы оплаты' }}">
+                <span class="znet-payment-logo znet-payment-logo-mir">МИР</span>
+                <span class="znet-payment-logo">Visa</span>
+                <span class="znet-payment-logo">Mastercard</span>
+                <span class="znet-payment-logo">СБП</span>
+            </div>
         </div>
     </section>
 
     <section class="card">
         <div class="card-body">
-            <h2 class="h5">Оказание услуги</h2>
-            <p class="mb-0">
-                Znet оказывает услугу дистанционно. Физическая доставка товара не осуществляется:
-                доступ к VPN-сервису, приложение и инструкции предоставляются в электронном виде через личный кабинет
-                и email клиента.
-            </p>
+            <h2 class="h5">{{ is_en ? 'Service delivery' : 'Оказание услуги' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    Znet provides the service remotely. No physical goods are delivered:
+                    VPN access, the app, and instructions are provided digitally through the account area
+                    and the client email.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Znet оказывает услугу дистанционно. Физическая доставка товара не осуществляется:
+                    доступ к VPN-сервису, приложение и инструкции предоставляются в электронном виде через личный кабинет
+                    и email клиента.
+                </p>
+            {% endif %}
         </div>
     </section>
 {% endblock %}

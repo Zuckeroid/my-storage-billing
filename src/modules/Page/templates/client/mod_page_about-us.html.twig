@@ -1,11 +1,13 @@
 {% extends "layout_default.html.twig" %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
-{% block meta_title %}О сервисе{% endblock %}
-{% block meta_description %}Znet — сервис защищенного VPN-доступа для личного использования.{% endblock %}
+{% block meta_title %}{{ is_en ? 'About Znet' : 'О сервисе' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Znet is a secure VPN access service for personal use.' : 'Znet — сервис защищенного VPN-доступа для личного использования.' }}{% endblock %}
 {% block body_class %}about-us{% endblock %}
 
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">О сервисе</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'About Znet' : 'О сервисе' }}</li>
 {% endblock %}
 
 {% block content %}
@@ -14,39 +16,59 @@
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">Что делает Znet</h2>
-            <p>
-                Znet предоставляет пользователям доступ к VPN-сервису для защиты интернет-соединения,
-                приватного подключения к сети и удобного выбора доступных серверов в рамках оплаченного тарифа.
-            </p>
-            <p class="mb-0">
-                После регистрации и оплаты клиент получает доступ к личному кабинету, приложению Znet
-                и инструкциям по подключению. Услуга оказывается дистанционно.
-            </p>
+            <h2 class="h5">{{ is_en ? 'What Znet does' : 'Что делает Znet' }}</h2>
+            {% if is_en %}
+                <p>
+                    Znet provides VPN access for protecting your internet connection, keeping network access private,
+                    and choosing available servers within the paid plan.
+                </p>
+                <p class="mb-0">
+                    After registration and payment, the client gets access to the account area, the Znet app,
+                    and setup instructions. The service is provided remotely.
+                </p>
+            {% else %}
+                <p>
+                    Znet предоставляет пользователям доступ к VPN-сервису для защиты интернет-соединения,
+                    приватного подключения к сети и удобного выбора доступных серверов в рамках оплаченного тарифа.
+                </p>
+                <p class="mb-0">
+                    После регистрации и оплаты клиент получает доступ к личному кабинету, приложению Znet
+                    и инструкциям по подключению. Услуга оказывается дистанционно.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">Как предоставляется доступ</h2>
-            <ul class="mb-0">
-                <li>Клиент выбирает тариф и оплачивает счет на сайте.</li>
-                <li>После подтверждения оплаты доступ активируется автоматически или после обработки заказа.</li>
-                <li>Инструкции и сервисные уведомления отправляются на email, указанный при регистрации.</li>
-                <li>Поддержка по вопросам оплаты, доступа и работы приложения доступна через страницу поддержки.</li>
-            </ul>
+            <h2 class="h5">{{ is_en ? 'How access is provided' : 'Как предоставляется доступ' }}</h2>
+            {% if is_en %}
+                <ul class="mb-0">
+                    <li>The client chooses a plan and pays for it on the website.</li>
+                    <li>After payment confirmation, access is activated automatically or after order processing.</li>
+                    <li>Instructions and service notifications are sent to the email used during registration.</li>
+                    <li>Support for payment, access, and app questions is available on the support page.</li>
+                </ul>
+            {% else %}
+                <ul class="mb-0">
+                    <li>Клиент выбирает тариф и оплачивает счет на сайте.</li>
+                    <li>После подтверждения оплаты доступ активируется автоматически или после обработки заказа.</li>
+                    <li>Инструкции и сервисные уведомления отправляются на email, указанный при регистрации.</li>
+                    <li>Поддержка по вопросам оплаты, доступа и работы приложения доступна через страницу поддержки.</li>
+                </ul>
+            {% endif %}
         </div>
     </section>
 
     <section class="card">
         <div class="card-body">
-            <h2 class="h5">Юридическая информация</h2>
-            {% if company.name %}<p class="mb-1">Наименование: {{ company.name }}</p>{% endif %}
+            <h2 class="h5">{{ is_en ? 'Legal information' : 'Юридическая информация' }}</h2>
+            {% if company.name %}<p class="mb-1">{{ is_en ? 'Legal name' : 'Наименование' }}: {{ company.name }}</p>{% endif %}
             {% if company.address_2 %}<p class="mb-1">{{ company.address_2 }}</p>{% endif %}
-            {% if company.vat_number %}<p class="mb-1">ИНН {{ company.vat_number }}</p>{% endif %}
-            {% if company.number %}<p class="mb-1">ОГРНИП {{ company.number }}</p>{% endif %}
-            {% if company.address_1 %}<p class="mb-1">Адрес: {{ company.address_1 }}</p>{% endif %}
-            {% if company.tel %}<p class="mb-1">Телефон: {{ company.tel }}</p>{% endif %}
+            {% if company.vat_number %}<p class="mb-1">{{ is_en ? 'Tax ID' : 'ИНН' }} {{ company.vat_number }}</p>{% endif %}
+            {% if company.number %}<p class="mb-1">{{ is_en ? 'Registration number' : 'ОГРНИП' }} {{ company.number }}</p>{% endif %}
+            {% if company.address_1 %}<p class="mb-1">{{ is_en ? 'Address' : 'Адрес' }}: {{ company.address_1 }}</p>{% endif %}
+            {% if company.tel %}<p class="mb-1">{{ is_en ? 'Phone' : 'Телефон' }}: {{ company.tel }}</p>{% endif %}
             <p class="mb-0">Email: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
         </div>
     </section>

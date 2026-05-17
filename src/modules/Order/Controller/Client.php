@@ -40,28 +40,14 @@ class Client implements \FOSSBilling\InjectionAwareInterface
         $app->redirect('/#plans');
     }
 
-    public function get_configure_product_by_slug(\Box_App $app, $slug): string
+    public function get_configure_product_by_slug(\Box_App $app, $slug): never
     {
-        $api = $this->di['api_guest'];
-        $product = $api->product_get(['slug' => $slug]);
-        $tpl = 'mod_service' . $product['type'] . '_order';
-        if ($api->system_template_exists(['file' => $tpl . '.html.twig'])) {
-            return $app->render($tpl, ['product' => $product]);
-        }
-
-        return $app->render('mod_order_product', ['product' => $product]);
+        $app->redirect('/invoice#plans');
     }
 
-    public function get_configure_product(\Box_App $app, $id): string
+    public function get_configure_product(\Box_App $app, $id): never
     {
-        $api = $this->di['api_guest'];
-        $product = $api->product_get(['id' => $id]);
-        $tpl = 'mod_service' . $product['type'] . '_order';
-        if ($api->system_template_exists(['file' => $tpl . '.html.twig'])) {
-            return $app->render($tpl, ['product' => $product]);
-        }
-
-        return $app->render('mod_order_product', ['product' => $product]);
+        $app->redirect('/invoice#plans');
     }
 
     public function get_orders(\Box_App $app): string

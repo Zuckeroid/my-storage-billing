@@ -15,8 +15,8 @@
                     <thead>
                     <tr>
                         <th>{{ is_en ? 'Plan' : 'Тариф' }}</th>
-                        <th>{{ 'Price'|trans }}</th>
-                        <th class="text-end"><span class="visually-hidden">{{ 'Actions'|trans }}</span></th>
+                        <th>{{ is_en ? 'Price' : 'Цена' }}</th>
+                        <th class="text-end"><span class="visually-hidden">{{ is_en ? 'Actions' : 'Действия' }}</span></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -94,7 +94,7 @@
 
                         {% if item.setup_price != 0 %}
                             <tr>
-                                <td>{{ item.title }} {{ 'setup'|trans }}</td>
+                                <td>{{ item.title }} {{ is_en ? 'setup' : 'настройка' }}</td>
                                 <td>
                                     {% if item.discount_setup %}
                                         <del>{{ item.setup_price | money_convert }}</del>
@@ -115,17 +115,17 @@
             <div class="znet-cart-summary-grid">
                 <div class="znet-cart-promo">
                     {% if not cart.promocode %}
-                        <a href="#" id="show-promo-field">{{ 'Have a coupon code?'|trans }}</a>
+                        <a href="#" id="show-promo-field">{{ is_en ? 'Have a coupon code?' : 'Есть промокод?' }}</a>
                     {% endif %}
 
-                    <form method="post" action="{{ 'api/guest/cart/apply_promo'|link }}" {{ fb_api_form({message: 'Promo Code Applied to Order'|trans, reload: true}) }}
+                    <form method="post" action="{{ 'api/guest/cart/apply_promo'|link }}" {{ fb_api_form({message: is_en ? 'Promo code applied' : 'Промокод применен', reload: true}) }}
                         {% if not cart.promocode %}style="display:none"{% endif %} id="apply-promo">
                         <div class="input-append">
-                            <input class="form-control" type="text" name="promocode" id="promocode" value="{{ request.promocode|default(cart.promocode) }}" {% if promo.required %}required="required"{% endif %} placeholder="{{ 'Enter code'|trans }}">
+                            <input class="form-control" type="text" name="promocode" id="promocode" value="{{ request.promocode|default(cart.promocode) }}" {% if promo.required %}required="required"{% endif %} placeholder="{{ is_en ? 'Enter code' : 'Введите код' }}">
                             {% if cart.promocode %}
-                                <a class="btn btn-outline-primary" href="{{ 'api/guest/cart/remove_promo'|link }}" type="button" {{ fb_api_link({reload: true}) }}>{{ 'Remove'|trans }}</a>
+                                <a class="btn btn-outline-primary" href="{{ 'api/guest/cart/remove_promo'|link }}" type="button" {{ fb_api_link({reload: true}) }}>{{ is_en ? 'Remove' : 'Убрать' }}</a>
                             {% else %}
-                                <button class="btn btn-primary" type="submit">{{ 'Apply'|trans }}</button>
+                                <button class="btn btn-primary" type="submit">{{ is_en ? 'Apply' : 'Применить' }}</button>
                             {% endif %}
                         </div>
                     </form>
@@ -136,11 +136,11 @@
 
                         {% if cart.discount >0 %}
                             <tr>
-                                <td><strong>{{ 'Subtotal:'|trans }}</strong></td>
+                                <td><strong>{{ is_en ? 'Subtotal:' : 'Промежуточно:' }}</strong></td>
                                 <td><strong>{{ (cart.subtotal)| money_convert }}</strong></td>
                             </tr>
                             <tr>
-                                <td><strong>{{ 'Discount:'|trans }}</strong></td>
+                                <td><strong>{{ is_en ? 'Discount:' : 'Скидка:' }}</strong></td>
                                 <td><strong>- {{ cart.discount | money_convert }}</strong></td>
                             </tr>
                         {% endif %}
@@ -150,12 +150,12 @@
                             {% set tax_rate = client.invoice_get_tax_rate %}
                             {% set tax_amount = cart.total * tax_rate / 100 %}
                             <tr>
-                                <td><strong>{{ 'VAT'|trans }} ({{ tax_rate }}%) :</strong></td>
+                                <td><strong>{{ is_en ? 'VAT' : 'НДС' }} ({{ tax_rate }}%):</strong></td>
                                 <td><strong>{{ tax_amount | money_convert }}</strong></td>
                             </tr>
                         {% endif %}
                         <tr>
-                            <td><strong>{{ 'Total:'|trans }}</strong></td>
+                            <td><strong>{{ is_en ? 'Total:' : 'Итого:' }}</strong></td>
                             <td><strong>{{ (cart.total + tax_amount) | money_convert }}</strong></td>
                         </tr>
 
@@ -170,7 +170,7 @@
                                         {% if cart.currency.code in gtw.accepted_currencies %}
                                             <label class="radio" for="gateway-{{gtw.id}}">
                                                 <input type="radio" name="gateway_id" id="gateway-{{gtw.id}}" value="{{gtw.id}}" {{ loop.first ? 'checked' : '' }}/>
-                                                {{ 'Pay by'|trans }} {{ gtw.title }}
+                                                {{ is_en ? 'Payment method:' : 'Способ оплаты:' }} {{ gtw.title }}
                                             </label>
                                         {% endif %}
                                     {% endfor %}
@@ -179,25 +179,37 @@
                             <div class="control-group">
                                 <div class="controls mt-3">
                                     {% if enough_in_balance %}
-                                        <p>{{ 'Total amount will be deducted from account balance'|trans }}</p>
+                                        <p>{{ is_en ? 'The total amount will be deducted from your account balance.' : 'Сумма будет списана с баланса аккаунта.' }}</p>
                                     {% endif %}
                                     {% if settings.checkout_tos == 'explicit' %}
                                         <div class="form-check mb-1">
                                             <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required>
                                             <label class="form-check-label" for="flexCheckDefault">
                                                 {# TODO: Make this translatable once support for placeholders is implemented #}
-                                                <span>I agree to the <a href="{{ '/tos'|link }}" target="_blank">{{ 'terms of service'|trans }}</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">{{ 'privacy policy'|trans }}</a>.</span>
+                                                <span>
+                                                    {% if is_en %}
+                                                        I agree to the <a href="{{ '/tos'|link }}" target="_blank">terms of service</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">privacy policy</a>.
+                                                    {% else %}
+                                                        Я принимаю <a href="{{ '/tos'|link }}" target="_blank">условия сервиса</a> и <a href="{{ '/privacy-policy'|link }}" target="_blank">политику конфиденциальности</a>.
+                                                    {% endif %}
+                                                </span>
                                             </label>
                                         </div>
                                     {% endif %}
                                     <button id="checkoutButton" class="btn btn-primary" type="submit" {% if not client %} hidden="true" {% endif %}>{{ is_en ? 'Pay' : 'Оплатить' }}</button>
-                                    <p id="loginMessage" {% if client %} hidden="true" {% endif %}>{{ 'You must first login / create an account before you can checkout.'|trans }}</p>
+                                    <p id="loginMessage" {% if client %} hidden="true" {% endif %}>{{ is_en ? 'Sign in or create an account to continue to payment.' : 'Войдите или создайте аккаунт, чтобы перейти к оплате.' }}</p>
                                 </div>
                             </div>
                         </fieldset>
                         {% if settings.checkout_tos == 'implicit' %}
                             {# TODO: Make this translatable once support for placeholders is implemented #}
-                            <span class="text-muted">By completing your order, you agree to our <a href="{{ '/tos'|link }}" target="_blank">{{ 'terms of service'|trans }}</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">{{ 'privacy policy'|trans }}</a>.</span>
+                            <span class="text-muted">
+                                {% if is_en %}
+                                    By completing payment, you agree to our <a href="{{ '/tos'|link }}" target="_blank">terms of service</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">privacy policy</a>.
+                                {% else %}
+                                    Продолжая оплату, вы принимаете <a href="{{ '/tos'|link }}" target="_blank">условия сервиса</a> и <a href="{{ '/privacy-policy'|link }}" target="_blank">политику конфиденциальности</a>.
+                                {% endif %}
+                            </span>
                         {% endif %}
                     </form>
                 </div>

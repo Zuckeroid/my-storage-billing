@@ -17,7 +17,7 @@
     {% endif %}
     {% set description = product.description ? product.description|striptags : '' %}
     {% set plan_description = description ?: (is_en ? 'VPN access for everyday private use.' : 'VPN-доступ для повседневного личного использования.') %}
-    {% set href = '/order/' ~ product.slug %}
+    {% set href = client ? ('invoice'|link ~ '#plans') : ('signup'|link) %}
 
     {% if storage_plan_view == 'dashboard_cards' %}
         <article class="znet-plan-card{% if loop.index == 2 %} znet-plan-card-featured{% endif %}">
@@ -41,7 +41,7 @@
                 </div>
             </div>
 
-            <a class="znet-btn {% if loop.index == 2 %}znet-btn-accent{% else %}znet-btn-outline{% endif %} znet-plan-btn" href="{{ href|link }}">{{ is_en ? 'Choose' : 'Выбрать' }}</a>
+            <a class="znet-btn {% if loop.index == 2 %}znet-btn-accent{% else %}znet-btn-outline{% endif %} znet-plan-btn" href="{{ href }}">{{ is_en ? 'Choose' : 'Выбрать' }}</a>
         </article>
     {% elseif storage_plan_view == 'card_items' %}
         <div class="col-md-4 mb-3">
@@ -59,7 +59,7 @@
                     {% if description %}
                         <p class="text-secondary small flex-grow-1">{{ description }}</p>
                     {% endif %}
-                    <a class="btn btn-primary w-100 mt-auto" href="{{ href|link }}">{{ is_en ? 'Choose plan' : 'Выбрать тариф' }}</a>
+                    <a class="btn btn-primary w-100 mt-auto" href="{{ href }}">{{ is_en ? 'Choose plan' : 'Выбрать тариф' }}</a>
                 </div>
             </div>
         </div>

@@ -1,11 +1,13 @@
 {% extends "layout_default.html.twig" %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
-{% block meta_title %}Пользовательское соглашение{% endblock %}
-{% block meta_description %}Пользовательское соглашение Znet для клиентов VPN-сервиса.{% endblock %}
+{% block meta_title %}{{ is_en ? 'Terms of Service' : 'Пользовательское соглашение' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Znet terms of service for VPN clients.' : 'Пользовательское соглашение Znet для клиентов VPN-сервиса.' }}{% endblock %}
 {% block body_class %}tos{% endblock %}
 
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">Пользовательское соглашение</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Terms of Service' : 'Пользовательское соглашение' }}</li>
 {% endblock %}
 
 {% block content %}
@@ -14,62 +16,105 @@
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">1. Назначение сервиса</h2>
-            <p class="mb-0">
-                Znet предназначен для предоставления VPN-доступа для личного использования, защиты соединения
-                и выбора доступных серверов в рамках оплаченного тарифа.
-            </p>
+            <h2 class="h5">{{ is_en ? '1. Service purpose' : '1. Назначение сервиса' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    Znet provides VPN access for personal use, connection protection,
+                    and selection of available servers within the paid plan.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Znet предназначен для предоставления VPN-доступа для личного использования, защиты соединения
+                    и выбора доступных серверов в рамках оплаченного тарифа.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">2. Аккаунт пользователя</h2>
-            <p class="mb-0">
-                Пользователь отвечает за достоверность email, указанного при регистрации, и за сохранность данных доступа.
-                Все инструкции, сервисные уведомления и информация по заказам отправляются на зарегистрированный email.
-            </p>
+            <h2 class="h5">{{ is_en ? '2. User account' : '2. Аккаунт пользователя' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    The user is responsible for the accuracy of the email provided during registration and for keeping access data secure.
+                    Instructions, service notifications, and order information are sent to the registered email.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Пользователь отвечает за достоверность email, указанного при регистрации, и за сохранность данных доступа.
+                    Все инструкции, сервисные уведомления и информация по заказам отправляются на зарегистрированный email.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">3. Оплата и продление</h2>
-            <p class="mb-0">
-                Услуга оплачивается по выбранному тарифу. Период, стоимость и статус счета отображаются в аккаунте клиента.
-                Доступ к услуге может быть ограничен при отсутствии оплаты или окончании оплаченного периода.
-            </p>
+            <h2 class="h5">{{ is_en ? '3. Payment and renewal' : '3. Оплата и продление' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    The service is paid according to the selected plan. The period, price, and payment status are shown in the client account.
+                    Service access may be limited if payment is missing or the paid period has ended.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Услуга оплачивается по выбранному тарифу. Период, стоимость и статус счета отображаются в аккаунте клиента.
+                    Доступ к услуге может быть ограничен при отсутствии оплаты или окончании оплаченного периода.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">4. Запрещенное использование</h2>
-            <p class="mb-0">
-                Запрещено использовать сервис для действий, нарушающих законодательство РФ, права третьих лиц,
-                правила платежных систем, а также для рассылки спама, атак на сетевую инфраструктуру
-                или иной деятельности, нарушающей нормальную работу сервиса.
-            </p>
+            <h2 class="h5">{{ is_en ? '4. Prohibited use' : '4. Запрещенное использование' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    It is prohibited to use the service for activities that violate Russian law, third-party rights,
+                    payment system rules, spam distribution, attacks on network infrastructure,
+                    or any other activity that disrupts normal service operation.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Запрещено использовать сервис для действий, нарушающих законодательство РФ, права третьих лиц,
+                    правила платежных систем, а также для рассылки спама, атак на сетевую инфраструктуру
+                    или иной деятельности, нарушающей нормальную работу сервиса.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">5. Оказание услуги</h2>
-            <p class="mb-0">
-                Услуга предоставляется дистанционно. Физическая доставка не осуществляется: доступ, приложение
-                и инструкции предоставляются в электронном виде через личный кабинет и email клиента.
-            </p>
+            <h2 class="h5">{{ is_en ? '5. Service delivery' : '5. Оказание услуги' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    The service is provided remotely. No physical delivery is performed: access, the app,
+                    and instructions are provided digitally through the account area and client email.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Услуга предоставляется дистанционно. Физическая доставка не осуществляется: доступ, приложение
+                    и инструкции предоставляются в электронном виде через личный кабинет и email клиента.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card">
         <div class="card-body">
-            <h2 class="h5">6. Поддержка</h2>
-            <p class="mb-0">
-                По вопросам работы сервиса, оплаты и доступа пользователь может обратиться на
-                <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
-            </p>
+            <h2 class="h5">{{ is_en ? '6. Support' : '6. Поддержка' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    For questions about service operation, payment, or access, contact
+                    <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    По вопросам работы сервиса, оплаты и доступа пользователь может обратиться на
+                    <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+                </p>
+            {% endif %}
         </div>
     </section>
 {% endblock %}

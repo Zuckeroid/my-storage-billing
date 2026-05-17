@@ -205,8 +205,6 @@
             </div>
         </div>
 
-        <div id="faq" class="znet-anchor-target" aria-hidden="true"></div>
-
         <section id="plans" class="znet-plans-section">
             <div class="znet-container">
                 <div class="znet-section-head">
@@ -219,7 +217,7 @@
                     {% for product in storage_products %}
                         {% set price = '' %}
                         {% set period = '' %}
-                        {% set base_href = ('/order/' ~ product.slug)|link %}
+                        {% set base_href = client ? ('invoice'|link ~ '#plans') : ('signup'|link) %}
                         {% if product.pricing.type == 'recurrent' and product.pricing.recurrent['1M'] is defined and product.pricing.recurrent['1M'].enabled %}
                             {% set price = product.pricing.recurrent['1M'].price|money_convert|replace({'.00': ''}) %}
                             {% set period = is_en ? 'per month' : 'в месяц' %}
@@ -251,7 +249,7 @@
                                                         <option
                                                             value="{{ code }}"
                                                             data-price="{{ prices.price|money_convert|replace({'.00': ''}) }}"
-                                                            data-href="{{ base_href }}?period={{ code }}"
+                                                            data-href="{{ base_href }}"
                                                             {% if code == '1M' %}selected="selected"{% endif %}
                                                         >
                                                             {% if code == '1M' %}
@@ -287,7 +285,7 @@
                                 </li>
                             </ul>
 
-                            <a class="znet-btn {% if loop.index == 2 %}znet-btn-accent{% else %}znet-btn-outline{% endif %} znet-plan-btn" href="{{ base_href }}{% if product.pricing.type == 'recurrent' and product.pricing.recurrent['1M'] is defined and product.pricing.recurrent['1M'].enabled %}?period=1M{% endif %}">{{ is_en ? 'Choose' : 'Выбрать' }}</a>
+                            <a class="znet-btn {% if loop.index == 2 %}znet-btn-accent{% else %}znet-btn-outline{% endif %} znet-plan-btn" href="{{ base_href }}">{{ is_en ? 'Choose' : 'Выбрать' }}</a>
                         </article>
                     {% else %}
                         <div class="znet-plans-empty">

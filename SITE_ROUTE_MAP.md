@@ -53,7 +53,7 @@ Service exceptions:
 | `/invoice/print/:hash`, `/invoice/pdf/:hash` | Service | `Invoice` | Print/PDF export | Keep as technical output. |
 | `/order/service`, `/service` | Client | `Order/mod_order_list.html.twig`, redirect alias | Connection list | Canonical client connection list. No billing table UX. |
 | `/order/service/manage/:id`, `/service/manage/:id` | Client | `Order/mod_order_manage.html.twig`, redirect alias | Connection/instructions | Canonical service detail. Keep Android/iPhone paths simple. |
-| `/order`, `/order/:id`, `/order/:slug` | Legacy public order | `Order` | Old product/order flow | Do not use as primary UX. Redirect or hide once `/orderbutton` is stable. |
+| `/order`, `/order/:id`, `/order/:slug` | Legacy public order | `Order` | Old product/order flow | Redirects users to the unified `/invoice#plans` plan/payment hub. |
 | `/support`, `/support/*`, `/support/kb*`, `/contact-us` | Legacy support | `Support`, redirect aliases | Tickets/KB/contact legacy pages | Non-canonical. Route users to `/contacts`. |
 | `/news`, `/news/:slug`, `/blog*` | Legacy content | `News`, redirect aliases | FOSSBilling demo/news | Non-canonical. Keep redirected/hidden. |
 | `/email`, `/emails` | Legacy client utility | `Email`, redirect alias | Transactional email history | Hide from navigation. Decide later whether client should see it. |

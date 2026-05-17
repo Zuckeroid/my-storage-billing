@@ -13,7 +13,7 @@
     <section id="payment-html" class="znet-order-panel znet-order-payment-panel" hidden>
         <div class="znet-order-panel-head">
             <div>
-                <h3>{{ 'Payment'|trans }}</h3>
+                <h3>{{ is_en|default(false) ? 'Payment' : 'Оплата' }}</h3>
             </div>
         </div>
         <div class="znet-order-panel-body" id="payment-html-inner"></div>

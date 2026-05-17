@@ -1,11 +1,13 @@
 {% extends "layout_default.html.twig" %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
-{% block meta_title %}Политика конфиденциальности{% endblock %}
-{% block meta_description %}Политика обработки персональных данных пользователей Znet.{% endblock %}
+{% block meta_title %}{{ is_en ? 'Privacy Policy' : 'Политика конфиденциальности' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Znet personal data processing policy.' : 'Политика обработки персональных данных пользователей Znet.' }}{% endblock %}
 {% block body_class %}privacy-policy{% endblock %}
 
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">Политика конфиденциальности</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Privacy Policy' : 'Политика конфиденциальности' }}</li>
 {% endblock %}
 
 {% block content %}
@@ -14,57 +16,91 @@
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">1. Оператор данных</h2>
+            <h2 class="h5">{{ is_en ? '1. Data controller' : '1. Оператор данных' }}</h2>
             <p class="mb-0">
-                Оператор: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
-                Email для обращений: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+                {{ is_en ? 'Controller' : 'Оператор' }}: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, {{ is_en ? 'Tax ID' : 'ИНН' }} {{ company.vat_number }}{% endif %}{% if company.number %}, {{ is_en ? 'Registration number' : 'ОГРНИП' }} {{ company.number }}{% endif %}.
+                {{ is_en ? 'Contact email' : 'Email для обращений' }}: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
             </p>
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">2. Какие данные обрабатываются</h2>
-            <ul class="mb-0">
-                <li>Email, имя и контактные данные, указанные при регистрации.</li>
-                <li>Данные о выбранном тарифе, заказах, счетах и платежах.</li>
-                <li>Технические данные, необходимые для работы сайта и защиты аккаунта.</li>
-                <li>Технические события приложения Znet, необходимые для диагностики подключения и качества сервиса.</li>
-            </ul>
+            <h2 class="h5">{{ is_en ? '2. Data we process' : '2. Какие данные обрабатываются' }}</h2>
+            {% if is_en %}
+                <ul class="mb-0">
+                    <li>Email, name, and contact data provided during registration.</li>
+                    <li>Data about the selected plan, orders, payments, and billing records.</li>
+                    <li>Technical data required for website operation and account protection.</li>
+                    <li>Znet app technical events required for connection diagnostics and service quality.</li>
+                </ul>
+            {% else %}
+                <ul class="mb-0">
+                    <li>Email, имя и контактные данные, указанные при регистрации.</li>
+                    <li>Данные о выбранном тарифе, заказах, счетах и платежах.</li>
+                    <li>Технические данные, необходимые для работы сайта и защиты аккаунта.</li>
+                    <li>Технические события приложения Znet, необходимые для диагностики подключения и качества сервиса.</li>
+                </ul>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">3. Цели обработки</h2>
-            <ul class="mb-0">
-                <li>Создание и обслуживание аккаунта клиента.</li>
-                <li>Выставление счетов и прием оплаты.</li>
-                <li>Отправка инструкций и сервисных уведомлений на зарегистрированный email.</li>
-                <li>Обработка обращений в поддержку.</li>
-                <li>Диагностика ошибок подключения, стабильности VPN-доступа и работы приложения.</li>
-            </ul>
+            <h2 class="h5">{{ is_en ? '3. Processing purposes' : '3. Цели обработки' }}</h2>
+            {% if is_en %}
+                <ul class="mb-0">
+                    <li>Creating and maintaining the client account.</li>
+                    <li>Issuing payment requests and accepting payments.</li>
+                    <li>Sending instructions and service notifications to the registered email.</li>
+                    <li>Handling support requests.</li>
+                    <li>Diagnosing connection errors, VPN access stability, and app operation.</li>
+                </ul>
+            {% else %}
+                <ul class="mb-0">
+                    <li>Создание и обслуживание аккаунта клиента.</li>
+                    <li>Выставление счетов и прием оплаты.</li>
+                    <li>Отправка инструкций и сервисных уведомлений на зарегистрированный email.</li>
+                    <li>Обработка обращений в поддержку.</li>
+                    <li>Диагностика ошибок подключения, стабильности VPN-доступа и работы приложения.</li>
+                </ul>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">4. Хранение и защита</h2>
-            <p class="mb-0">
-                Данные обрабатываются в объеме, необходимом для оказания услуги, выполнения обязательств перед клиентом
-                и соблюдения требований законодательства. Доступ к данным ограничивается техническими и организационными мерами.
-                Полные данные банковских карт и коды проверки карты не обрабатываются и не хранятся на сайте Znet.
-            </p>
+            <h2 class="h5">{{ is_en ? '4. Storage and protection' : '4. Хранение и защита' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    Data is processed only to the extent required to provide the service, fulfill obligations to the client,
+                    and comply with legal requirements. Access to data is limited by technical and organizational measures.
+                    Full bank card details and card verification codes are not processed or stored on the Znet website.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Данные обрабатываются в объеме, необходимом для оказания услуги, выполнения обязательств перед клиентом
+                    и соблюдения требований законодательства. Доступ к данным ограничивается техническими и организационными мерами.
+                    Полные данные банковских карт и коды проверки карты не обрабатываются и не хранятся на сайте Znet.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card">
         <div class="card-body">
-            <h2 class="h5">5. Обращения пользователя</h2>
-            <p class="mb-0">
-                Пользователь может направить запрос по персональным данным на
-                <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
-            </p>
+            <h2 class="h5">{{ is_en ? '5. User requests' : '5. Обращения пользователя' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    The user may send a personal data request to
+                    <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Пользователь может направить запрос по персональным данным на
+                    <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+                </p>
+            {% endif %}
         </div>
     </section>
 {% endblock %}

@@ -92,7 +92,7 @@
                         showPaymentHtml();
                     } else {
                         const link = '{{ "invoice/banklink"|link }}' + '/' + result.invoice_hash + '/' + result.gateway_id + '?allow_subscription=0';
-                        paymentHtmlInnerEl.innerHTML = '<a href="' + link + '" target="_parent" id="redirect-to-gateway">Redirect to payment gateway</a>';
+                        paymentHtmlInnerEl.innerHTML = '<a href="' + link + '" target="_parent" id="redirect-to-gateway">{{ is_en ? 'Continue to payment' : 'Перейти к оплате' }}</a>';
                         checkoutInnerEl?.remove();
                         showPaymentHtml();
                         document.getElementById('redirect-to-gateway')?.click();

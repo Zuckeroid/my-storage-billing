@@ -1,17 +1,19 @@
 {% extends "layout_default.html.twig" %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
 {% set company = guest.system_company %}
 
-{% block meta_title %}{{ 'Login'|trans }}{% endblock %}
-{% block meta_description %}{{ 'Sign in to manage your connection, payments, and profile.'|trans }}{% endblock %}
+{% block meta_title %}{{ is_en ? 'Login' : 'Вход' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Sign in to manage your connection, payments, and profile.' : 'Войдите, чтобы управлять подключением, оплатой и профилем.' }}{% endblock %}
 
 {% block body_class %}page-login{% endblock %}
-{% block shell_eyebrow %}{{ 'Access'|trans }}{% endblock %}
-{% block shell_title %}{{ 'Login'|trans }}{% endblock %}
-{% block shell_description %}{{ 'Sign in to manage your connection, payments, and profile.'|trans }}{% endblock %}
+{% block shell_eyebrow %}{{ is_en ? 'Access' : 'Доступ' }}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Login' : 'Вход' }}{% endblock %}
+{% block shell_description %}{{ is_en ? 'Sign in to manage your connection, payments, and profile.' : 'Войдите, чтобы управлять подключением, оплатой и профилем.' }}{% endblock %}
 {% block shell_head_actions %}
     {% if settings.show_signup_link %}
-        <a class="znet-btn znet-btn-accent" href="{{ 'signup'|link }}">{{ 'Register'|trans }}</a>
+        <a class="znet-btn znet-btn-accent" href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>
     {% endif %}
 {% endblock %}
 {% block content %}
@@ -27,13 +29,13 @@
                         <label class="form-label" for="password">{{ 'Password'|trans }}</label>
                         <input class="form-control" id="password" type="password" placeholder="{{ 'Enter your password'|trans }}" name="password" required="required" autocomplete="current-password">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-3">{{ 'Login'|trans }}</button>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">{{ is_en ? 'Login' : 'Войти' }}</button>
                 </form>
 
                 {% if settings.show_password_reset_link or settings.show_signup_link %}
                     <div class="znet-shell-link-row">
                         {% if settings.show_signup_link %}
-                            <a class="btn btn-outline-primary mb-2 w-100" href="{{ 'signup'|link }}">{{ 'Register'|trans }}</a>
+                            <a class="btn btn-outline-primary mb-2 w-100" href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>
                         {% endif %}
                         {% if settings.show_password_reset_link %}
                             <a class="btn btn-outline-primary mb-2 w-100" href="{{ 'password-reset'|link }}">{{ 'Forgot password?'|trans }}</a>

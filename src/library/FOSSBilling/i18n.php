@@ -24,7 +24,7 @@ class i18n
      *
      * @return string the locale code to use for the system
      */
-    public static function getActiveLocale(bool $autoDetect = true): string
+    public static function getActiveLocale(bool $autoDetect = false): string
     {
         $locale = null;
 

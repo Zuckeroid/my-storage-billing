@@ -32,7 +32,7 @@
                     <div class="znet-plan-badge">{{ is_en ? 'Popular' : 'Оптимальный' }}</div>
                 {% endif %}
 
-                <form method="post" action="{{ 'api/guest/cart/add_item'|link }}" class="znet-order-plan-form znet-order-plan-card-form" {{ fb_api_form({message: is_en ? 'Plan selected' : 'Тариф выбран', redirect: plan_checkout_url}) }}>
+                <form method="post" action="{{ 'api/guest/cart/add_item'|link }}" class="znet-order-plan-form znet-order-plan-card-form" {{ fb_api_form({message: is_en ? 'Plan added' : 'Тариф добавлен', redirect: plan_checkout_url}) }}>
                     <input type="hidden" name="id" value="{{ product.id }}" />
 
                     <div class="znet-order-plan-card-name">

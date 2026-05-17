@@ -2069,6 +2069,31 @@ html {
   margin-top: 22px;
 }
 
+.znet-shell-page .znet-payment-logo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.znet-shell-page .znet-payment-logo {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(134, 239, 172, 0.18);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--znet-text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.znet-shell-page .znet-payment-logo-mir {
+  color: var(--znet-accent-soft);
+}
+
 .znet-shell-page .znet-shell-inline-tabs {
   display: flex;
   align-items: flex-start;

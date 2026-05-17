@@ -1,11 +1,13 @@
 {% extends "layout_default.html.twig" %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
-{% block meta_title %}Возврат средств{% endblock %}
-{% block meta_description %}Правила отмены услуги и возврата средств Znet.{% endblock %}
+{% block meta_title %}{{ is_en ? 'Refund Policy' : 'Возврат средств' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Znet service cancellation and refund rules.' : 'Правила отмены услуги и возврата средств Znet.' }}{% endblock %}
 {% block body_class %}page-refund-policy{% endblock %}
 
 {% block breadcrumb %}
-    <li class="breadcrumb-item active" aria-current="page">Возврат средств</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ is_en ? 'Refund Policy' : 'Возврат средств' }}</li>
 {% endblock %}
 
 {% block content %}
@@ -14,40 +16,70 @@
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">Отмена услуги и возврат</h2>
-            <p>
-                Znet оказывает цифровую услугу VPN-доступа. Возврат денежных средств рассматривается по обращению
-                клиента и выполняется в случаях, предусмотренных настоящими правилами и законодательством РФ.
-            </p>
-            <ul class="mb-0">
-                <li>Если доступ к услуге не был предоставлен после оплаты по технической причине на стороне сервиса.</li>
-                <li>Если платеж был совершен ошибочно и клиент обратился в поддержку до начала оказания услуги.</li>
-                <li>Если возврат требуется по иным основаниям, предусмотренным законодательством РФ.</li>
-            </ul>
+            <h2 class="h5">{{ is_en ? 'Cancellation and refund' : 'Отмена услуги и возврат' }}</h2>
+            {% if is_en %}
+                <p>
+                    Znet provides a digital VPN access service. Refund requests are reviewed after a client request
+                    and processed in cases covered by these rules and Russian law.
+                </p>
+                <ul class="mb-0">
+                    <li>If service access was not provided after payment due to a technical issue on the service side.</li>
+                    <li>If the payment was made by mistake and the client contacted support before service delivery started.</li>
+                    <li>If a refund is required on other grounds provided by Russian law.</li>
+                </ul>
+            {% else %}
+                <p>
+                    Znet оказывает цифровую услугу VPN-доступа. Возврат денежных средств рассматривается по обращению
+                    клиента и выполняется в случаях, предусмотренных настоящими правилами и законодательством РФ.
+                </p>
+                <ul class="mb-0">
+                    <li>Если доступ к услуге не был предоставлен после оплаты по технической причине на стороне сервиса.</li>
+                    <li>Если платеж был совершен ошибочно и клиент обратился в поддержку до начала оказания услуги.</li>
+                    <li>Если возврат требуется по иным основаниям, предусмотренным законодательством РФ.</li>
+                </ul>
+            {% endif %}
         </div>
     </section>
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5">Как запросить возврат</h2>
-            <p>
-                Напишите на <a href="mailto:{{ support_email }}">{{ support_email }}</a> с email,
-                использованного при регистрации. Укажите номер счета, дату оплаты и причину обращения.
-            </p>
-            <p class="mb-0">
-                Возврат выполняется тем же способом, которым была произведена оплата, если иное не предусмотрено
-                правилами платежного провайдера или не согласовано сторонами.
-            </p>
+            <h2 class="h5">{{ is_en ? 'How to request a refund' : 'Как запросить возврат' }}</h2>
+            {% if is_en %}
+                <p>
+                    Email <a href="mailto:{{ support_email }}">{{ support_email }}</a> from the address
+                    used during registration. Include the payment number, payment date, and request reason.
+                </p>
+                <p class="mb-0">
+                    Refunds are made using the same method as the original payment unless otherwise required
+                    by the payment provider rules or agreed by the parties.
+                </p>
+            {% else %}
+                <p>
+                    Напишите на <a href="mailto:{{ support_email }}">{{ support_email }}</a> с email,
+                    использованного при регистрации. Укажите номер счета, дату оплаты и причину обращения.
+                </p>
+                <p class="mb-0">
+                    Возврат выполняется тем же способом, которым была произведена оплата, если иное не предусмотрено
+                    правилами платежного провайдера или не согласовано сторонами.
+                </p>
+            {% endif %}
         </div>
     </section>
 
     <section class="card">
         <div class="card-body">
-            <h2 class="h5">Срок рассмотрения</h2>
-            <p class="mb-0">
-                Обращения по возвратам рассматриваются после получения информации, необходимой для проверки платежа
-                и статуса оказания услуги. При одобрении возврата срок зачисления зависит от банка и платежного провайдера.
-            </p>
+            <h2 class="h5">{{ is_en ? 'Review time' : 'Срок рассмотрения' }}</h2>
+            {% if is_en %}
+                <p class="mb-0">
+                    Refund requests are reviewed after receiving the information needed to check the payment
+                    and service delivery status. If approved, the crediting time depends on the bank and payment provider.
+                </p>
+            {% else %}
+                <p class="mb-0">
+                    Обращения по возвратам рассматриваются после получения информации, необходимой для проверки платежа
+                    и статуса оказания услуги. При одобрении возврата срок зачисления зависит от банка и платежного провайдера.
+                </p>
+            {% endif %}
         </div>
     </section>
 {% endblock %}

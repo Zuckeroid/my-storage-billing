@@ -1,18 +1,20 @@
 {% extends "layout_default.html.twig" %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
 
 {% import "macro_functions.html.twig" as mf %}
 
-{% block meta_title %}{{ 'Register'|trans }}{% endblock %}
-{% block meta_description %}{{ 'Create your account to start using Znet and manage everything in one place.'|trans }}{% endblock %}
+{% block meta_title %}{{ is_en ? 'Create account' : 'Создать аккаунт' }}{% endblock %}
+{% block meta_description %}{{ is_en ? 'Create your account to start using Znet and manage everything in one place.' : 'Создайте аккаунт, чтобы начать пользоваться Znet и управлять всем в одном месте.' }}{% endblock %}
 
 {% set company = guest.system_company %}
 
 {% block body_class %}page-signup{% endblock %}
-{% block shell_eyebrow %}{{ 'Access'|trans }}{% endblock %}
-{% block shell_title %}{{ 'Registration'|trans }}{% endblock %}
-{% block shell_description %}{{ 'Create your account to start using Znet and manage everything in one place.'|trans }}{% endblock %}
+{% block shell_eyebrow %}{{ is_en ? 'Access' : 'Доступ' }}{% endblock %}
+{% block shell_title %}{{ is_en ? 'Registration' : 'Регистрация' }}{% endblock %}
+{% block shell_description %}{{ is_en ? 'Create your account to start using Znet and manage everything in one place.' : 'Создайте аккаунт, чтобы начать пользоваться Znet и управлять всем в одном месте.' }}{% endblock %}
 {% block shell_head_actions %}
-    <a class="znet-btn znet-btn-outline" href="{{ 'login'|link }}">{{ 'Login'|trans }}</a>
+    <a class="znet-btn znet-btn-outline" href="{{ 'login'|link }}">{{ is_en ? 'Login' : 'Войти' }}</a>
 {% endblock %}
 {% block content %}
     <div class="znet-shell-auth-wrap">
@@ -63,7 +65,7 @@
                                         <option value="male">{{ 'Male'|trans }}</option>
                                         <option value="female">{{ 'Female'|trans }}</option>
                                         <option value="nonbinary">{{ 'Non-binary'|trans }}</option>
-                                        <option value="other">{{ 'Other'|trans }}Other</option>
+                                        <option value="other">{{ 'Other'|trans }}</option>
                                     </select>
                                 </div>
                             {% endif %}
@@ -162,20 +164,26 @@
                                 <div class="form-check mb-1">
                                     <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required>
                                     <label class="form-check-label" for="flexCheckDefault">
-                                        {# TODO: Make this translatable once support for placeholders is implemented #}
-                                        <span>I agree to the <a href="{{ '/tos'|link }}" target="_blank">{{ 'terms of service'|trans }}</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">{{ 'privacy policy'|trans }}.</span>
+                                        {% if is_en %}
+                                            <span>I agree to the <a href="{{ '/tos'|link }}" target="_blank">terms of service</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">privacy policy</a>.</span>
+                                        {% else %}
+                                            <span>Я принимаю <a href="{{ '/tos'|link }}" target="_blank">условия сервиса</a> и <a href="{{ '/privacy-policy'|link }}" target="_blank">политику конфиденциальности</a>.</span>
+                                        {% endif %}
                                     </label>
                                 </div>
                             {% endif %}
 
                             <div class="form-actions mb-3">
-                                <button class="btn btn-primary w-100" type="submit">{{ 'Register'|trans }}</button>
+                                <button class="btn btn-primary w-100" type="submit">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</button>
                             </div>
 
                             {% if settings.signup_tos == 'implicit' %}
                                 <div class="mb-1">
-                                    {# TODO: Make this translatable once support for placeholders is implemented #}
-                                    <span class="text-muted mb-1">By creating an account, you agree to our <a href="{{ '/tos'|link }}" target="_blank">{{ 'terms of service'|trans }}</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">{{ 'privacy policy'|trans }}</a>.</span>
+                                    {% if is_en %}
+                                        <span class="text-muted mb-1">By creating an account, you agree to the <a href="{{ '/tos'|link }}" target="_blank">terms of service</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">privacy policy</a>.</span>
+                                    {% else %}
+                                        <span class="text-muted mb-1">Создавая аккаунт, вы принимаете <a href="{{ '/tos'|link }}" target="_blank">условия сервиса</a> и <a href="{{ '/privacy-policy'|link }}" target="_blank">политику конфиденциальности</a>.</span>
+                                    {% endif %}
                                 </div>
                             {% endif %}
                 </form>

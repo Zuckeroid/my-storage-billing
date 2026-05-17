@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="no-js" lang="{{ guest.system_locale|default(settings.locale|default('en'))|split('_')[0] }}" data-bs-theme="{{ settings.theme|default('light') }}">
+<html class="no-js" lang="{{ guest.system_locale|default(settings.locale|default('ru_RU'))|split('_')[0] }}" data-bs-theme="{{ settings.theme|default('light') }}">
 <head>
     <meta charset="utf-8">
     <title>{{ settings.meta_title_prefix }} {% block meta_title %}{% endblock %} {{ settings.meta_title_suffix }}</title>
@@ -12,14 +12,14 @@
 
     {% block opengraph %}{% endblock %}
 
-    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=my-storage-20260418d">
-    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=my-storage-20260418d">
+    <link rel="stylesheet" href="{{ 'build/css/vendor.css' | asset_url }}?v=znet-20260514a">
+    <link rel="stylesheet" href="{{ 'build/css/huraga.css' | asset_url }}?v=znet-20260514a">
 
     <link rel="icon" type="image/png" sizes="256x256" href="{{ 'img/znet/favicon.png' | asset_url }}?v=znet-20260512a">
     <link rel="shortcut icon" href="{{ 'favicon.ico' | asset_url }}?v=znet-20260512a">
 
     <script src="{{ 'Api/API.js' | library_url }}?v=znet-api-20260512a"></script>
-    <script src="{{ 'build/js/huraga.js' | asset_url }}?v=my-storage-20260418d"></script>
+    <script src="{{ 'build/js/huraga.js' | asset_url }}?v=znet-20260514a"></script>
     {% block head %}{% endblock %}
     {% block js %}{% endblock %}
     {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
