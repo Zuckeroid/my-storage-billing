@@ -817,6 +817,9 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'config_revision' => isset($snapshot['config_revision']) ? trim((string) $snapshot['config_revision']) : null,
             'runtime_payload' => $runtimePayload !== '' ? $runtimePayload : null,
             'xray_config' => $runtimePayload !== '' ? $runtimePayload : null,
+            'subscription_link' => isset($snapshot['subscription_link'])
+                ? trim((string) $snapshot['subscription_link'])
+                : (isset($snapshot['subscriptionLink']) ? trim((string) $snapshot['subscriptionLink']) : null),
             'device_id' => isset($snapshot['device_id']) ? trim((string) $snapshot['device_id']) : null,
             'device_name' => isset($snapshot['device_name']) ? trim((string) $snapshot['device_name']) : null,
             'platform' => isset($snapshot['platform']) ? trim((string) $snapshot['platform']) : null,

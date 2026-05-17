@@ -286,6 +286,83 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         return $this->buildAccessBundle($client);
     }
 
+    public function createManualDeviceForClient(
+        \Model_Client $client,
+        ?int $orderId = null,
+        string $platform = 'ios',
+        ?string $deviceName = null,
+    ): array {
+        $this->ensureStorage();
+        $this->expireDeviceTokens((int) $client->id);
+
+        if ($client->status !== \Model_Client::ACTIVE) {
+            throw new \FOSSBilling\InformationException('Application access is not available for this account.', [], 401);
+        }
+
+        $overview = $this->getDeviceOverview($client);
+        if (!$overview['has_active_access']) {
+            throw new \FOSSBilling\InformationException('No active subscription is ready for application access yet.', [], 409);
+        }
+
+        $selectedGroup = $this->resolveActivationTargetGroup($overview, $orderId);
+        if ($selectedGroup === null) {
+            throw new \FOSSBilling\InformationException('Selected service is not ready for device activation.', [], 409);
+        }
+
+        $targetOrderId = (int) ($selectedGroup['order_id'] ?? ($overview['primary_order_id'] ?? 0));
+        if ($targetOrderId < 1) {
+            throw new \FOSSBilling\InformationException('Selected service is not ready for device activation.', [], 409);
+        }
+
+        $normalizedPlatform = mb_substr(trim($platform) !== '' ? trim($platform) : 'ios', 0, 64);
+        $normalizedDeviceName = mb_substr(trim((string) ($deviceName ?? '')) !== '' ? trim((string) $deviceName) : 'iPhone', 0, 255);
+        $installId = sprintf('manual-%s-client-%d-order-%d', strtolower($normalizedPlatform), (int) $client->id, $targetOrderId);
+        $reusableDevice = $this->findMostRecentDeviceForInstall(
+            (int) $client->id,
+            $targetOrderId,
+            $installId,
+        );
+        $reusableIsActive = $reusableDevice instanceof OODBBean
+            && (string) $reusableDevice->status === self::STATUS_ACTIVE;
+
+        if (
+            !$reusableIsActive
+            && !self::UNLIMITED_DEVICE_TEST_MODE
+            && (((int) ($selectedGroup['active'] ?? 0)) + 1 + ((int) ($selectedGroup['pending_tokens'] ?? 0)) > (int) ($selectedGroup['device_limit'] ?? 0))
+        ) {
+            throw new \FOSSBilling\InformationException('No device slots are available for this service.', [], 409);
+        }
+
+        $now = $this->now();
+        $deviceToken = $this->generateToken();
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+10 years'));
+        $device = $reusableDevice instanceof OODBBean
+            ? $reusableDevice
+            : $this->di['db']->dispense(self::DEVICE_BEAN);
+        $device->client_id = $client->id;
+        $device->source_order_id = $targetOrderId;
+        $device->activation_token_id = null;
+        $device->device_name = $normalizedDeviceName;
+        $device->platform = $normalizedPlatform;
+        $device->install_id = $installId;
+        $device->device_token_hash = $this->hashToken($deviceToken);
+        $device->status = self::STATUS_ACTIVE;
+        $device->expires_at = $expiresAt;
+        $device->last_seen_at = $now;
+        if (empty($device->created_at)) {
+            $device->created_at = $now;
+        }
+        $device->updated_at = $now;
+        $this->di['db']->store($device);
+
+        $this->notifyOrchestratorDeviceEvent($client, $device, 'device_activated');
+
+        $bundle = $this->buildAccessBundle($client, null, null, null, $device);
+        $bundle['manual_device'] = $this->mapDeviceRow($device);
+
+        return $bundle;
+    }
+
     public function updateDeviceConfigSnapshotFromOrchestrator(string $externalSubscriptionId, array $snapshot): bool
     {
         $this->ensureStorage();
@@ -1826,6 +1903,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
 
     private function mapDeviceRow(OODBBean $device): array
     {
+        $snapshot = $this->getDeviceConfigSnapshot($device);
+        $subscriptionLink = $this->extractConfigSnapshotString($snapshot, 'subscription_link')
+            ?? $this->extractConfigSnapshotString($snapshot, 'subscriptionLink');
+        $runtimePayload = $this->extractConfigSnapshotPayload($snapshot);
+
         return [
             'id' => (int) $device->id,
             'name' => $device->device_name ? (string) $device->device_name : null,
@@ -1833,6 +1915,11 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             'install_id' => $device->install_id ? (string) $device->install_id : null,
             'status' => (string) $device->status,
             'source_order_id' => $device->source_order_id ? (int) $device->source_order_id : null,
+            'config_ready' => $this->isConnectionSnapshotReady($snapshot, $runtimePayload),
+            'subscription_link' => $subscriptionLink,
+            'protocol' => $this->extractConfigSnapshotString($snapshot, 'protocol'),
+            'node_label' => $this->extractConfigSnapshotString($snapshot, 'node_label'),
+            'config_updated_at' => $this->formatDateAtom($device->config_updated_at ? (string) $device->config_updated_at : null),
             'expires_at' => $this->formatDateAtom((string) $device->expires_at),
             'last_seen_at' => $this->formatDateAtom($device->last_seen_at ? (string) $device->last_seen_at : null),
             'created_at' => $this->formatDateAtom($device->created_at ? (string) $device->created_at : null),

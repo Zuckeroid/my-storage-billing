@@ -281,20 +281,67 @@
                             : 'Приложения Znet для iPhone пока нет. Сейчас добавьте ссылку подписки в совместимый VPN-клиент. Auto ON/OFF доступен только в Android-приложении.' }}
                     </p>
 
-                    {% if orchestrator_access.subscription_link %}
-                        <div class="znet-shell-link-row mb-3">
-                            <button class="btn btn-outline-primary" type="button" data-znet-copy-subscription>{{ is_en ? 'Copy subscription link' : 'Скопировать ссылку' }}</button>
-                            <a class="btn btn-primary" href="{{ orchestrator_access.subscription_link }}" target="_blank" rel="noopener noreferrer">{{ is_en ? 'Open link' : 'Открыть ссылку' }}</a>
-                        </div>
-                        <div class="znet-shell-checklist">
-                            <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Copy the subscription link.' : 'Скопируйте ссылку подписки.' }}</span></div>
-                            <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Open a compatible VPN client on iPhone.' : 'Откройте совместимый VPN-клиент на iPhone.' }}</span></div>
-                            <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Import the link as a subscription.' : 'Импортируйте ссылку как подписку.' }}</span></div>
-                        </div>
-                    {% else %}
+                    {% if not appbridge.has_active_access %}
                         <p class="znet-shell-inline-note mb-0">
-                            {{ is_en ? 'The link will appear after activation.' : 'Ссылка появится после активации.' }}
+                            {{ is_en ? 'The iPhone link will become available after the service is activated.' : 'Ссылка для iPhone появится после активации услуги.' }}
                         </p>
+                    {% elseif order_appbridge_groups is empty %}
+                        <p class="znet-shell-inline-note mb-0">
+                            {{ is_en ? 'iPhone link creation is being prepared for this service.' : 'Создание ссылки iPhone для этой услуги готовится.' }}
+                        </p>
+                    {% else %}
+                        {% for group in order_appbridge_groups %}
+                            <div class="znet-shell-link-row mb-3">
+                                <button
+                                    class="btn btn-primary"
+                                    type="button"
+                                    data-appbridge-create-iphone
+                                    data-order-id="{{ group.order_id }}"
+                                    {% if not group.eligible_for_app %}disabled{% endif %}
+                                >
+                                    {{ is_en ? 'Create iPhone link' : 'Создать ссылку для iPhone' }}
+                                </button>
+                            </div>
+
+                            {% for device in group.devices %}
+                                {% set device_platform = device.platform|default('')|lower %}
+                                {% if device_platform starts with 'ios' or device_platform starts with 'iphone' or device_platform starts with 'manual-ios' %}
+                                    <article class="znet-appbridge-device mt-3">
+                                        <div class="znet-appbridge-device-copy">
+                                            <strong>{{ device.name ?: 'iPhone' }}</strong>
+                                            {% if device.subscription_link %}
+                                                <label class="form-label small text-secondary mt-2" for="znet-device-subscription-{{ device.id }}">
+                                                    {{ is_en ? 'Subscription link' : 'Ссылка подписки' }}
+                                                </label>
+                                                <div class="input-group">
+                                                    <input class="form-control" id="znet-device-subscription-{{ device.id }}" type="text" value="{{ device.subscription_link }}" readonly onclick="this.select();">
+                                                    <button class="btn btn-outline-primary" type="button" data-znet-copy-value="{{ device.subscription_link|e('html_attr') }}">{{ is_en ? 'Copy' : 'Скопировать' }}</button>
+                                                    <a class="btn btn-primary" href="{{ device.subscription_link }}" target="_blank" rel="noopener noreferrer">{{ is_en ? 'Open' : 'Открыть' }}</a>
+                                                </div>
+                                            {% else %}
+                                                <p class="mb-0 text-secondary small">
+                                                    {{ is_en ? 'The link is being prepared. Refresh this page in a few seconds.' : 'Ссылка готовится. Обновите страницу через несколько секунд.' }}
+                                                </p>
+                                            {% endif %}
+                                            {% if device.config_updated_at %}
+                                                <p class="mb-0 text-secondary small">{{ is_en ? 'Updated' : 'Обновлено' }}: {{ mf.compact_datetime(device.config_updated_at) }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="znet-appbridge-device-actions">
+                                            <button class="btn btn-outline-primary" type="button" data-appbridge-revoke data-device-id="{{ device.id }}">
+                                                {{ is_en ? 'Disconnect' : 'Отключить' }}
+                                            </button>
+                                        </div>
+                                    </article>
+                                {% endif %}
+                            {% endfor %}
+
+                            <div class="znet-shell-checklist mt-3">
+                                <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Create and copy the iPhone subscription link.' : 'Создайте и скопируйте ссылку подписки для iPhone.' }}</span></div>
+                                <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Open a compatible VPN client on iPhone.' : 'Откройте совместимый VPN-клиент на iPhone.' }}</span></div>
+                                <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Import the link as a subscription.' : 'Импортируйте ссылку как подписку.' }}</span></div>
+                            </div>
+                        {% endfor %}
                     {% endif %}
                 </div>
             </details>
@@ -493,6 +540,32 @@
                     }, 1800);
                 }));
             }
+
+            document.querySelectorAll('[data-znet-copy-value]').forEach((copyButton) => {
+                copyButton.addEventListener('click', async function () {
+                    const originalText = copyButton.textContent;
+                    const value = copyButton.getAttribute('data-znet-copy-value') || '';
+                    if (!value) {
+                        return;
+                    }
+
+                    try {
+                        await navigator.clipboard.writeText(value);
+                    } catch (error) {
+                        const helper = document.createElement('textarea');
+                        helper.value = value;
+                        document.body.appendChild(helper);
+                        helper.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(helper);
+                    }
+
+                    copyButton.textContent = "{{ is_en ? 'Copied' : 'Скопировано' }}";
+                    window.setTimeout(() => {
+                        copyButton.textContent = originalText;
+                    }, 1800);
+                });
+            });
         });
     </script>
 {% endautoescape %}

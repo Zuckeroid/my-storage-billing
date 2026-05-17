@@ -37,6 +37,16 @@ class Client extends \Api_Abstract
         );
     }
 
+    public function manual_device_create(array $data): array
+    {
+        return $this->getService()->createManualDeviceForClient(
+            $this->getIdentity(),
+            isset($data['order_id']) ? (int) $data['order_id'] : null,
+            isset($data['platform']) ? (string) $data['platform'] : 'ios',
+            isset($data['device_name']) ? (string) $data['device_name'] : null,
+        );
+    }
+
     #[RequiredParams(['id' => 'Device id required'])]
     public function device_revoke(array $data): array
     {

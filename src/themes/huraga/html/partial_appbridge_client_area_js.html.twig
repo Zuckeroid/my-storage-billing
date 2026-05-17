@@ -4,13 +4,14 @@
         const tokenValue = modal?.querySelector('[data-appbridge-token]');
         const meta = modal?.querySelector('[data-appbridge-meta]');
         const addButtons = document.querySelectorAll('[data-appbridge-add-device]');
+        const iphoneButtons = document.querySelectorAll('[data-appbridge-create-iphone]');
         const openTokenButtons = document.querySelectorAll('[data-appbridge-open-token]');
         const closeButtons = modal?.querySelectorAll('[data-appbridge-close]') || [];
         const copyButton = modal?.querySelector('[data-appbridge-copy-btn]');
         const rotateButton = modal?.querySelector('[data-appbridge-rotate-btn]');
         const tokenButton = modal?.querySelector('[data-appbridge-token-copy]');
 
-        if (!modal || !tokenValue || !meta || addButtons.length === 0) {
+        if (!modal || !tokenValue || !meta || (addButtons.length === 0 && iphoneButtons.length === 0)) {
             return;
         }
 
@@ -65,6 +66,11 @@
             return groups.find((group) => Number(group.order_id || 0) === Number(orderId || 0)) || null;
         };
 
+        const isIphoneDevice = (device) => {
+            const platform = String(device?.platform || '').toLowerCase();
+            return platform.startsWith('ios') || platform.startsWith('iphone') || platform.startsWith('manual-ios');
+        };
+
         const updateStats = (payload) => {
             const devices = payload?.devices || {};
             const isUnlimited = Boolean(devices.is_unlimited_test_mode);
@@ -83,6 +89,13 @@
 
                 const disableCreate = !payload?.has_active_access || Number(devices.eligible_order_count || 0) !== 1 || (!isUnlimited && Number(devices.available || 0) < 1);
                 button.disabled = disableCreate;
+            });
+
+            iphoneButtons.forEach((button) => {
+                const orderId = Number(button.getAttribute('data-order-id') || 0);
+                const group = groupMap.get(orderId);
+                const hasIphoneDevice = Array.isArray(group?.devices) && group.devices.some(isIphoneDevice);
+                button.disabled = !group || !group.eligible_for_app || (!isUnlimited && Number(group.available || 0) < 1 && !hasIphoneDevice);
             });
 
             groups.forEach((group) => {
@@ -172,6 +185,31 @@
                 }, (error) => {
                     updateStats(initialState);
                     setAddButtonsDisabled(false);
+                    setMessage(`${error.message} (${error.code})`, 'error');
+                });
+            });
+        });
+
+        iphoneButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const orderId = Number(button.getAttribute('data-order-id') || 0);
+                if (!orderId) {
+                    setMessage('{{ is_en ? 'Service is not selected for iPhone link.' : 'Для ссылки iPhone не выбрана услуга.' }}', 'error');
+                    return;
+                }
+
+                button.disabled = true;
+                API.client.post('appbridge/manual_device_create', {
+                    order_id: orderId,
+                    platform: 'ios',
+                    device_name: 'iPhone'
+                }, (result) => {
+                    setResultState(result);
+                    updateStats(result);
+                    setMessage('{{ is_en ? 'iPhone link is being prepared. Refreshing...' : 'Ссылка для iPhone готовится. Обновляем страницу...' }}');
+                    window.setTimeout(() => window.location.reload(), 1500);
+                }, (error) => {
+                    button.disabled = false;
                     setMessage(`${error.message} (${error.code})`, 'error');
                 });
             });
