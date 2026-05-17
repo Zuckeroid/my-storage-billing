@@ -467,20 +467,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $deviceSubscription = $preferredOrderId !== null
             ? $this->findSubscriptionByOrderId($subscriptions, $preferredOrderId)
             : null;
-        $activeConnections = [];
-
-        foreach ($subscriptions as $subscription) {
-            if (
-                $preferredOrderId !== null
-                && (int) ($subscription['order_id'] ?? 0) !== $preferredOrderId
-            ) {
-                continue;
-            }
-
-            if ($this->isSubscriptionReadyForApp($subscription, true)) {
-                $activeConnections[] = $subscription;
-            }
-        }
 
         $overview = $this->getDeviceOverview($client);
         $primarySubscription = $preferredOrderId !== null
@@ -496,7 +482,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 $deviceSubscription !== null
                 && $this->isSubscriptionReadyForApp($deviceSubscription)
             )
-            : !empty($activeConnections);
+            : !empty($overview['has_active_access']);
 
         $app = [
             'token_expires_at' => $this->formatDateAtom($tokenExpiresAt),
