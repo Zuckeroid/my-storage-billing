@@ -47,13 +47,15 @@
 {% block shell_eyebrow %}{{ client ? '' : (is_en ? 'Page' : 'Страница') }}{% endblock %}
 {% block shell_title %}{% endblock %}
 {% block shell_description %}{% endblock %}
+{% block shell_description_fallback %}on{% endblock %}
 {% set shell_eyebrow_text = block('shell_eyebrow')|striptags|trim %}
 {% set shell_title_text = block('shell_title')|striptags|trim %}
 {% if shell_title_text is empty %}
     {% set shell_title_text = block('meta_title')|striptags|trim %}
 {% endif %}
 {% set shell_description_text = block('shell_description')|striptags|trim %}
-{% if shell_description_text is empty %}
+{% set shell_description_fallback = block('shell_description_fallback')|striptags|trim %}
+{% if shell_description_text is empty and shell_description_fallback != 'off' %}
     {% set shell_description_text = block('meta_description')|striptags|trim %}
 {% endif %}
 

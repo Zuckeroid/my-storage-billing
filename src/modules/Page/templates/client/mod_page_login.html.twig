@@ -7,9 +7,10 @@
 {% block meta_description %}{{ is_en ? 'Sign in to manage your connection, payments, and profile.' : 'Войдите, чтобы управлять подключением, оплатой и профилем.' }}{% endblock %}
 
 {% block body_class %}page-login{% endblock %}
-{% block shell_eyebrow %}{{ is_en ? 'Access' : 'Доступ' }}{% endblock %}
+{% block shell_eyebrow %}{% endblock %}
 {% block shell_title %}{{ is_en ? 'Login' : 'Войти' }}{% endblock %}
-{% block shell_description %}{{ is_en ? 'Use the same account you created in Znet.' : 'Используйте тот же аккаунт, который вы создали в Znet.' }}{% endblock %}
+{% block shell_description %}{% endblock %}
+{% block shell_description_fallback %}off{% endblock %}
 {% block shell_head_actions %}
     {% if settings.show_signup_link %}
         <a class="znet-btn znet-btn-accent" href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>

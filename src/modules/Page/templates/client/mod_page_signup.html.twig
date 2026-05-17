@@ -11,9 +11,10 @@
 {% block meta_description %}{{ is_en ? 'Create your account to start using Znet and manage everything in one place.' : 'Создайте аккаунт, чтобы начать пользоваться Znet и управлять всем в одном месте.' }}{% endblock %}
 
 {% block body_class %}page-signup{% endblock %}
-{% block shell_eyebrow %}{{ is_en ? 'Access' : 'Доступ' }}{% endblock %}
+{% block shell_eyebrow %}{% endblock %}
 {% block shell_title %}{{ is_en ? 'Registration' : 'Регистрация' }}{% endblock %}
-{% block shell_description %}{{ is_en ? 'Create your Znet account. The same account is used for payment and connection setup.' : 'Создайте аккаунт Znet. Он используется для оплаты и настройки подключения.' }}{% endblock %}
+{% block shell_description %}{% endblock %}
+{% block shell_description_fallback %}off{% endblock %}
 {% block shell_head_actions %}
     <a class="znet-btn znet-btn-outline" href="{{ 'login'|link }}">{{ is_en ? 'Login' : 'Войти' }}</a>
 {% endblock %}
