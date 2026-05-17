@@ -883,17 +883,12 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 || !empty($access['error'])
                 || !empty($access['last_sync_at']);
 
-            if (!$hasBridgeData) {
+            if (!$hasBridgeData && !$this->isOrderStatusEligibleForDeviceToken($order)) {
                 continue;
             }
 
             $deviceLimitMeta = $this->resolveOrderDeviceLimitMeta($order, $access);
-            $hasUsableAccess =
-                ($access['status'] ?? null) === self::STATUS_ACTIVE
-                || $connectionReady;
-            $eligibleForApp =
-                ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
-                && $hasUsableAccess;
+            $eligibleForApp = $this->isOrderReadyForDeviceToken($order, $access);
 
             $subscriptions[] = [
                 'order_id' => (int) $order->id,
@@ -938,6 +933,31 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $value = trim((string) $snapshot[$key]);
 
         return $value === '' ? null : $value;
+    }
+
+    private function isOrderReadyForDeviceToken(\Model_ClientOrder $order, array $access): bool
+    {
+        if (!$this->isOrderStatusEligibleForDeviceToken($order)) {
+            return false;
+        }
+
+        $provisionStatus = isset($access['status'])
+            ? strtolower(trim((string) $access['status']))
+            : '';
+
+        return !in_array($provisionStatus, ['failed', 'cancelled', 'canceled', 'suspended', 'deleted'], true);
+    }
+
+    private function isOrderStatusEligibleForDeviceToken(\Model_ClientOrder $order): bool
+    {
+        return in_array(
+            (string) ($order->status ?? ''),
+            [
+                \Model_ClientOrder::STATUS_ACTIVE,
+                \Model_ClientOrder::STATUS_PENDING_SETUP,
+            ],
+            true,
+        );
     }
 
     private function extractConfigSnapshotPayload(?array $snapshot): ?string
@@ -1193,15 +1213,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             return $configuredLimitMeta;
         }
 
-        $connectionReady =
-            !empty($access['config_snapshot']['ready'])
-            || !empty($access['config_snapshot']['runtime_payload'])
-            || !empty($access['config_snapshot']['xray_config']);
-        $hasUsableAccess =
-            ($access['status'] ?? null) === self::STATUS_ACTIVE
-            || $connectionReady;
-
-        if (($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE && $hasUsableAccess) {
+        if ($this->isOrderReadyForDeviceToken($order, $access)) {
             return [
                 'value' => 1,
                 'source' => 'fallback.active_access',
