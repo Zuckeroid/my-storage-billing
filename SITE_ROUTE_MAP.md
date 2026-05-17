@@ -33,10 +33,10 @@ Service exceptions:
 | `/` logged in, `/client` | Client | `mod_index_dashboard.html.twig` + `layout_default` | "Ваш Znet" dashboard | Canonical. Keep simple: connection, balance, support. Payment choice lives on `/invoice#plans`. |
 | `/orderbutton` | Public / Client | `Orderbutton` | Technical order/checkout fallback | Keep as a public fallback route. Logged-in users redirect to `/invoice#plans`. Primary client plan choice lives inside `/invoice`. |
 | `/orderbutton/js` | Service | `Orderbutton` | Widget script endpoint | Keep only if core checkout needs it. No design work. |
-| `/login` | Public | `Page/mod_page_login.html.twig` | Full login fallback | Keep as fallback, but primary login UX is the header auth panel. |
-| `/signup` | Public | `Page/mod_page_signup.html.twig` | Full registration fallback | Keep as fallback, align with header auth panel. Check legal links. |
-| `/password-reset` | Public | `Page/mod_page_password-reset.html.twig` | Full reset fallback | Keep. |
-| `/reset-password-confirm/:hash`, `/client/reset-password-confirm/:hash` | Public / Client | Client reset route | Password reset confirmation | Keep. |
+| `/login` | Public | `Page/mod_page_login.html.twig` | Full login fallback | Keep as the canonical full-page login. Header auth panel is the quick entry to the same scenario. |
+| `/signup` | Public | `Page/mod_page_signup.html.twig` | Full registration fallback | Keep as the canonical full-page registration. Match header auth fields and legal links. |
+| `/password-reset` | Public | `Page/mod_page_password-reset.html.twig` | Full reset fallback | Keep as the canonical reset request page. |
+| `/reset-password-confirm/:hash`, `/client/reset-password-confirm/:hash` | Public / Client | `Client/mod_client_set_new_password.html.twig` | Password reset confirmation | Keep in the Znet public shell. |
 | `/payment` | Public | `Page/mod_page_payment.html.twig` | Payment/moderation page | Keep. Needs one shell/copy pass with other public pages. |
 | `/about-us` | Public | `Page/mod_page_about-us.html.twig` | Service/company page | Keep. Needs final company details and shell alignment. |
 | `/contacts` | Public | `Page/mod_page_contacts.html.twig` | Single support/contact entry | Canonical support route. All user-facing support should lead here. |
@@ -99,7 +99,7 @@ Canonical pages:
 
 Current state:
 
-- Auth fallback pages exist separately from the header auth panel. That is acceptable as a fallback, but they must not feel like a second product.
+- Auth fallback pages exist separately from the header auth panel. They are the full-page version of the same login/registration/reset scenario.
 - Legal/moderation pages mostly exist, but need one consistent shell pass after real company details are filled.
 - Checkout remains available as a fallback, but client-facing plan choice is shown on `/invoice`.
 
@@ -107,7 +107,7 @@ Main mismatches to fix:
 
 - `/invoice/:hash` was redesigned after this map was created; verify the live unpaid/paid states before changing adjacent payment pages.
 - `/payment` and `/about-us` should use the same title/card rhythm as `/contacts`.
-- `/signup` should be checked against the header signup panel so fields, legal text, and password UX match.
+- `/signup`, `/login`, `/password-reset`, and reset-confirm now share the Znet shell and the same auth-language as the header panel.
 
 ### Client Shell
 
@@ -132,7 +132,7 @@ Current state:
 Main mismatches to fix:
 
 - Payment detail, gateway transition, and thank-you states now use the Znet shell; live-check unpaid, paid, and gateway return states.
-- Service detail has useful information, but it can still drift into "technical manual" territory. Keep technical data collapsed.
+- Service detail has useful information, but it can still drift into "technical manual" territory. Keep technical data collapsed. Android is device-token based; iPhone/iPad is a single compatible-client subscription profile.
 - Balance is currently first-class but minimal: current amount, top-up form, collapsed history.
 
 ### Legacy / Hidden Surface
@@ -160,6 +160,6 @@ Rule: these pages should be redirected, hidden from navigation, or left as techn
 
 - Decide whether `/order`, `/order/:id`, and `/order/:slug` should redirect to the payment hub or only remain hidden technical routes.
 - Live-check `/invoice`, `/invoice/:hash`, `/invoice/banklink/:hash/:id`, and `/invoice/thank-you/:hash`.
-- Compare `/login`, `/signup`, and the header auth panel as one auth system.
+- Live-check `/login`, `/signup`, `/password-reset`, and `/client/reset-password-confirm/:hash` after deploy as one auth system.
 - Keep `/contacts` as the only visible support route.
 - After desktop is stable, make a single mobile checklist per template type: home, public shell, client shell.

@@ -202,11 +202,11 @@
                 API.client.post('appbridge/manual_device_create', {
                     order_id: orderId,
                     platform: 'ios',
-                    device_name: 'iPhone'
+                    device_name: 'iPhone/iPad profile'
                 }, (result) => {
                     setResultState(result);
                     updateStats(result);
-                    setMessage('{{ is_en ? 'iPhone link is being prepared. Refreshing...' : 'Ссылка для iPhone готовится. Обновляем страницу...' }}');
+                    setMessage('{{ is_en ? 'iPhone/iPad profile is being prepared. Refreshing...' : 'Профиль iPhone/iPad готовится. Обновляем страницу...' }}');
                     window.setTimeout(() => window.location.reload(), 1500);
                 }, (error) => {
                     button.disabled = false;

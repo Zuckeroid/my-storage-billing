@@ -1,197 +1,240 @@
 {% extends "layout_default.html.twig" %}
+
 {% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
 {% set is_en = current_locale starts with 'en' %}
+{% set required_fields = guest.client_required|default([]) %}
+{% set custom_fields = guest.client_custom_fields|default({}) %}
 
 {% import "macro_functions.html.twig" as mf %}
 
 {% block meta_title %}{{ is_en ? 'Create account' : 'Создать аккаунт' }}{% endblock %}
 {% block meta_description %}{{ is_en ? 'Create your account to start using Znet and manage everything in one place.' : 'Создайте аккаунт, чтобы начать пользоваться Znet и управлять всем в одном месте.' }}{% endblock %}
 
-{% set company = guest.system_company %}
-
 {% block body_class %}page-signup{% endblock %}
 {% block shell_eyebrow %}{{ is_en ? 'Access' : 'Доступ' }}{% endblock %}
 {% block shell_title %}{{ is_en ? 'Registration' : 'Регистрация' }}{% endblock %}
-{% block shell_description %}{{ is_en ? 'Create your account to start using Znet and manage everything in one place.' : 'Создайте аккаунт, чтобы начать пользоваться Znet и управлять всем в одном месте.' }}{% endblock %}
+{% block shell_description %}{{ is_en ? 'Create your Znet account. The same account is used for payment and connection setup.' : 'Создайте аккаунт Znet. Он используется для оплаты и настройки подключения.' }}{% endblock %}
 {% block shell_head_actions %}
     <a class="znet-btn znet-btn-outline" href="{{ 'login'|link }}">{{ is_en ? 'Login' : 'Войти' }}</a>
 {% endblock %}
+
 {% block content %}
     <div class="znet-shell-auth-wrap">
         <div class="card znet-shell-auth-card">
             <div class="card-body">
-                <form method="post" action="{{ 'api/guest/client/create'|link }}" class="auth" {{ fb_api_form({redirect: '/'|link}) }}>
-                            {% set r = guest.client_required %}
+                <form method="post" action="{{ 'api/guest/client/create'|link }}" class="auth znet-auth-form" {{ fb_api_form({redirect: '/'|link}) }}>
+                    <div class="znet-auth-grid znet-auth-grid-two">
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-first-name">{{ 'First Name'|trans }}</label>
+                            <input
+                                class="form-control"
+                                id="znet-page-signup-first-name"
+                                type="text"
+                                name="first_name"
+                                value="{{ request.first_name }}"
+                                required="required"
+                                autocomplete="given-name"
+                            >
+                        </div>
 
+                        {% if 'last_name' in required_fields %}
                             <div class="mb-3">
-                                <label class="form-label" for="first-name">{{ 'First Name'|trans }}</label>
-                                <input class="form-control" id="first-name" type="text" name="first_name"
-                                       value="{{ request.first_name }}" required="required"/>
+                                <label class="form-label" for="znet-page-signup-last-name">{{ 'Last Name'|trans }}</label>
+                                <input
+                                    class="form-control"
+                                    id="znet-page-signup-last-name"
+                                    type="text"
+                                    name="last_name"
+                                    value="{{ request.last_name }}"
+                                    required="required"
+                                    autocomplete="family-name"
+                                >
                             </div>
+                        {% endif %}
+                    </div>
 
-                            {% if 'last_name' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="last_name">{{ 'Last Name'|trans }}</label>
-                                    <input class="form-control" id="last_name" type="text" name="last_name"
-                                           value="{{ request.last_name }}" required="required"/>
-                                </div>
-                            {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label" for="znet-page-signup-email">{{ 'Email Address'|trans }}</label>
+                        <input
+                            class="form-control"
+                            id="znet-page-signup-email"
+                            type="email"
+                            name="email"
+                            value="{{ request.email }}"
+                            required="required"
+                            autocomplete="email"
+                        >
+                    </div>
 
+                    {% if 'company' in required_fields %}
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-company">{{ 'Company'|trans }}</label>
+                            <input class="form-control" id="znet-page-signup-company" type="text" name="company" value="{{ request.company }}" required="required">
+                        </div>
+                    {% endif %}
+
+                    {% if 'birthday' in required_fields %}
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-birthday">{{ 'Birthday'|trans }}</label>
+                            <input class="form-control" id="znet-page-signup-birthday" type="date" name="birthday" value="">
+                        </div>
+                    {% endif %}
+
+                    {% if 'gender' in required_fields %}
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-gender">{{ 'Gender'|trans }}</label>
+                            <select class="form-select" id="znet-page-signup-gender" name="gender">
+                                <option value="male">{{ 'Male'|trans }}</option>
+                                <option value="female">{{ 'Female'|trans }}</option>
+                                <option value="nonbinary">{{ 'Non-binary'|trans }}</option>
+                                <option value="other">{{ 'Other'|trans }}</option>
+                            </select>
+                        </div>
+                    {% endif %}
+
+                    {% if 'address_1' in required_fields %}
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-address-1">{{ 'Address'|trans }}</label>
+                            <input class="form-control" id="znet-page-signup-address-1" type="text" name="address_1" value="{{ request.address_1 }}">
+                        </div>
+                    {% endif %}
+
+                    {% if 'address_2' in required_fields %}
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-address-2">{{ 'Address 2'|trans }}</label>
+                            <input class="form-control" id="znet-page-signup-address-2" type="text" name="address_2" value="{{ request.address_2 }}">
+                        </div>
+                    {% endif %}
+
+                    <div class="znet-auth-grid znet-auth-grid-two">
+                        {% if 'city' in required_fields %}
                             <div class="mb-3">
-                                <label class="form-label" for="reg-email">{{ 'Email Address'|trans }}</label>
-                                <input class="form-control" id="reg-email" type="email" name="email"
-                                       value="{{ request.email }}" required="required"/>
+                                <label class="form-label" for="znet-page-signup-city">{{ 'City'|trans }}</label>
+                                <input class="form-control" id="znet-page-signup-city" type="text" name="city" value="{{ request.city }}">
                             </div>
+                        {% endif %}
 
-                            {% if 'company' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="company">{{ 'Company'|trans }}</label>
-                                    <input class="form-control" id="company" type="text" name="company"
-                                           value="{{ request.company }}" required="required"/>
-                                </div>
-                            {% endif %}
-
-                            {% if 'birthday' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="birthday">{{ 'Birthday'|trans }}</label>
-                                    <input class="form-control" id="birthday" type="date" name="birthday" value=""/>
-                                </div>
-                            {% endif %}
-
-                            {% if 'gender' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="gender">{{ 'Gender'|trans }}</label>
-                                    <select class="form-select" id="gender" name="gender">
-                                        <option value="male">{{ 'Male'|trans }}</option>
-                                        <option value="female">{{ 'Female'|trans }}</option>
-                                        <option value="nonbinary">{{ 'Non-binary'|trans }}</option>
-                                        <option value="other">{{ 'Other'|trans }}</option>
-                                    </select>
-                                </div>
-                            {% endif %}
-
-                            {% if 'address_1' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="address_1">{{ 'Address'|trans }}</label>
-                                    <input class="form-control" id="address_1" type="text" name="address_1"
-                                           value="{{ request.address_1 }}"/>
-                                </div>
-                            {% endif %}
-
-                            {% if 'address_2' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="address_2">{{ 'Address 2'|trans }}</label>
-                                    <input class="form-control" id="address_2" type="text" name="address_2"
-                                           value="{{ request.address_2 }}"/>
-                                </div>
-                            {% endif %}
-
-                            {% if 'city' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="city">{{ 'City'|trans }}</label>
-                                    <input class="form-control" id="city" type="text" name="city"
-                                           value="{{ request.city }}"/>
-                                </div>
-                            {% endif %}
-
-                            {% if 'country' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="country">{{ 'Country'|trans }}</label>
-                                    <select class="form-select" id="country" name="country" required="required">
-                                        <option value="">{{ '-- Select country --'|trans }}</option>
-                                        {% for val,label in guest.system_countries %}
-                                            <option value="{{ val }}" label="{{ label|e }}" {% if guest.system_default_country == val %}selected{% endif %}>{{ label|e }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            {% endif %}
-
-                            {% if 'state' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="state">{{ 'State'|trans }}</label>
-                                    <input class="form-control" id="state" type="text" name="state"
-                                           value="{{ request.state }}"/>
-                                </div>
-                            {% endif %}
-
-                            {% if 'postcode' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="postcode">{{ 'Zip/Postal Code'|trans }}</label>
-                                    <input class="form-control" id="postcode" type="text" name="postcode"
-                                           value="{{ request.postcode }}"/>
-                                </div>
-                            {% endif %}
-
-                            {% if 'phone' in r %}
-                                <div class="mb-3">
-                                    <label class="form-label" for="phone">{{ 'Phone Number'|trans }}</label>
-                                    <div class="input-group">
-                                        <input class="form-control" id="phone" type="text" name="phone_cc" value=""
-                                               style="width: 20%"/>
-                                        <input class="form-control" id="phone" type="text" name="phone"
-                                               value="{{ request.phone }}" style="width: 70%"/>
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            {% set custom_fields = guest.client_custom_fields %}
-                            {% for field_name, field in custom_fields %}
-                                {% if field.active %}
-                                    <div class="mb-3">
-                                        <label class="form-label"
-                                               for="{{ field_name }}">{{ field.title is not empty ? field.title : field_name | capitalize }}</label>
-                                        <input class="form-control" id="{{ field_name }}" type="text"
-                                               name="{{ field_name }}" value="{{ request.(field_name) }}"
-                                               {% if field.required %}required="required"{% endif %} />
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-
+                        {% if 'state' in required_fields %}
                             <div class="mb-3">
-                                <label class="form-label" for="reg-password">{{ 'Password'|trans }}</label>
-                                <input class="form-control" id="reg-password" type="password" name="password" value=""
-                                       required="required"/>
+                                <label class="form-label" for="znet-page-signup-state">{{ 'State'|trans }}</label>
+                                <input class="form-control" id="znet-page-signup-state" type="text" name="state" value="{{ request.state }}">
                             </div>
+                        {% endif %}
+                    </div>
 
+                    <div class="znet-auth-grid znet-auth-grid-two">
+                        {% if 'country' in required_fields %}
                             <div class="mb-3">
-                                <label class="form-label" for="password-confirm">{{ 'Password confirm'|trans }}</label>
-                                <input class="form-control" id="password-confirm" type="password" name="password_confirm" value="" required="required"/>
+                                <label class="form-label" for="znet-page-signup-country">{{ 'Country'|trans }}</label>
+                                <select class="form-select" id="znet-page-signup-country" name="country" required="required">
+                                    <option value="">{{ '-- Select country --'|trans }}</option>
+                                    {% for val, label in guest.system_countries %}
+                                        <option value="{{ val }}" label="{{ label|e }}" {% if guest.system_default_country == val %}selected{% endif %}>{{ label|e }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
+                        {% endif %}
 
-                            {{ mf.recaptcha }}
-
-                            {% if settings.signup_tos == 'explicit' %}
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required>
-                                    <label class="form-check-label" for="flexCheckDefault">
-                                        {% if is_en %}
-                                            <span>I agree to the <a href="{{ '/tos'|link }}" target="_blank">terms of service</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">privacy policy</a>.</span>
-                                        {% else %}
-                                            <span>Я принимаю <a href="{{ '/tos'|link }}" target="_blank">условия сервиса</a> и <a href="{{ '/privacy-policy'|link }}" target="_blank">политику конфиденциальности</a>.</span>
-                                        {% endif %}
-                                    </label>
-                                </div>
-                            {% endif %}
-
-                            <div class="form-actions mb-3">
-                                <button class="btn btn-primary w-100" type="submit">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</button>
+                        {% if 'postcode' in required_fields %}
+                            <div class="mb-3">
+                                <label class="form-label" for="znet-page-signup-postcode">{{ 'Zip/Postal Code'|trans }}</label>
+                                <input class="form-control" id="znet-page-signup-postcode" type="text" name="postcode" value="{{ request.postcode }}">
                             </div>
+                        {% endif %}
+                    </div>
 
-                            {% if settings.signup_tos == 'implicit' %}
-                                <div class="mb-1">
-                                    {% if is_en %}
-                                        <span class="text-muted mb-1">By creating an account, you agree to the <a href="{{ '/tos'|link }}" target="_blank">terms of service</a> and <a href="{{ '/privacy-policy'|link }}" target="_blank">privacy policy</a>.</span>
-                                    {% else %}
-                                        <span class="text-muted mb-1">Создавая аккаунт, вы принимаете <a href="{{ '/tos'|link }}" target="_blank">условия сервиса</a> и <a href="{{ '/privacy-policy'|link }}" target="_blank">политику конфиденциальности</a>.</span>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
+                    {% if 'phone' in required_fields %}
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-phone">{{ 'Phone Number'|trans }}</label>
+                            <div class="znet-auth-phone-group">
+                                <input class="form-control znet-auth-phone-cc" id="znet-page-signup-phone-cc" type="text" name="phone_cc" value="" placeholder="+7">
+                                <input class="form-control" id="znet-page-signup-phone" type="text" name="phone" value="{{ request.phone }}" placeholder="{{ 'Phone Number'|trans }}">
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% for field_name, field in custom_fields %}
+                        {% if field.active %}
+                            <div class="mb-3">
+                                <label class="form-label" for="znet-page-signup-{{ field_name }}">
+                                    {{ field.title is not empty ? field.title : field_name | capitalize }}
+                                </label>
+                                <input
+                                    class="form-control"
+                                    id="znet-page-signup-{{ field_name }}"
+                                    type="text"
+                                    name="{{ field_name }}"
+                                    value="{{ request.(field_name) }}"
+                                    {% if field.required %}required="required"{% endif %}
+                                >
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="znet-auth-grid znet-auth-grid-two">
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-password">{{ 'Password'|trans }}</label>
+                            <input
+                                class="form-control"
+                                id="znet-page-signup-password"
+                                type="password"
+                                name="password"
+                                value=""
+                                required="required"
+                                autocomplete="new-password"
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="znet-page-signup-password-confirm">{{ 'Password confirm'|trans }}</label>
+                            <input
+                                class="form-control"
+                                id="znet-page-signup-password-confirm"
+                                type="password"
+                                name="password_confirm"
+                                value=""
+                                required="required"
+                                autocomplete="new-password"
+                            >
+                        </div>
+                    </div>
+
+                    {{ mf.recaptcha }}
+
+                    {% if settings.signup_tos == 'explicit' %}
+                        <div class="form-check znet-auth-check mb-3">
+                            <input class="form-check-input" type="checkbox" value="" id="znet-page-signup-tos" required>
+                            <label class="form-check-label" for="znet-page-signup-tos">
+                                <span>
+                                    {{ is_en ? 'I agree to the' : 'Я принимаю' }}
+                                    <a href="{{ '/tos'|link }}" target="_blank" rel="noopener">{{ 'terms of service'|trans }}</a>
+                                    {{ is_en ? 'and' : 'и' }}
+                                    <a href="{{ '/privacy-policy'|link }}" target="_blank" rel="noopener">{{ 'privacy policy'|trans }}</a>.
+                                </span>
+                            </label>
+                        </div>
+                    {% endif %}
+
+                    <button class="znet-btn znet-btn-accent znet-auth-submit" type="submit">
+                        {{ is_en ? 'Create account' : 'Создать аккаунт' }}
+                    </button>
+
+                    {% if settings.signup_tos == 'implicit' %}
+                        <div class="znet-auth-legal">
+                            <span>
+                                {{ is_en ? 'By creating an account, you agree to our' : 'Создавая аккаунт, вы принимаете' }}
+                                <a href="{{ '/tos'|link }}" target="_blank" rel="noopener">{{ 'terms of service'|trans }}</a>
+                                {{ is_en ? 'and' : 'и' }}
+                                <a href="{{ '/privacy-policy'|link }}" target="_blank" rel="noopener">{{ 'privacy policy'|trans }}</a>.
+                            </span>
+                        </div>
+                    {% endif %}
                 </form>
-                <div class="znet-shell-link-row">
-                    <a class="btn btn-outline-primary mb-2 w-100"
-                       href="{{ 'login'|link }}">{{ 'Already a user?'|trans }}</a>
+
+                <div class="znet-auth-foot">
+                    <a class="znet-auth-text-link" href="{{ 'login'|link }}">{{ is_en ? 'Already have an account?' : 'Уже есть аккаунт?' }}</a>
                     {% if settings.show_password_reset_link %}
-                        <a class="btn btn-outline-primary mb-2 w-100" href="{{ 'password-reset'|link }}">{{ 'Forgot password?'|trans }}</a>
+                        <a class="znet-auth-text-link" href="{{ 'password-reset'|link }}">{{ 'Forgot password?'|trans }}</a>
                     {% endif %}
                 </div>
             </div>

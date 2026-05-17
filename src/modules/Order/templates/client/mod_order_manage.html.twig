@@ -78,8 +78,8 @@
                 <h2>{{ is_en ? 'How to connect' : 'Как подключиться' }}</h2>
                 <p>
                     {{ is_en
-                        ? 'Android has the full Znet app experience. iPhone users can connect with a compatible VPN client using the subscription link.'
-                        : 'На Android доступен полный сценарий через приложение Znet. На iPhone пока используем совместимый VPN-клиент и ссылку подписки.' }}
+                        ? 'Android has the full Znet app experience. iPhone and iPad use one compatible-client profile with a subscription link.'
+                        : 'На Android доступен полный сценарий через приложение Znet. Для iPhone и iPad используется один профиль совместимого клиента со ссылкой подписки.' }}
                 </p>
             </div>
         </div>
@@ -270,15 +270,15 @@
                             <path d="M11 6h2M11.5 18h1" />
                         </svg>
                     </span>
-                    <span class="znet-platform-title">iPhone</span>
-                    <span class="znet-platform-summary-note">{{ is_en ? 'Subscription link' : 'Ссылка подписки' }}</span>
+                    <span class="znet-platform-title">iPhone / iPad</span>
+                    <span class="znet-platform-summary-note">{{ is_en ? 'Compatible client profile' : 'Профиль совместимого клиента' }}</span>
                 </summary>
                 <div class="znet-platform-body">
-                    <h3 class="h4 mb-2">{{ is_en ? 'Use subscription link' : 'Используйте ссылку подписки' }}</h3>
+                    <h3 class="h4 mb-2">{{ is_en ? 'Compatible-client profile' : 'Профиль для совместимого клиента' }}</h3>
                     <p class="text-secondary">
                         {{ is_en
-                            ? 'The Znet iPhone app is not ready yet. For now, add the subscription link to a compatible VPN client. Auto ON/OFF is available only in the Android app.'
-                            : 'Приложения Znet для iPhone пока нет. Сейчас добавьте ссылку подписки в совместимый VPN-клиент. Auto ON/OFF доступен только в Android-приложении.' }}
+                            ? 'The Znet iPhone app is not ready yet. For now, create one subscription profile and add the link to a compatible VPN client on iPhone or iPad. Auto ON/OFF is available only in the Android app.'
+                            : 'Приложения Znet для iPhone пока нет. Сейчас создайте один профиль подписки и добавьте ссылку в совместимый VPN-клиент на iPhone или iPad. Auto ON/OFF доступен только в Android-приложении.' }}
                     </p>
 
                     {% if not appbridge.has_active_access %}
@@ -291,6 +291,7 @@
                         </p>
                     {% else %}
                         {% for group in order_appbridge_groups %}
+                            {% set iphone_devices = group.devices|filter(device => (device.platform|default('')|lower) matches '/^(ios|iphone|manual-ios)/') %}
                             <div class="znet-shell-link-row mb-3">
                                 <button
                                     class="btn btn-primary"
@@ -299,16 +300,25 @@
                                     data-order-id="{{ group.order_id }}"
                                     {% if not group.eligible_for_app %}disabled{% endif %}
                                 >
-                                    {{ is_en ? 'Create iPhone link' : 'Создать ссылку для iPhone' }}
+                                    {% if iphone_devices is empty %}
+                                        {{ is_en ? 'Create iPhone/iPad profile' : 'Создать профиль iPhone/iPad' }}
+                                    {% else %}
+                                        {{ is_en ? 'Refresh subscription link' : 'Обновить ссылку подписки' }}
+                                    {% endif %}
                                 </button>
                             </div>
 
-                            {% for device in group.devices %}
-                                {% set device_platform = device.platform|default('')|lower %}
-                                {% if device_platform starts with 'ios' or device_platform starts with 'iphone' or device_platform starts with 'manual-ios' %}
+                            {% if iphone_devices is empty %}
+                                <p class="znet-shell-inline-note mb-0">
+                                    {{ is_en
+                                        ? 'This creates one iPhone/iPad profile for the active service.'
+                                        : 'Будет создан один профиль iPhone/iPad для активной услуги.' }}
+                                </p>
+                            {% else %}
+                                {% for device in iphone_devices %}
                                     <article class="znet-appbridge-device mt-3">
                                         <div class="znet-appbridge-device-copy">
-                                            <strong>{{ device.name ?: 'iPhone' }}</strong>
+                                            <strong>{{ is_en ? 'iPhone/iPad profile' : 'Профиль iPhone/iPad' }}</strong>
                                             {% if device.subscription_link %}
                                                 <label class="form-label small text-secondary mt-2" for="znet-device-subscription-{{ device.id }}">
                                                     {{ is_en ? 'Subscription link' : 'Ссылка подписки' }}
@@ -326,6 +336,11 @@
                                             {% if device.config_updated_at %}
                                                 <p class="mb-0 text-secondary small">{{ is_en ? 'Updated' : 'Обновлено' }}: {{ mf.compact_datetime(device.config_updated_at) }}</p>
                                             {% endif %}
+                                            <p class="mb-0 text-secondary small">
+                                                {{ is_en
+                                                    ? 'Use this link in a compatible VPN client on iPhone or iPad.'
+                                                    : 'Используйте эту ссылку в совместимом VPN-клиенте на iPhone или iPad.' }}
+                                            </p>
                                         </div>
                                         <div class="znet-appbridge-device-actions">
                                             <button class="btn btn-outline-primary" type="button" data-appbridge-revoke data-device-id="{{ device.id }}">
@@ -333,12 +348,12 @@
                                             </button>
                                         </div>
                                     </article>
-                                {% endif %}
-                            {% endfor %}
+                                {% endfor %}
+                            {% endif %}
 
                             <div class="znet-shell-checklist mt-3">
-                                <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Create and copy the iPhone subscription link.' : 'Создайте и скопируйте ссылку подписки для iPhone.' }}</span></div>
-                                <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Open a compatible VPN client on iPhone.' : 'Откройте совместимый VPN-клиент на iPhone.' }}</span></div>
+                                <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Create and copy the iPhone/iPad subscription link.' : 'Создайте и скопируйте ссылку подписки для iPhone/iPad.' }}</span></div>
+                                <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Open a compatible VPN client on iPhone or iPad.' : 'Откройте совместимый VPN-клиент на iPhone или iPad.' }}</span></div>
                                 <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Import the link as a subscription.' : 'Импортируйте ссылку как подписку.' }}</span></div>
                             </div>
                         {% endfor %}
