@@ -102,12 +102,11 @@
                     </div>
                 {% endif %}
 
-                <div class="znet-shell-link-row mb-3">
-                    <a class="btn btn-primary" href="{{ android_apk_url }}" download>{{ is_en ? 'Download Android app' : 'Скачать Android' }}</a>
-                    {% if orchestrator_access.subscription_link %}
+                {% if orchestrator_access.subscription_link %}
+                    <div class="znet-shell-link-row mb-3">
                         <button class="btn btn-outline-primary" type="button" data-znet-copy-subscription>{{ is_en ? 'Copy subscription link' : 'Скопировать ссылку' }}</button>
-                    {% endif %}
-                </div>
+                    </div>
+                {% endif %}
 
                 {% if orchestrator_access.subscription_link %}
                     <label class="form-label" for="znet-subscription-link">{{ is_en ? 'Subscription link' : 'Ссылка подписки' }}</label>
@@ -283,8 +282,12 @@
                     </p>
 
                     {% if orchestrator_access.subscription_link %}
+                        <div class="znet-shell-link-row mb-3">
+                            <button class="btn btn-outline-primary" type="button" data-znet-copy-subscription>{{ is_en ? 'Copy subscription link' : 'Скопировать ссылку' }}</button>
+                            <a class="btn btn-primary" href="{{ orchestrator_access.subscription_link }}" target="_blank" rel="noopener noreferrer">{{ is_en ? 'Open link' : 'Открыть ссылку' }}</a>
+                        </div>
                         <div class="znet-shell-checklist">
-                            <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Copy the subscription link above.' : 'Скопируйте ссылку подписки выше.' }}</span></div>
+                            <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Copy the subscription link.' : 'Скопируйте ссылку подписки.' }}</span></div>
                             <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Open a compatible VPN client on iPhone.' : 'Откройте совместимый VPN-клиент на iPhone.' }}</span></div>
                             <div class="znet-shell-check-item"><span class="znet-check">✓</span><span>{{ is_en ? 'Import the link as a subscription.' : 'Импортируйте ссылку как подписку.' }}</span></div>
                         </div>

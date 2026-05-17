@@ -477,11 +477,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
                 continue;
             }
 
-            if (
-                ($subscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
-                && ($subscription['provision_status'] ?? null) === self::STATUS_ACTIVE
-                && !empty($subscription['connection_ready'])
-            ) {
+            if ($this->isSubscriptionReadyForApp($subscription, true)) {
                 $activeConnections[] = $subscription;
             }
         }
@@ -498,8 +494,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         $hasActiveAccess = $preferredOrderId !== null
             ? (
                 $deviceSubscription !== null
-                && ($deviceSubscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
-                && ($deviceSubscription['provision_status'] ?? null) === self::STATUS_ACTIVE
+                && $this->isSubscriptionReadyForApp($deviceSubscription)
             )
             : !empty($activeConnections);
 
@@ -568,10 +563,7 @@ class Service implements \FOSSBilling\InjectionAwareInterface
     {
         $activeReady = array_values(array_filter(
             $subscriptions,
-            static fn(array $subscription): bool =>
-                ($subscription['order_status'] ?? null) === \Model_ClientOrder::STATUS_ACTIVE
-                && ($subscription['provision_status'] ?? null) === self::STATUS_ACTIVE
-                && !empty($subscription['connection_ready']),
+            fn(array $subscription): bool => $this->isSubscriptionReadyForApp($subscription, true),
         ));
 
         if (!empty($activeReady)) {
@@ -644,11 +636,28 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             return null;
         }
 
-        if (($subscription['provision_status'] ?? null) !== self::STATUS_ACTIVE) {
+        if (empty($subscription['eligible_for_app'])) {
             return null;
         }
 
         return $subscription;
+    }
+
+    private function isSubscriptionReadyForApp(array $subscription, bool $requireConnectionReady = false): bool
+    {
+        if (($subscription['order_status'] ?? null) !== \Model_ClientOrder::STATUS_ACTIVE) {
+            return false;
+        }
+
+        if (empty($subscription['eligible_for_app'])) {
+            return false;
+        }
+
+        if ($requireConnectionReady && empty($subscription['connection_ready'])) {
+            return false;
+        }
+
+        return true;
     }
 
     private function buildConnectionPayload(array $subscriptions, ?array $primarySubscription): array
@@ -879,9 +888,12 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             }
 
             $deviceLimitMeta = $this->resolveOrderDeviceLimitMeta($order, $access);
+            $hasUsableAccess =
+                ($access['status'] ?? null) === self::STATUS_ACTIVE
+                || $connectionReady;
             $eligibleForApp =
                 ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
-                && ($access['status'] ?? null) === self::STATUS_ACTIVE;
+                && $hasUsableAccess;
 
             $subscriptions[] = [
                 'order_id' => (int) $order->id,
@@ -1181,15 +1193,15 @@ class Service implements \FOSSBilling\InjectionAwareInterface
             return $configuredLimitMeta;
         }
 
-        if (
-            ($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE
-            && ($access['status'] ?? null) === self::STATUS_ACTIVE
-            && (
-                !empty($access['config_snapshot']['ready'])
-                || !empty($access['config_snapshot']['runtime_payload'])
-                || !empty($access['config_snapshot']['xray_config'])
-            )
-        ) {
+        $connectionReady =
+            !empty($access['config_snapshot']['ready'])
+            || !empty($access['config_snapshot']['runtime_payload'])
+            || !empty($access['config_snapshot']['xray_config']);
+        $hasUsableAccess =
+            ($access['status'] ?? null) === self::STATUS_ACTIVE
+            || $connectionReady;
+
+        if (($order->status ?? null) === \Model_ClientOrder::STATUS_ACTIVE && $hasUsableAccess) {
             return [
                 'value' => 1,
                 'source' => 'fallback.active_access',

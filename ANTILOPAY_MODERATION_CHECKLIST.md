@@ -42,3 +42,11 @@ These fields are rendered on `/about-us`, `/contacts`, `/offer`, and `/privacy-p
 - Confirm the invoice shows the correct price in RUB.
 - Check that support email and phone are visible without logging in.
 - Check that old `my-storage.org` links are not visible on public pages.
+
+## Operational Checks
+
+- Activate a fresh paid service through the normal payment flow and through billing admin; both paths must prepare access.
+- Confirm Android device token creation works after activation.
+- Confirm the iPhone fallback is visible on the service page: subscription link, copy action, and short import instructions.
+- Confirm the subscription link is not removed when the orchestrator sends a device config snapshot.
+- Confirm duplicate client pseudonyms do not affect login or access: billing identity is client ID/email, not display name.

@@ -107,7 +107,6 @@ class Service implements \FOSSBilling\InjectionAwareInterface
         }
 
         $this->setOrderMeta($order->id, 'orchestrator_config_snapshot', $encoded);
-        $this->setOrderMeta($order->id, 'orchestrator_subscription_link', '');
         $this->setOrderMeta($order->id, 'orchestrator_last_sync_at', date('Y-m-d H:i:s'));
         $this->di['mod_service']('Appbridge')->updateDeviceConfigSnapshotFromOrchestrator(
             $externalSubscriptionId,
