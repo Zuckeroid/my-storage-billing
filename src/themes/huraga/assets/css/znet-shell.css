@@ -312,10 +312,10 @@ html {
 .znet-shell-page .znet-shell-globe {
   position: absolute;
   z-index: 0;
-  top: 8px;
-  left: 50%;
+  top: 0;
+  left: calc(50% + 220px);
   transform: translateX(-50%);
-  width: min(78vw, 1040px);
+  width: min(56vw, 820px);
   pointer-events: none;
   opacity: 0.94;
 }
@@ -2309,7 +2309,9 @@ html {
 
 @media (max-width: 1100px) {
   .znet-shell-page .znet-shell-globe {
-    width: min(88vw, 860px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(88vw, 620px);
   }
 
   .znet-shell-page .znet-shell-plan-grid {
@@ -2340,6 +2342,8 @@ html {
 
   .znet-shell-page .znet-shell-globe {
     top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
     width: min(94vw, 560px);
     opacity: 0.9;
   }

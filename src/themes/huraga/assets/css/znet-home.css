@@ -172,6 +172,44 @@ html {
   flex-wrap: nowrap;
 }
 
+.znet-homepage .znet-locale-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.znet-homepage .znet-locale-btn {
+  min-height: 36px;
+  min-width: 74px;
+  padding: 0 12px;
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.znet-homepage .znet-locale-btn:hover,
+.znet-homepage .znet-locale-btn:focus-visible {
+  border-color: rgba(134, 239, 172, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--znet-accent-soft);
+}
+
+.znet-homepage .znet-locale-btn .fi {
+  width: 1.15em;
+  height: 0.9em;
+  border-radius: 2px;
+}
+
 .znet-homepage .znet-btn {
   display: inline-flex;
   align-items: center;
@@ -545,6 +583,10 @@ html {
   margin-top: 0;
   display: grid;
   gap: 14px;
+}
+
+.znet-homepage .znet-hero-desktop .znet-hero-points {
+  margin-top: 34px;
 }
 
 .znet-homepage .znet-hero-point,

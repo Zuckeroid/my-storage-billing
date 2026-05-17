@@ -1,3 +1,10 @@
+{% set languages = guest.extension_languages(true) %}
+{% set current_locale = guest.system_locale|default(settings.locale|default('ru_RU')) %}
+{% set is_en = current_locale starts with 'en' %}
+{% set next_locale = is_en ? 'ru_RU' : 'en_US' %}
+{% set next_locale_flag = is_en ? 'ru' : 'us' %}
+{% set next_locale_label = is_en ? 'RU' : 'US' %}
+
 <div class="znet-page-shell">
     <header class="znet-site-header znet-site-header-desktop">
         <div class="znet-container znet-header-bar">
@@ -21,6 +28,19 @@
                     <span>{{ is_en ? 'Login' : 'Войти' }}</span>
                 </a>
                 <a class="znet-btn znet-btn-accent" href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>
+                {% if languages|length > 1 %}
+                    <div class="znet-locale-switch" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
+                        <button
+                            class="znet-locale-btn"
+                            type="button"
+                            data-znet-locale="{{ next_locale }}"
+                            aria-label="{{ is_en ? 'Switch language to Russian' : 'Переключить язык на английский' }}"
+                        >
+                            <span class="fi fi-{{ next_locale_flag }}" aria-hidden="true"></span>
+                            <span>{{ next_locale_label }}</span>
+                        </button>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </header>
@@ -38,6 +58,17 @@
                         <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
                     </svg>
                 </a>
+                {% if languages|length > 1 %}
+                    <button
+                        class="znet-locale-btn znet-locale-btn-mobile"
+                        type="button"
+                        data-znet-locale="{{ next_locale }}"
+                        aria-label="{{ is_en ? 'Switch language to Russian' : 'Переключить язык на английский' }}"
+                    >
+                        <span class="fi fi-{{ next_locale_flag }}" aria-hidden="true"></span>
+                        <span>{{ next_locale_label }}</span>
+                    </button>
+                {% endif %}
                 <button
                     class="znet-btn znet-btn-ghost znet-btn-icon-only znet-header-menu-toggle"
                     type="button"
@@ -319,6 +350,33 @@
 </div>
 
 <script>
+    (() => {
+        const setCookie = function (name, value, days) {
+            let expires = '';
+
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+                expires = '; expires=' + date.toUTCString();
+            }
+
+            document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/; SameSite=Lax';
+        };
+
+        document.querySelectorAll('[data-znet-locale]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const locale = button.getAttribute('data-znet-locale');
+
+                if (!locale || locale === '{{ current_locale }}') {
+                    return;
+                }
+
+                setCookie('fb_locale', locale, 365);
+                window.location.reload();
+            });
+        });
+    })();
+
     (() => {
         const header = document.querySelector('.znet-site-header-mobile');
         const toggle = header?.querySelector('.znet-header-menu-toggle');
