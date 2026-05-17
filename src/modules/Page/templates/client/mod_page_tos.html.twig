@@ -4,6 +4,7 @@
 
 {% block meta_title %}{{ is_en ? 'Terms of Service' : 'Пользовательское соглашение' }}{% endblock %}
 {% block meta_description %}{{ is_en ? 'Znet terms of service for VPN clients.' : 'Пользовательское соглашение Znet для клиентов VPN-сервиса.' }}{% endblock %}
+{% block shell_description_fallback %}off{% endblock %}
 {% block body_class %}tos{% endblock %}
 
 {% block breadcrumb %}
