@@ -44,10 +44,10 @@
         {% set profile_name = profile.email|split('@')|first %}
     {% endif %}
 {% endif %}
-{% block shell_eyebrow %}{{ client ? '' : (is_en ? 'Page' : 'Страница') }}{% endblock %}
+{% block shell_eyebrow %}{% endblock %}
 {% block shell_title %}{% endblock %}
 {% block shell_description %}{% endblock %}
-{% block shell_description_fallback %}on{% endblock %}
+{% block shell_description_fallback %}{{ client ? 'on' : 'off' }}{% endblock %}
 {% set shell_eyebrow_text = block('shell_eyebrow')|striptags|trim %}
 {% set shell_title_text = block('shell_title')|striptags|trim %}
 {% if shell_title_text is empty %}
@@ -96,10 +96,10 @@
 
             {% if not client %}
                 <nav class="znet-shell-nav" aria-label="{{ is_en ? 'Public navigation' : 'Публичная навигация' }}">
+                    <a href="{{ '/'|link }}#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
                     <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
                     <a href="{{ '/about-us'|link }}" data-znet-nav>{{ is_en ? 'About' : 'О сервисе' }}</a>
                     <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
-                    <a href="{{ '/offer'|link }}" data-znet-nav>{{ is_en ? 'Offer' : 'Оферта' }}</a>
                 </nav>
             {% endif %}
 
@@ -187,10 +187,10 @@
                     <a href="{{ '/client/profile'|link }}" data-znet-nav>{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}</a>
                     <a href="{{ 'client/logout'|link }}">{{ is_en ? 'Logout' : 'Выйти' }}</a>
                 {% else %}
+                    <a href="{{ '/'|link }}#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
                     <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
                     <a href="{{ '/about-us'|link }}" data-znet-nav>{{ is_en ? 'About' : 'О сервисе' }}</a>
                     <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
-                    <a href="{{ '/offer'|link }}" data-znet-nav>{{ is_en ? 'Offer' : 'Оферта' }}</a>
                     <a href="{{ 'signup'|link }}">{{ is_en ? 'Create account' : 'Создать аккаунт' }}</a>
                 {% endif %}
 
@@ -222,7 +222,7 @@
             <div class="znet-shell-panel-shell">
                 <section class="znet-shell-panel">
                     {% if shell_title_text %}
-                        <div class="znet-shell-panel-head">
+                        <div class="znet-shell-panel-head {% if shell_eyebrow_text is empty and shell_description_text is empty %}znet-shell-panel-head-compact{% endif %}">
                             <div>
                                 {% if shell_eyebrow_text %}
                                     <span class="znet-shell-eyebrow">{{ shell_eyebrow_text }}</span>
@@ -283,12 +283,16 @@
                         <a href="{{ '/invoice'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
                         <a href="{{ '/client/profile'|link }}" data-znet-nav>{{ profile_name ?: (is_en ? 'Profile' : 'Профиль') }}</a>
                         <a href="{{ '/contacts'|link }}" data-znet-nav>{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                        <a href="{{ '/tos'|link }}" data-znet-nav>{{ is_en ? 'Agreement' : 'Соглашение' }}</a>
+                        <a href="{{ '/privacy-policy'|link }}" data-znet-nav>{{ is_en ? 'Privacy' : 'Конфиденциальность' }}</a>
                     </nav>
                 {% endif %}
 
                 {% if not client %}
                     <nav class="znet-shell-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
+                        <a href="{{ '/'|link }}#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
                         <a href="{{ '/payment'|link }}" data-znet-nav>{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                        <a href="{{ '/about-us'|link }}" data-znet-nav>{{ is_en ? 'About' : 'О сервисе' }}</a>
                         <a href="{{ '/offer'|link }}" data-znet-nav>{{ is_en ? 'Offer' : 'Оферта' }}</a>
                         <a href="{{ '/tos'|link }}" data-znet-nav>{{ is_en ? 'Agreement' : 'Соглашение' }}</a>
                         <a href="{{ '/privacy-policy'|link }}" data-znet-nav>{{ is_en ? 'Privacy' : 'Конфиденциальность' }}</a>

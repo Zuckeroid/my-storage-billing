@@ -359,6 +359,11 @@ html {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.znet-shell-page .znet-shell-panel-head-compact {
+  min-height: auto;
+  padding-bottom: 14px;
+}
+
 .znet-shell-page .znet-shell-panel-head > div:first-child {
   flex: 1 1 auto;
   min-width: 0;
@@ -381,6 +386,10 @@ html {
   line-height: 1.02;
   letter-spacing: -0.045em;
   font-weight: 600;
+}
+
+.znet-shell-page .znet-shell-panel-head-compact h1 {
+  margin-top: 0;
 }
 
 .znet-shell-page .znet-shell-panel-head p {
@@ -1427,6 +1436,8 @@ html {
 
 .znet-shell-page .znet-shell-auth-wrap {
   width: min(640px, 100%);
+  justify-self: center;
+  margin-inline: auto;
 }
 
 .znet-shell-page .znet-shell-auth-card {

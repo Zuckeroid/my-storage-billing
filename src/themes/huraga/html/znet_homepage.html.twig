@@ -6,9 +6,10 @@
             </a>
 
             <nav class="znet-nav" aria-label="{{ is_en ? 'Main navigation' : 'Основная навигация' }}">
-                <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
                 <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
-                <a href="#support">{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                <a href="{{ '/payment'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                <a href="{{ '/about-us'|link }}">{{ is_en ? 'About' : 'О сервисе' }}</a>
+                <a href="{{ '/contacts'|link }}">{{ is_en ? 'Support' : 'Поддержка' }}</a>
             </nav>
 
             <div class="znet-header-actions">
@@ -53,9 +54,10 @@
             </div>
 
             <nav class="znet-nav" id="znet-mobile-header-nav" aria-label="{{ is_en ? 'Mobile navigation' : 'Мобильная навигация' }}">
-                <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
                 <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
-                <a href="#support">{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                <a href="{{ '/payment'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                <a href="{{ '/about-us'|link }}">{{ is_en ? 'About' : 'О сервисе' }}</a>
+                <a href="{{ '/contacts'|link }}">{{ is_en ? 'Support' : 'Поддержка' }}</a>
             </nav>
         </div>
     </header>
@@ -303,10 +305,11 @@
                 <img class="znet-brand-logo znet-footer-brand-logo" src="{{ 'img/znet/Logo.png'|asset_url }}" alt="Znet">
             </div>
             <nav class="znet-footer-nav" aria-label="{{ is_en ? 'Footer navigation' : 'Навигация в подвале' }}">
-                <a href="#features">{{ is_en ? 'Benefits' : 'Преимущества' }}</a>
                 <a href="#plans">{{ is_en ? 'Plans' : 'Тарифы' }}</a>
                 <a href="{{ '/payment'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>
+                <a href="{{ '/about-us'|link }}">{{ is_en ? 'About' : 'О сервисе' }}</a>
                 <a href="{{ '/offer'|link }}">{{ is_en ? 'Offer' : 'Оферта' }}</a>
+                <a href="{{ '/tos'|link }}">{{ is_en ? 'Agreement' : 'Соглашение' }}</a>
                 <a href="{{ '/privacy-policy'|link }}">{{ is_en ? 'Privacy' : 'Конфиденциальность' }}</a>
                 <a href="{{ '/refund-policy'|link }}">{{ is_en ? 'Refunds' : 'Возврат' }}</a>
                 <a href="{{ '/contacts'|link }}">{{ is_en ? 'Support' : 'Поддержка' }}</a>

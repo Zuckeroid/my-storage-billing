@@ -25,6 +25,20 @@ Service exceptions:
 - `layout_blank.html.twig`, PDF, print, API, admin, webhooks, and payment callback routes are not part of visual redesign.
 - Mobile styles should be treated as a single later pass, not page-by-page patches.
 
+## Navigation Rule
+
+Header:
+
+- Public/home: plans, payment, about, support; login, registration, and language actions stay on the right.
+- Client: keep the main client work in the shell/sidebar and keep the header focused on profile, logout, and language.
+
+Footer:
+
+- Public/home: plans, payment, about, offer, agreement, privacy, refunds, support.
+- Client: connection, payment, profile, support, agreement, privacy.
+
+Visible page headers should stay compact: no generic eyebrow labels and no repeated meta-description text under the title unless the page truly needs explanatory copy.
+
 ## Canonical Route Map
 
 | Route | Type | Template / module | Current role | Decision |
