@@ -349,10 +349,6 @@ html {
   -webkit-backdrop-filter: blur(16px);
 }
 
-.znet-shell-page.znet-shell-client .znet-shell-panel {
-  min-height: min(500px, calc(100vh - var(--znet-header-offset) - 220px));
-}
-
 .znet-shell-page .znet-shell-panel-head {
   display: flex;
   align-items: center;
@@ -2374,10 +2370,6 @@ html {
     min-height: auto;
     padding: 22px 20px;
     background: var(--znet-flyout-bg);
-  }
-
-  .znet-shell-page.znet-shell-client .znet-shell-panel {
-    min-height: auto;
   }
 
   .znet-shell-page .znet-shell-panel-head,
