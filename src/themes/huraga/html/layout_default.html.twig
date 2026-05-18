@@ -44,17 +44,29 @@
         {% set profile_name = profile.email|split('@')|first %}
     {% endif %}
 {% endif %}
-{% block shell_eyebrow %}{% endblock %}
-{% block shell_title %}{% endblock %}
-{% block shell_description %}{% endblock %}
-{% block shell_description_fallback %}{{ client ? 'on' : 'off' }}{% endblock %}
-{% set shell_eyebrow_text = block('shell_eyebrow')|striptags|trim %}
-{% set shell_title_text = block('shell_title')|striptags|trim %}
+{% if block('shell_eyebrow') is defined %}
+    {% set shell_eyebrow_text = block('shell_eyebrow')|striptags|trim %}
+{% else %}
+    {% set shell_eyebrow_text = '' %}
+{% endif %}
+{% if block('shell_title') is defined %}
+    {% set shell_title_text = block('shell_title')|striptags|trim %}
+{% else %}
+    {% set shell_title_text = '' %}
+{% endif %}
 {% if shell_title_text is empty %}
     {% set shell_title_text = block('meta_title')|striptags|trim %}
 {% endif %}
-{% set shell_description_text = block('shell_description')|striptags|trim %}
-{% set shell_description_fallback = block('shell_description_fallback')|striptags|trim %}
+{% if block('shell_description') is defined %}
+    {% set shell_description_text = block('shell_description')|striptags|trim %}
+{% else %}
+    {% set shell_description_text = '' %}
+{% endif %}
+{% if block('shell_description_fallback') is defined %}
+    {% set shell_description_fallback = block('shell_description_fallback')|striptags|trim %}
+{% else %}
+    {% set shell_description_fallback = client ? 'on' : 'off' %}
+{% endif %}
 {% if shell_description_text is empty and shell_description_fallback != 'off' %}
     {% set shell_description_text = block('meta_description')|striptags|trim %}
 {% endif %}

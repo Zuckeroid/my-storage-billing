@@ -27,7 +27,7 @@
 
 {% block page_header %}{{ is_en ? 'VPN access' : 'VPN-доступ' }}{% endblock %}
 {% block body_class %}{% if client %}dashboard storage-dashboard{% else %}public-homepage znet-homepage{% endif %}{% endblock %}
-{% block shell_eyebrow %}{% if not client %}{{ parent() }}{% endif %}{% endblock %}
+{% block shell_eyebrow %}{% endblock %}
 {% block shell_title %}{% if client %}{{ is_en ? 'Your Znet' : 'Ваш Znet' }}{% endif %}{% endblock %}
 {% block shell_description %}{% endblock %}
 {% block shell_head_actions %}{% endblock %}
