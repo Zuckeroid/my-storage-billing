@@ -2349,11 +2349,11 @@ html {
   }
 
   .znet-shell-page .znet-shell-panel-shell {
-    padding-top: min(46vw, 280px);
+    padding-top: 0;
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-stage {
-    padding-top: 0;
+    padding-top: 14px;
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-globe {
@@ -2363,7 +2363,7 @@ html {
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
-    padding-top: 14px;
+    padding-top: 0;
   }
 
   .znet-shell-page .znet-shell-panel {
@@ -2533,11 +2533,11 @@ html {
   }
 
   .znet-shell-page .znet-shell-panel-shell {
-    padding-top: min(52vw, 250px);
+    padding-top: 0;
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-stage {
-    padding-top: 0;
+    padding-top: 12px;
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-globe {
@@ -2546,7 +2546,7 @@ html {
   }
 
   .znet-shell-page.znet-shell-client .znet-shell-panel-shell {
-    padding-top: 14px;
+    padding-top: 0;
   }
 
   .znet-shell-page .znet-shell-panel {
