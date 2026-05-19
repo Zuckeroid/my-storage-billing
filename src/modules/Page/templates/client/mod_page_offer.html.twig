@@ -13,20 +13,47 @@
 {% block content %}
     {% set company = guest.system_company %}
     {% set support_email = company.email|default('support@znetapp.ru') %}
+    {% if support_email == 'support@my-storage.org' %}
+        {% set support_email = 'support@znetapp.ru' %}
+    {% endif %}
+    {% set company_name = company.name|default('') %}
+    {% if company_name == 'My Storage' %}
+        {% set company_name = '' %}
+    {% endif %}
+    {% set company_tel = company.tel|default('') %}
+    {% if company_tel == '+7 000 000-00-00' %}
+        {% set company_tel = '' %}
+    {% endif %}
+    {% set company_address_1 = company.address_1|default('') %}
+    {% if company_address_1 == 'Адрес указывается перед запуском production' %}
+        {% set company_address_1 = '' %}
+    {% endif %}
+    {% set company_address_2 = company.address_2|default('') %}
+    {% if company_address_2 == 'ИП Фамилия Имя Отчество' %}
+        {% set company_address_2 = '' %}
+    {% endif %}
+    {% set company_vat_number = company.vat_number|default('') %}
+    {% if company_vat_number == '000000000000' %}
+        {% set company_vat_number = '' %}
+    {% endif %}
+    {% set company_number = company.number|default('') %}
+    {% if company_number == '000000000000000' %}
+        {% set company_number = '' %}
+    {% endif %}
 
     <section class="card mb-3">
         <div class="card-body">
             <h2 class="h5">{{ is_en ? '1. Parties' : '1. Стороны' }}</h2>
             {% if is_en %}
                 <p>
-                    Provider: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, Tax ID {{ company.vat_number }}{% endif %}{% if company.number %}, registration number {{ company.number }}{% endif %}.
+                    Provider: {% if company_name %}{{ company_name }}{% else %}Znet{% endif %}{% if company_address_2 %}, {{ company_address_2 }}{% endif %}{% if company_vat_number %}, Tax ID {{ company_vat_number }}{% endif %}{% if company_number %}, registration number {{ company_number }}{% endif %}.
                 </p>
                 <p class="mb-0">
                     Client: an individual who registered an account on the Znet website and paid for the selected plan.
                 </p>
             {% else %}
                 <p>
-                    Исполнитель: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, ИНН {{ company.vat_number }}{% endif %}{% if company.number %}, ОГРНИП {{ company.number }}{% endif %}.
+                    Исполнитель: {% if company_name %}{{ company_name }}{% else %}Znet{% endif %}{% if company_address_2 %}, {{ company_address_2 }}{% endif %}{% if company_vat_number %}, ИНН {{ company_vat_number }}{% endif %}{% if company_number %}, ОГРНИП {{ company_number }}{% endif %}.
                 </p>
                 <p class="mb-0">
                     Клиент: физическое лицо, зарегистрировавшее аккаунт на сайте Znet и оплатившее выбранный тариф.
@@ -135,8 +162,8 @@
         <div class="card-body">
             <h2 class="h5">{{ is_en ? '7. Contacts' : '7. Контакты' }}</h2>
             <p class="mb-1">{{ is_en ? 'Support email' : 'Email поддержки' }}: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
-            {% if company.tel %}<p class="mb-1">{{ is_en ? 'Phone' : 'Телефон' }}: {{ company.tel }}</p>{% endif %}
-            {% if company.address_1 %}<p class="mb-0">{{ is_en ? 'Address' : 'Адрес' }}: {{ company.address_1 }}</p>{% endif %}
+            {% if company_tel %}<p class="mb-1">{{ is_en ? 'Phone' : 'Телефон' }}: {{ company_tel }}</p>{% endif %}
+            {% if company_address_1 %}<p class="mb-0">{{ is_en ? 'Address' : 'Адрес' }}: {{ company_address_1 }}</p>{% endif %}
         </div>
     </section>
 {% endblock %}

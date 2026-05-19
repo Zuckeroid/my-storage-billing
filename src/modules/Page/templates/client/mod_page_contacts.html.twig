@@ -5,6 +5,29 @@
 {% set telegram_label = '@znet_supp_bot' %}
 {% set company = guest.system_company %}
 {% set support_email = company.email|default('support@znetapp.ru') %}
+{% if support_email == 'support@my-storage.org' %}
+    {% set support_email = 'support@znetapp.ru' %}
+{% endif %}
+{% set company_name = company.name|default('') %}
+{% if company_name == 'My Storage' %}
+    {% set company_name = '' %}
+{% endif %}
+{% set company_tel = company.tel|default('') %}
+{% if company_tel == '+7 000 000-00-00' %}
+    {% set company_tel = '' %}
+{% endif %}
+{% set company_vat_number = company.vat_number|default('') %}
+{% if company_vat_number == '000000000000' %}
+    {% set company_vat_number = '' %}
+{% endif %}
+{% set company_number = company.number|default('') %}
+{% if company_number == '000000000000000' %}
+    {% set company_number = '' %}
+{% endif %}
+{% set company_address_1 = company.address_1|default('') %}
+{% if company_address_1 == 'Адрес указывается перед запуском production' %}
+    {% set company_address_1 = '' %}
+{% endif %}
 
 {% block meta_title %}{{ is_en ? 'Support' : 'Поддержка' }}{% endblock %}
 {% block meta_description %}{{ is_en ? 'Znet support contacts and service legal information.' : 'Контакты поддержки Znet и юридическая информация сервиса.' }}{% endblock %}
@@ -23,11 +46,11 @@
             <div class="card-body">
                 <h2 class="h5">{{ is_en ? 'Contacts' : 'Контакты' }}</h2>
                 <p class="mb-1">Email: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
-                {% if company.tel %}<p class="mb-1">{{ is_en ? 'Phone' : 'Телефон' }}: {{ company.tel }}</p>{% endif %}
-                {% if company.name %}<p class="mb-1">{{ is_en ? 'Legal name' : 'Наименование' }}: {{ company.name }}</p>{% endif %}
-                {% if company.vat_number %}<p class="mb-1">{{ is_en ? 'Tax ID' : 'ИНН' }}: {{ company.vat_number }}</p>{% endif %}
-                {% if company.number %}<p class="mb-1">{{ is_en ? 'Registration number' : 'ОГРНИП' }}: {{ company.number }}</p>{% endif %}
-                {% if company.address_1 %}<p class="mb-0">{{ is_en ? 'Address' : 'Адрес' }}: {{ company.address_1 }}</p>{% endif %}
+                {% if company_tel %}<p class="mb-1">{{ is_en ? 'Phone' : 'Телефон' }}: {{ company_tel }}</p>{% endif %}
+                {% if company_name %}<p class="mb-1">{{ is_en ? 'Legal name' : 'Наименование' }}: {{ company_name }}</p>{% endif %}
+                {% if company_vat_number %}<p class="mb-1">{{ is_en ? 'Tax ID' : 'ИНН' }}: {{ company_vat_number }}</p>{% endif %}
+                {% if company_number %}<p class="mb-1">{{ is_en ? 'Registration number' : 'ОГРНИП' }}: {{ company_number }}</p>{% endif %}
+                {% if company_address_1 %}<p class="mb-0">{{ is_en ? 'Address' : 'Адрес' }}: {{ company_address_1 }}</p>{% endif %}
             </div>
         </div>
     </section>

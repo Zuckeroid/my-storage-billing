@@ -14,6 +14,9 @@
 {% block content %}
     {% set company = guest.system_company %}
     {% set support_email = company.email|default('support@znetapp.ru') %}
+    {% if support_email == 'support@my-storage.org' %}
+        {% set support_email = 'support@znetapp.ru' %}
+    {% endif %}
 
     <section class="card mb-3">
         <div class="card-body">

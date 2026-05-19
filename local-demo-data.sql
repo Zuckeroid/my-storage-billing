@@ -1,22 +1,22 @@
 INSERT INTO setting (`param`, `value`, `public`, `created_at`, `updated_at`)
 VALUES
-  ('company_name', 'My Storage', 0, NOW(), NOW()),
-  ('company_email', 'support@my-storage.org', 0, NOW(), NOW()),
-  ('company_tel', '+7 000 000-00-00', 0, NOW(), NOW()),
-  ('company_signature', 'Personal cloud storage for documents, photos, and important files.', 0, NOW(), NOW()),
+  ('company_name', 'Znet', 0, NOW(), NOW()),
+  ('company_email', 'support@znetapp.ru', 0, NOW(), NOW()),
+  ('company_tel', '', 0, NOW(), NOW()),
+  ('company_signature', 'Secure VPN access for personal use.', 0, NOW(), NOW()),
   ('company_address_1', 'Адрес указывается перед запуском production', 0, NOW(), NOW()),
   ('company_address_2', 'ИП Фамилия Имя Отчество', 0, NOW(), NOW()),
   ('company_address_3', 'Корреспондентский счет указывается перед запуском production', 0, NOW(), NOW()),
   ('company_number', '000000000000000', 0, NOW(), NOW()),
   ('company_vat_number', '000000000000', 0, NOW(), NOW()),
-  ('company_note', 'My Storage - личное облачное хранилище для документов, фотографий и важных файлов.', 0, NOW(), NOW()),
+  ('company_note', 'Znet - сервис защищенного VPN-доступа для личного использования.', 0, NOW(), NOW()),
   ('company_bank_name', 'Название банка', 0, NOW(), NOW()),
   ('company_bic', '000000000', 0, NOW(), NOW()),
   ('company_account_number', '00000000000000000000', 0, NOW(), NOW()),
   ('company_bank_info_pagebottom', '1', 0, NOW(), NOW()),
   ('hide_company_public', '0', 0, NOW(), NOW()),
-  ('company_tos', 'Публичная оферта и пользовательское соглашение опубликованы на сайте My Storage. Услуга предназначена для личного облачного хранения файлов. Инструкции направляются на email клиента после оплаты.', 0, NOW(), NOW()),
-  ('company_privacy_policy', 'My Storage обрабатывает email, данные аккаунта, сведения о заказах и платежах для регистрации, приема оплаты, оказания услуги и поддержки клиентов.', 0, NOW(), NOW())
+  ('company_tos', 'Публичная оферта и пользовательское соглашение опубликованы на сайте Znet. Услуга предназначена для защищенного VPN-доступа. Инструкции направляются на email клиента после оплаты.', 0, NOW(), NOW()),
+  ('company_privacy_policy', 'Znet обрабатывает email, данные аккаунта, сведения о заказах и платежах для регистрации, приема оплаты, оказания услуги и поддержки клиентов.', 0, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), `updated_at` = NOW();
 UPDATE currency SET title = 'Russian Ruble', code = 'RUB', format = '{{price}} ₽' WHERE id = 1;
 UPDATE extension SET status = 'disabled' WHERE name = 'branding';
@@ -36,6 +36,6 @@ VALUES
   (102, 1, 102, NULL, 'Storage Plus', 'storage-plus', '200 GB for personal files. Protected file access for 3 devices. Instructions are sent by email after payment.', 'product', 1, 'enabled', 0, 0, 'after_payment', NULL, NULL, 0, 0, 0, NULL, NULL, NULL, 2, NULL, NOW(), NOW(), 'custom'),
   (103, 1, 103, NULL, 'Storage Family', 'storage-family', '500 GB for personal files. Protected file access for 5 devices. Instructions are sent by email after payment.', 'product', 1, 'enabled', 0, 0, 'after_payment', NULL, NULL, 0, 0, 0, NULL, NULL, NULL, 3, NULL, NOW(), NOW(), 'custom');
 
-DELETE FROM client WHERE email = 'test@my-storage.org';
+DELETE FROM client WHERE email = 'test@znetapp.ru';
 INSERT INTO client (`client_group_id`, `role`, `auth_type`, `email`, `pass`, `status`, `email_approved`, `tax_exempt`, `type`, `first_name`, `last_name`, `phone_cc`, `phone`, `currency`, `lang`, `ip`, `created_at`, `updated_at`)
-VALUES (1, 'client', 'email', 'test@my-storage.org', '$2y$12$viNoD35ChkPwbOGMnKc30eUXJIB0YPuEyFH8JcJ.iW3AobLP02hOm', 'active', 1, 0, 'individual', 'Test', 'Client', '+7', '9261557792', 'RUB', 'ru_RU', '127.0.0.1', NOW(), NOW());
+VALUES (1, 'client', 'email', 'test@znetapp.ru', '$2y$12$viNoD35ChkPwbOGMnKc30eUXJIB0YPuEyFH8JcJ.iW3AobLP02hOm', 'active', 1, 0, 'individual', 'Test', 'Client', '+7', '9261557792', 'RUB', 'ru_RU', '127.0.0.1', NOW(), NOW());

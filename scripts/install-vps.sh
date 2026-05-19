@@ -121,8 +121,8 @@ set -a
 . ./.env
 set +a
 
-COMPANY_EMAIL="${COMPANY_EMAIL:-support@my-storage.org}"
-COMPANY_PHONE="${COMPANY_PHONE:-+7 000 000-00-00}"
+COMPANY_EMAIL="${COMPANY_EMAIL:-support@znetapp.ru}"
+COMPANY_PHONE="${COMPANY_PHONE:-}"
 COMPANY_LEGAL_NAME="${COMPANY_LEGAL_NAME:-ИП Фамилия Имя Отчество}"
 COMPANY_INN="${COMPANY_INN:-000000000000}"
 COMPANY_OGRNIP="${COMPANY_OGRNIP:-000000000000000}"
@@ -220,10 +220,10 @@ fi
 STORAGE_PRODUCT_COUNT="$(docker_compose -f docker-compose.prod.yml exec -T db mariadb -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -Nse "SELECT COUNT(*) FROM product WHERE slug IN ('storage-start', 'storage-plus', 'storage-family');" | tr -d '\r')"
 
 if [ "${STORAGE_PRODUCT_COUNT}" = "0" ]; then
-  echo "Applying initial My Storage seed data..."
+  echo "Applying initial Znet seed data..."
   docker_compose -f docker-compose.prod.yml exec -T db mariadb --default-character-set=utf8mb4 -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < local-demo-data.sql
 else
-  echo "Skipping product seed because My Storage products already exist. Existing prices and product edits are preserved."
+  echo "Skipping product seed because Znet products already exist. Existing prices and product edits are preserved."
 fi
 
 COMPANY_EMAIL_ESC="$(sql_escape "${COMPANY_EMAIL}")"
@@ -255,7 +255,7 @@ ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = NOW();
 SQL
 
 if [ "${INSTALL_DEMO_USER:-false}" != "true" ]; then
-  docker_compose -f docker-compose.prod.yml exec -T db mariadb --default-character-set=utf8mb4 -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -e "DELETE FROM client WHERE email = 'test@my-storage.org';"
+  docker_compose -f docker-compose.prod.yml exec -T db mariadb --default-character-set=utf8mb4 -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -e "DELETE FROM client WHERE email = 'test@znetapp.ru';"
 fi
 
 ADMIN_COUNT="$(docker_compose -f docker-compose.prod.yml exec -T db mariadb -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" -Nse "SELECT COUNT(*) FROM admin;" | tr -d '\r')"
@@ -273,7 +273,7 @@ SQL
 fi
 
 echo
-echo "My Storage billing is running on local port ${APP_PORT:-8080}."
+echo "Znet billing is running on local port ${APP_PORT:-8080}."
 echo "Admin URL: ${APP_URL%/}/admin"
 echo "Admin login: ${ADMIN_EMAIL}"
 echo "Admin password is stored in .env as ADMIN_PASSWORD."

@@ -14,12 +14,31 @@
 {% block content %}
     {% set company = guest.system_company %}
     {% set support_email = company.email|default('support@znetapp.ru') %}
+    {% if support_email == 'support@my-storage.org' %}
+        {% set support_email = 'support@znetapp.ru' %}
+    {% endif %}
+    {% set company_name = company.name|default('') %}
+    {% if company_name == 'My Storage' %}
+        {% set company_name = '' %}
+    {% endif %}
+    {% set company_address_2 = company.address_2|default('') %}
+    {% if company_address_2 == 'ИП Фамилия Имя Отчество' %}
+        {% set company_address_2 = '' %}
+    {% endif %}
+    {% set company_vat_number = company.vat_number|default('') %}
+    {% if company_vat_number == '000000000000' %}
+        {% set company_vat_number = '' %}
+    {% endif %}
+    {% set company_number = company.number|default('') %}
+    {% if company_number == '000000000000000' %}
+        {% set company_number = '' %}
+    {% endif %}
 
     <section class="card mb-3">
         <div class="card-body">
             <h2 class="h5">{{ is_en ? '1. Data controller' : '1. Оператор данных' }}</h2>
             <p class="mb-0">
-                {{ is_en ? 'Controller' : 'Оператор' }}: {% if company.name %}{{ company.name }}{% else %}Znet{% endif %}{% if company.address_2 %}, {{ company.address_2 }}{% endif %}{% if company.vat_number %}, {{ is_en ? 'Tax ID' : 'ИНН' }} {{ company.vat_number }}{% endif %}{% if company.number %}, {{ is_en ? 'Registration number' : 'ОГРНИП' }} {{ company.number }}{% endif %}.
+                {{ is_en ? 'Controller' : 'Оператор' }}: {% if company_name %}{{ company_name }}{% else %}Znet{% endif %}{% if company_address_2 %}, {{ company_address_2 }}{% endif %}{% if company_vat_number %}, {{ is_en ? 'Tax ID' : 'ИНН' }} {{ company_vat_number }}{% endif %}{% if company_number %}, {{ is_en ? 'Registration number' : 'ОГРНИП' }} {{ company_number }}{% endif %}.
                 {{ is_en ? 'Contact email' : 'Email для обращений' }}: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
             </p>
         </div>

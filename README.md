@@ -1,6 +1,6 @@
-# My Storage Billing
+# Znet Billing
 
-Локальный форк FOSSBilling для публичного сайта, личного кабинета и приема оплат My Storage.
+Локальный форк FOSSBilling для публичного сайта, личного кабинета и приема оплат Znet.
 
 Внутри уже зафиксированы:
 
@@ -22,7 +22,7 @@ docker compose -f docker-compose.local.yml up -d --build
 
 Тестовый клиент для демо-стенда:
 
-- email: `test@my-storage.org`
+- email: `test@znetapp.ru`
 - password: `Test12345!`
 
 ## Установка на VPS
@@ -62,7 +62,7 @@ bash scripts/install-vps.sh
 - `Dockerfile.prod` - production image с PHP, Composer-зависимостями и собранными assets.
 - `docker-compose.prod.yml` - app + MariaDB для VPS.
 - `scripts/install-vps.sh` - первичная установка, импорт схемы, seed тарифов и создание администратора.
-- `local-demo-data.sql` - настройки My Storage, тарифы и демо-клиент для локального стенда.
+- `local-demo-data.sql` - настройки Znet, тарифы и демо-клиент для локального стенда.
 - `src/config.php` - локальный/серверный конфиг, не хранится в git.
 
 ## Upstream
