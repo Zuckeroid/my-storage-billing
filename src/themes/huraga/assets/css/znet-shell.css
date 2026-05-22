@@ -2358,6 +2358,7 @@ html {
   }
 
   .znet-shell-page .znet-shell-globe {
+    display: none;
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
