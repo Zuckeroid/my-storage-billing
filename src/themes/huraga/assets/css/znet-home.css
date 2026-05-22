@@ -111,6 +111,12 @@ html {
   gap: 28px;
 }
 
+.znet-homepage .znet-footer-nav {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 10px;
+}
+
 .znet-homepage .znet-nav a,
 .znet-homepage .znet-footer-nav a {
   color: rgba(255, 255, 255, 0.82);
@@ -1116,6 +1122,12 @@ html {
   .znet-homepage .znet-footer-shell {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .znet-homepage .znet-footer-nav {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 10px 18px;
   }
 
   .znet-homepage .znet-site-header-mobile .znet-header-bar {

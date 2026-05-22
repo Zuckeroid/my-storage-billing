@@ -2043,15 +2043,17 @@ html {
 }
 
 .znet-shell-page .znet-date-stack {
-  display: inline-grid;
-  gap: 2px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
   white-space: nowrap;
-  line-height: 1.12;
+  line-height: 1;
 }
 
 .znet-shell-page .znet-date-stack-date {
   color: var(--znet-text);
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .znet-shell-page .znet-date-stack-time {

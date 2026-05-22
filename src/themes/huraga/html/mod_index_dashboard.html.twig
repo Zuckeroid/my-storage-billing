@@ -21,7 +21,7 @@
 
 {% block head %}
     {% if not client %}
-        <link rel="stylesheet" href="{{ 'css/znet-home.css' | asset_url }}?v=znet-home-20260522b">
+        <link rel="stylesheet" href="{{ 'css/znet-home.css' | asset_url }}?v=znet-home-20260522c">
     {% endif %}
 {% endblock %}
 
@@ -100,7 +100,7 @@
                                 <span>{{ is_en ? 'Balance' : 'Баланс' }}</span>
                                 <strong>{{ profile.balance | money(profile.currency) }}</strong>
                             </div>
-                            <a class="btn btn-sm btn-outline-primary znet-shell-stat-action" href="{{ 'client/balance'|link }}#wallet-topup">
+                            <a class="btn btn-sm btn-outline-primary znet-shell-stat-action" href="{{ 'client/balance'|link }}">
                                 {{ is_en ? 'Top up' : 'Пополнить' }}
                             </a>
                         </article>
