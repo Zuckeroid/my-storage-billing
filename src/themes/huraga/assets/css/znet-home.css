@@ -160,6 +160,14 @@ html {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.znet-homepage .znet-menu-language {
+  padding: 8px 12px 2px;
+}
+
+.znet-homepage .znet-menu-language .znet-locale-switch {
+  justify-content: flex-start;
+}
+
 .znet-homepage .znet-header-actions,
 .znet-homepage .znet-hero-actions {
   display: flex;

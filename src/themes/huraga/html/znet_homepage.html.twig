@@ -58,17 +58,6 @@
                         <path d="M5 19c1.8-3 4.1-4.5 7-4.5s5.2 1.5 7 4.5"></path>
                     </svg>
                 </a>
-                {% if languages|length > 1 %}
-                    <button
-                        class="znet-locale-btn znet-locale-btn-mobile"
-                        type="button"
-                        data-znet-locale="{{ next_locale }}"
-                        aria-label="{{ is_en ? 'Switch language to Russian' : 'Переключить язык на английский' }}"
-                    >
-                        <span class="fi fi-{{ next_locale_flag }}" aria-hidden="true"></span>
-                        <span>{{ next_locale_label }}</span>
-                    </button>
-                {% endif %}
                 <button
                     class="znet-btn znet-btn-ghost znet-btn-icon-only znet-header-menu-toggle"
                     type="button"
@@ -89,6 +78,21 @@
                 <a href="{{ '/payment'|link }}">{{ is_en ? 'Payment' : 'Оплата' }}</a>
                 <a href="{{ '/about-us'|link }}">{{ is_en ? 'About' : 'О сервисе' }}</a>
                 <a href="{{ '/contacts'|link }}">{{ is_en ? 'Support' : 'Поддержка' }}</a>
+                {% if languages|length > 1 %}
+                    <div class="znet-menu-language">
+                        <div class="znet-locale-switch" aria-label="{{ is_en ? 'Language' : 'Выбор языка' }}">
+                            <button
+                                class="znet-locale-btn"
+                                type="button"
+                                data-znet-locale="{{ next_locale }}"
+                                aria-label="{{ is_en ? 'Switch language to Russian' : 'Переключить язык на английский' }}"
+                            >
+                                <span class="fi fi-{{ next_locale_flag }}" aria-hidden="true"></span>
+                                <span>{{ next_locale_label }}</span>
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
             </nav>
         </div>
     </header>
