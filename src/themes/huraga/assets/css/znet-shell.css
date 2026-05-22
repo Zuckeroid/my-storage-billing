@@ -349,6 +349,10 @@ html {
   -webkit-backdrop-filter: blur(16px);
 }
 
+.znet-shell-page.znet-shell-client .znet-shell-panel {
+  min-height: min(647px, calc(100vh - var(--znet-header-offset) - 149px));
+}
+
 .znet-shell-page .znet-shell-panel-head {
   display: flex;
   align-items: center;
@@ -1646,10 +1650,10 @@ html {
   justify-content: center;
   width: 42px;
   height: 42px;
-  border: 1px solid rgba(134, 239, 172, 0.16);
+  border: 1px solid transparent;
   border-radius: 8px;
   color: var(--znet-accent);
-  background: rgba(134, 239, 172, 0.06);
+  background: transparent;
 }
 
 .znet-shell-page .znet-platform-icon svg {
@@ -2270,22 +2274,22 @@ html {
   right: 8px;
   width: 38px;
   height: 38px;
-  border: 1px solid rgba(23, 43, 35, 0.14);
+  border: 1px solid transparent;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(27, 46, 37, 0.05);
-  color: rgba(17, 38, 30, 0.7);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
   transform: translateY(-50%);
   cursor: pointer;
 }
 
 .znet-password-toggle:hover,
 .znet-password-toggle:focus-visible {
-  border-color: rgba(34, 197, 94, 0.35);
-  background: rgba(34, 197, 94, 0.1);
-  color: rgba(17, 38, 30, 0.92);
+  border-color: transparent;
+  background: transparent;
+  color: var(--znet-accent-soft);
 }
 
 .znet-password-toggle svg {
@@ -2370,6 +2374,10 @@ html {
     min-height: auto;
     padding: 22px 20px;
     background: var(--znet-flyout-bg);
+  }
+
+  .znet-shell-page.znet-shell-client .znet-shell-panel {
+    min-height: auto;
   }
 
   .znet-shell-page .znet-shell-panel-head,
