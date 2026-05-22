@@ -431,6 +431,7 @@ html {
 }
 
 .znet-homepage .znet-password-toggle {
+  appearance: none;
   position: absolute;
   top: 50%;
   right: 8px;
@@ -443,6 +444,7 @@ html {
   justify-content: center;
   background: transparent;
   color: rgba(255, 255, 255, 0.7);
+  box-shadow: none;
   transform: translateY(-50%);
   cursor: pointer;
 }
@@ -452,6 +454,8 @@ html {
   border-color: transparent;
   background: transparent;
   color: var(--znet-text);
+  box-shadow: none;
+  outline: none;
 }
 
 .znet-homepage .znet-password-toggle svg {
