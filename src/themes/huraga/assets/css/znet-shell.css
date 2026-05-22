@@ -2539,7 +2539,7 @@ html {
 
 @media (max-width: 720px) {
   .znet-shell-page {
-    --znet-header-offset: 72px;
+    --znet-header-offset: 62px;
   }
 
   .znet-shell-page .znet-container {
