@@ -1611,9 +1611,12 @@ html {
 .znet-shell-page .znet-platform-list {
   display: grid;
   gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .znet-shell-page .znet-platform-card {
+  position: relative;
   border: 1px solid rgba(134, 239, 172, 0.12);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
@@ -1621,6 +1624,7 @@ html {
 }
 
 .znet-shell-page .znet-platform-summary {
+  position: relative;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto 16px;
   gap: 12px;
@@ -1689,6 +1693,7 @@ html {
 
 .znet-shell-page .znet-platform-body {
   padding: 0 18px 18px;
+  min-width: 0;
 }
 
 .znet-shell-page .znet-appbridge-stats {
@@ -1774,7 +1779,7 @@ html {
 }
 
 .znet-appbridge-modal[hidden] {
-  display: none;
+  display: none !important;
 }
 
 .znet-appbridge-modal-backdrop {
@@ -1975,11 +1980,22 @@ html {
 
 .znet-shell-page .form-control,
 .znet-shell-page .form-select {
+  min-width: 0;
   min-height: 48px;
   border: 1px solid rgba(134, 239, 172, 0.12);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
   color: var(--znet-text);
+}
+
+.znet-shell-page .input-group {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.znet-shell-page .input-group > .form-control {
+  min-width: 0;
+  text-overflow: ellipsis;
 }
 
 .znet-shell-page .form-select {
@@ -2499,6 +2515,18 @@ html {
   .znet-shell-page .znet-platform-summary-note {
     grid-column: 2;
     grid-row: 2;
+  }
+
+  .znet-shell-page.order-manage .input-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .znet-shell-page.order-manage .input-group > .form-control,
+  .znet-shell-page.order-manage .input-group > .btn {
+    width: 100%;
+    border-radius: 8px !important;
   }
 
   .znet-shell-page .znet-app-download {

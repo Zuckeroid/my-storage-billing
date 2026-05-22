@@ -22,6 +22,23 @@
         let currentToken = '';
         let currentOrderId = null;
 
+        const copyWithHiddenTextarea = (value) => {
+            const helper = document.createElement('textarea');
+            helper.value = value;
+            helper.setAttribute('readonly', 'readonly');
+            helper.style.position = 'fixed';
+            helper.style.top = '-1000px';
+            helper.style.left = '-1000px';
+            helper.style.width = '1px';
+            helper.style.height = '1px';
+            helper.style.opacity = '0';
+            helper.style.pointerEvents = 'none';
+            document.body.appendChild(helper);
+            helper.select();
+            document.execCommand('copy');
+            helper.remove();
+        };
+
         const initialState = {
             has_active_access: {{ appbridge.has_active_access ? 'true' : 'false' }},
             devices: {
@@ -146,12 +163,7 @@
                 await navigator.clipboard.writeText(currentToken);
                 setMessage('{{ is_en ? 'Token copied' : 'Токен скопирован' }}');
             } catch (error) {
-                const helper = document.createElement('textarea');
-                helper.value = currentToken;
-                document.body.appendChild(helper);
-                helper.select();
-                document.execCommand('copy');
-                document.body.removeChild(helper);
+                copyWithHiddenTextarea(currentToken);
                 setMessage('{{ is_en ? 'Token copied' : 'Токен скопирован' }}');
             }
         };

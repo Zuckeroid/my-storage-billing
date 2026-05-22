@@ -103,18 +103,19 @@
                 {% endif %}
 
                 {% if orchestrator_access.subscription_link %}
-                    <div class="znet-shell-link-row mb-3">
+                    <div class="znet-shell-link-row mb-0">
                         <button class="btn btn-outline-primary" type="button" data-znet-copy-subscription>{{ is_en ? 'Copy subscription link' : 'Скопировать ссылку' }}</button>
+                        <a class="btn btn-primary" href="{{ orchestrator_access.subscription_link }}" target="_blank" rel="noopener noreferrer">{{ is_en ? 'Open subscription link' : 'Открыть ссылку' }}</a>
                     </div>
-                {% endif %}
 
-                {% if orchestrator_access.subscription_link %}
-                    <label class="form-label" for="znet-subscription-link">{{ is_en ? 'Subscription link' : 'Ссылка подписки' }}</label>
-                    <div class="input-group">
-                        <input class="form-control" id="znet-subscription-link" type="text" value="{{ orchestrator_access.subscription_link }}" readonly onclick="this.select();">
-                        <button class="btn btn-outline-primary" type="button" data-znet-copy-subscription>{{ is_en ? 'Copy' : 'Скопировать' }}</button>
-                        <a class="btn btn-primary" href="{{ orchestrator_access.subscription_link }}" target="_blank" rel="noopener noreferrer">{{ is_en ? 'Open' : 'Открыть' }}</a>
-                    </div>
+                    <details class="znet-app-install-guide znet-subscription-link-details mt-3">
+                        <summary>{{ is_en ? 'Show subscription link' : 'Показать ссылку подписки' }}</summary>
+                        <label class="form-label mt-3" for="znet-subscription-link">{{ is_en ? 'Subscription link' : 'Ссылка подписки' }}</label>
+                        <div class="input-group">
+                            <input class="form-control" id="znet-subscription-link" type="text" value="{{ orchestrator_access.subscription_link }}" readonly onclick="this.select();">
+                            <button class="btn btn-outline-primary" type="button" data-znet-copy-subscription>{{ is_en ? 'Copy' : 'Скопировать' }}</button>
+                        </div>
+                    </details>
                 {% else %}
                     <p class="text-secondary mb-0">
                         {{ is_en ? 'The subscription link will appear here after activation.' : 'Ссылка подписки появится здесь после активации.' }}
@@ -524,6 +525,23 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const renewalButton = document.getElementById('renewal-button');
+            const copyWithHiddenTextarea = function (value) {
+                const helper = document.createElement('textarea');
+                helper.value = value;
+                helper.setAttribute('readonly', 'readonly');
+                helper.style.position = 'fixed';
+                helper.style.top = '-1000px';
+                helper.style.left = '-1000px';
+                helper.style.width = '1px';
+                helper.style.height = '1px';
+                helper.style.opacity = '0';
+                helper.style.pointerEvents = 'none';
+                document.body.appendChild(helper);
+                helper.select();
+                document.execCommand('copy');
+                helper.remove();
+            };
+
             if (renewalButton) {
                 renewalButton.addEventListener('click', function (event) {
                     event.preventDefault();
@@ -547,7 +565,7 @@
                         await navigator.clipboard.writeText(subscriptionInput.value);
                         copyButton.textContent = "{{ is_en ? 'Copied' : 'Скопировано' }}";
                     } catch (error) {
-                        document.execCommand('copy');
+                        copyWithHiddenTextarea(subscriptionInput.value);
                         copyButton.textContent = "{{ is_en ? 'Copied' : 'Скопировано' }}";
                     }
                     window.setTimeout(() => {
@@ -567,12 +585,7 @@
                     try {
                         await navigator.clipboard.writeText(value);
                     } catch (error) {
-                        const helper = document.createElement('textarea');
-                        helper.value = value;
-                        document.body.appendChild(helper);
-                        helper.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(helper);
+                        copyWithHiddenTextarea(value);
                     }
 
                     copyButton.textContent = "{{ is_en ? 'Copied' : 'Скопировано' }}";
