@@ -615,8 +615,9 @@ html {
 }
 
 .znet-shell-page .znet-shell-stat-date .znet-date-stack-date {
-  font-size: 22px;
-  font-weight: 700;
+  color: var(--znet-text);
+  font-size: 28px;
+  font-weight: 500;
 }
 
 .znet-shell-page .znet-shell-stat-date .znet-date-stack-time {
