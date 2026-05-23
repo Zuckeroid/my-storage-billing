@@ -2374,12 +2374,17 @@ html {
   }
 
   .znet-shell-page .znet-shell-globe {
-    display: none;
+    display: none !important;
+    visibility: hidden !important;
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
     width: min(94vw, 560px);
     opacity: 0.9;
+  }
+
+  .znet-shell-page .znet-shell-globe img {
+    display: none !important;
   }
 
   .znet-shell-page .znet-shell-panel-shell {
