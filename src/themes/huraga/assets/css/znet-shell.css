@@ -614,6 +614,16 @@ html {
   white-space: nowrap;
 }
 
+.znet-shell-page .znet-shell-stat-date .znet-date-stack-date {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.znet-shell-page .znet-shell-stat-date .znet-date-stack-time {
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .znet-shell-page .znet-shell-stat p {
   margin: 0;
   color: var(--znet-text-soft);
@@ -1729,6 +1739,20 @@ html {
 .znet-shell-page .znet-appbridge-device-list {
   display: grid;
   gap: 12px;
+}
+
+.znet-shell-page .znet-appbridge-device-panel + .znet-appbridge-device-panel {
+  margin-top: 18px;
+}
+
+.znet-shell-page .znet-appbridge-device-panel-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.znet-shell-page .znet-appbridge-device-panel-list h3 {
+  color: var(--znet-text);
 }
 
 .znet-shell-page .znet-appbridge-device {
