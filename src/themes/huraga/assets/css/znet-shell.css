@@ -2357,6 +2357,19 @@ html {
 }
 
 @media (max-width: 920px) {
+  .znet-shell-page .znet-shell-header,
+  .znet-shell-page .znet-shell-menu,
+  .znet-shell-page .znet-shell-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .znet-shell-page *,
+  .znet-shell-page *::before,
+  .znet-shell-page *::after {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   .znet-shell-page .znet-shell-header-desktop {
     display: none;
   }
